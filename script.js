@@ -84,4 +84,47 @@ function createDaysGrid(startIndex, totalDays, prevMonthDaysNumber) {
   }
 }
 
-createDaysGrid(2, 31, 28);
+const getButton = document.querySelector("#get-button");
+const monthInput = document.querySelector("#month-input");
+const yearInput = document.querySelector("#year-input");
+
+const monthEl = document.querySelector("#month-title");
+const yearEl = document.querySelector("#year-title");
+
+getButton.addEventListener("click", (e) => {
+  const year = +yearInput.value;
+  const month = +monthInput.value;
+
+  yearEl.textContent = yearInput.value;
+  monthEl.textContent =
+    monthInput.options[monthInput.selectedIndex].dataset.name;
+
+  createDaysGrid(
+    getFirstDay(month - 1, year).getDay() - 1,
+    daysInMonth(month, year),
+    daysInMonth(month - 1, year)
+  );
+});
+
+// function getDaysInMonth(month, year) {
+//   var date = new Date(year, month, 1);
+//   console.log(date.getMonth());
+//   var days = [];
+//   while (date.getMonth() === month) {
+//     days.push(new Date(date));
+//     date.setDate(date.getDate() + 1);
+//   }
+//   return days;
+// }
+// console.log(getDaysInMonth(3, 2018));
+function daysInMonth(month, year) {
+  return new Date(year, month, 0).getDate();
+}
+
+function getFirstDay(month, year) {
+  return new Date(year, month, 1);
+}
+
+// console.log();
+// console.log();
+// console.log(daysInMonth(6, 2018));
