@@ -36,57 +36,21 @@
       <button id="get-button">Get!</button>
     </div>
 
-    <div class="month-container">
-      <!-- <?xml version="1.0" encoding="UTF-8"?>
-        <svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 178.3 274.65">
-            <g id="days-grid"></g>
-
-            <g id="text-group">
-                <text id="month-title" transform="translate(60.82 170.39)"
-                    style="fill: #231f20; font-family: Poppins-Regular, Poppins; font-size: 12px; isolation: isolate;">
-                    <tspan x="0" y="0">April</tspan>
-                </text>
-                <text id="year-title" transform="translate(139.12 170.39)"
-                    style="fill: #231f20; font-family: Poppins-Regular, Poppins; font-size: 12px; isolation: isolate;">
-                    <tspan x="0" y="0">2020</tspan>
-                </text>
-                <g id="days-titles">
-                    <text transform="translate(6.83 181.39)"
-                        style="fill: #231f20; font-family: Poppins-Regular, Poppins; font-size: 3.3px; isolation: isolate;">
-                        <tspan x="0" y="0">Monday</tspan>
-                    </text>
-                    <text transform="translate(31.82 181.39)"
-                        style="fill: #231f20; font-family: Poppins-Regular, Poppins; font-size: 3.3px; isolation: isolate;">
-                        <tspan x="0" y="0">Tuesday</tspan>
-                    </text>
-                    <text transform="translate(53.82 181.39)"
-                        style="fill: #231f20; font-family: Poppins-Regular, Poppins; font-size: 3.3px; isolation: isolate;">
-                        <tspan x="0" y="0">Wednesday</tspan>
-                    </text>
-                    <text transform="translate(80.82 181.39)"
-                        style="fill: #231f20; font-family: Poppins-Regular, Poppins; font-size: 3.3px; isolation: isolate;">
-                        <tspan x="0" y="0">Thursday</tspan>
-                    </text>
-                    <text transform="translate(108.82 181.39)"
-                        style="fill: #231f20; font-family: Poppins-Regular, Poppins; font-size: 3.3px; isolation: isolate;">
-                        <tspan x="0" y="0">Friday</tspan>
-                    </text>
-                    <text transform="translate(130.83 181.39)"
-                        style="fill: #231f20; font-family: Poppins-Regular, Poppins; font-size: 3.3px; isolation: isolate;">
-                        <tspan x="0" y="0">Saturday</tspan>
-                    </text>
-                    <text transform="translate(156.83 181.39)"
-                        style="fill: #231f20; font-family: Poppins-Regular, Poppins; font-size: 3.3px; isolation: isolate;">
-                        <tspan x="0" y="0">Sunday</tspan>
-                    </text>
-                </g>
-            </g>
-            <rect width="178.3" height="150" style="fill: #e8e8e8;" />
-        </svg> -->
-    </div>
+    <div class="calendar-container"></div>
 
     <button id="svg-download">Download SVG</button>
     <button id="png-download">Download PNG</button>
+
+    <input
+      type="file"
+      id="upload-input"
+      accept="image/jpeg, image/png, image/jpg"
+      hidden
+    />
+
+    <label for="upload-input" id="initial-upload" class="upload-btn"
+      >Upload</label
+    >
   </body>
-  <script src="./script.js"></script>
+  <script type="module" src="./script.js"></script>
 </html>

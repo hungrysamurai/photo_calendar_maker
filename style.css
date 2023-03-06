@@ -14,7 +14,6 @@ body {
 }
 
 .controls {
-  max-width: 100%;
   margin: 12px auto;
   display: flex;
   align-items: center;
@@ -32,15 +31,12 @@ body {
   margin-left: 12px;
 }
 
-.month-container {
+.calendar-container {
   margin: 0.5rem auto;
   width: 500px;
   max-width: 90%;
-  /* height: 500px; */
-  /* height: 800px; */
 }
 
-/* #days-grid text {
-    text-anchor: middle;
-    dominant-baseline: middle;
-} */
+svg {
+  box-shadow: 12px 12px 12px rgba(0, 0, 0, 0.2);
+}
