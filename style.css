@@ -1,43 +1,46 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap");
 
 * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
 body {
-    width: 100vw;
-    height: 100vh;
-    font-family: 'Poppins', sans-serif;
-    overflow: hidden;
+  width: 100vw;
+  height: 100vh;
+  font-family: "Poppins", sans-serif;
+  overflow: hidden;
 }
 
 .controls {
-    max-width: 100%;
-    margin: 12px auto;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  max-width: 100%;
+  margin: 12px auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .controls select {
-    font-size: 24px;
-    font-family: inherit;
+  font-size: 24px;
+  font-family: inherit;
 }
 
 .controls button {
-    font-size: 24px;
-    font-family: inherit;
-    margin-left: 12px;
+  font-size: 24px;
+  font-family: inherit;
+  margin-left: 12px;
 }
 
 .month-container {
-    margin: 0.5rem auto;
-    max-width: 90%;
+  margin: 0.5rem auto;
+  width: 500px;
+  max-width: 90%;
+  /* height: 500px; */
+  /* height: 800px; */
 }
 
-#days-grid text {
+/* #days-grid text {
     text-anchor: middle;
     dominant-baseline: middle;
-}
+} */

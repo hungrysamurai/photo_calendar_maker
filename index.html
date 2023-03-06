@@ -1,93 +1,92 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="./style.css">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="./style.css" />
     <title>Calendar Templates Generator</title>
-</head>
+  </head>
 
-<body>
+  <body>
     <div class="controls">
-        <select id="year-input">
-            <option value="2018">2018</option>
-            <option value="2019">2019</option>
-            <option value="2020">2020</option>
-            <option value="2021">2021</option>
-            <option value="2022">2022</option>
-            <option value="2023">2023</option>
-            <option value="2024">2024</option>
-        </select>
-        <select id="month-input">
-            <option value="1" data-name="January">Jan</option>
-            <option value="2" data-name="February">Feb</option>
-            <option value="3" data-name="March">Mar</option>
-            <option value="4" data-name="April">Apr</option>
-            <option value="5" data-name="May">May</option>
-            <option value="6" data-name="June">Jun</option>
-            <option value="7" data-name="July">Jul</option>
-            <option value="8" data-name="August">Aug</option>
-            <option value="9" data-name="September">Sep</option>
-            <option value="10" data-name="October">Oct</option>
-            <option value="11" data-name="November">Nov</option>
-            <option value="12" data-name="December">Dec</option>
-        </select>
-        <button id="get-button">Get!</button>
+      <select id="year-input">
+        <option value="2018">2018</option>
+        <option value="2019">2019</option>
+        <option value="2020">2020</option>
+        <option value="2021">2021</option>
+        <option value="2022">2022</option>
+        <option value="2023">2023</option>
+        <option value="2024">2024</option>
+      </select>
+      <select id="month-input">
+        <option value="1" data-name="January">Jan</option>
+        <option value="2" data-name="February">Feb</option>
+        <option value="3" data-name="March">Mar</option>
+        <option value="4" data-name="April">Apr</option>
+        <option value="5" data-name="May">May</option>
+        <option value="6" data-name="June">Jun</option>
+        <option value="7" data-name="July">Jul</option>
+        <option value="8" data-name="August">Aug</option>
+        <option value="9" data-name="September">Sep</option>
+        <option value="10" data-name="October">Oct</option>
+        <option value="11" data-name="November">Nov</option>
+        <option value="12" data-name="December">Dec</option>
+      </select>
+      <button id="get-button">Get!</button>
     </div>
 
     <div class="month-container">
-
-
-        <?xml version="1.0" encoding="UTF-8"?>
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192.55 136.29">
+      <!-- <?xml version="1.0" encoding="UTF-8"?>
+        <svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 178.3 274.65">
             <g id="days-grid"></g>
+
             <g id="text-group">
-                <text id="month-title" transform="translate(68 23)"
-                    style="fill: #231f20; font-family: Poppins, &apos;Poppins&apos;; font-size: 12px;">
-                    Month
+                <text id="month-title" transform="translate(60.82 170.39)"
+                    style="fill: #231f20; font-family: Poppins-Regular, Poppins; font-size: 12px; isolation: isolate;">
+                    <tspan x="0" y="0">April</tspan>
                 </text>
-                <text id="year-title" transform="translate(146.3 23)"
-                    style="fill: #231f20; font-family: Poppins, &apos;Poppins&apos;; font-size: 12px;">
-                    year
+                <text id="year-title" transform="translate(139.12 170.39)"
+                    style="fill: #231f20; font-family: Poppins-Regular, Poppins; font-size: 12px; isolation: isolate;">
+                    <tspan x="0" y="0">2020</tspan>
                 </text>
                 <g id="days-titles">
-                    <text transform="translate(14 34)"
-                        style="fill: #231f20; font-family: Poppins, &apos;Poppins&apos;; font-size: 3.3px;">
+                    <text transform="translate(6.83 181.39)"
+                        style="fill: #231f20; font-family: Poppins-Regular, Poppins; font-size: 3.3px; isolation: isolate;">
                         <tspan x="0" y="0">Monday</tspan>
                     </text>
-                    <text transform="translate(39 34)"
-                        style="fill: #231f20; font-family: Poppins, &apos;Poppins&apos;; font-size: 3.3px;">
+                    <text transform="translate(31.82 181.39)"
+                        style="fill: #231f20; font-family: Poppins-Regular, Poppins; font-size: 3.3px; isolation: isolate;">
                         <tspan x="0" y="0">Tuesday</tspan>
                     </text>
-                    <text transform="translate(61 34)"
-                        style="fill: #231f20; font-family: Poppins, &apos;Poppins&apos;; font-size: 3.3px;">
+                    <text transform="translate(53.82 181.39)"
+                        style="fill: #231f20; font-family: Poppins-Regular, Poppins; font-size: 3.3px; isolation: isolate;">
                         <tspan x="0" y="0">Wednesday</tspan>
                     </text>
-                    <text transform="translate(88 34)"
-                        style="fill: #231f20; font-family: Poppins, &apos;Poppins&apos;; font-size: 3.3px;">
+                    <text transform="translate(80.82 181.39)"
+                        style="fill: #231f20; font-family: Poppins-Regular, Poppins; font-size: 3.3px; isolation: isolate;">
                         <tspan x="0" y="0">Thursday</tspan>
                     </text>
-                    <text transform="translate(116 34)"
-                        style="fill: #231f20; font-family: Poppins, &apos;Poppins&apos;; font-size: 3.3px;">
+                    <text transform="translate(108.82 181.39)"
+                        style="fill: #231f20; font-family: Poppins-Regular, Poppins; font-size: 3.3px; isolation: isolate;">
                         <tspan x="0" y="0">Friday</tspan>
                     </text>
-                    <text transform="translate(138 34)"
-                        style="fill: #231f20; font-family: Poppins, &apos;Poppins&apos;; font-size: 3.3px;">
+                    <text transform="translate(130.83 181.39)"
+                        style="fill: #231f20; font-family: Poppins-Regular, Poppins; font-size: 3.3px; isolation: isolate;">
                         <tspan x="0" y="0">Saturday</tspan>
                     </text>
-                    <text transform="translate(164 34)"
-                        style="fill: #231f20; font-family: Poppins, &apos;Poppins&apos;; font-size: 3.3px;">
+                    <text transform="translate(156.83 181.39)"
+                        style="fill: #231f20; font-family: Poppins-Regular, Poppins; font-size: 3.3px; isolation: isolate;">
                         <tspan x="0" y="0">Sunday</tspan>
                     </text>
                 </g>
             </g>
-        </svg>
+            <rect width="178.3" height="150" style="fill: #e8e8e8;" />
+        </svg> -->
     </div>
 
-
-</body>
-<script src="./script.js"></script>
-
+    <button id="svg-download">Download SVG</button>
+    <button id="png-download">Download PNG</button>
+  </body>
+  <script src="./script.js"></script>
 </html>
