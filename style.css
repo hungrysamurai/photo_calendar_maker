@@ -17,7 +17,10 @@ body {
   margin: 12px auto;
   display: flex;
   align-items: center;
+  width: 100%;
   justify-content: center;
+  position: fixed;
+  z-index: 2;
 }
 
 .controls select {
@@ -32,11 +35,45 @@ body {
 }
 
 .calendar-container {
-  margin: 0.5rem auto;
-  width: 500px;
-  max-width: 90%;
+  width: 100%;
+  height: 100%;
+}
+
+.calendar-wrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+}
+
+.calendar-inner {
+  display: flex;
+  align-items: center;
+  position: absolute;
+  height: 90%;
+  transition: all 0.2s ease-in;
+}
+
+.month-container {
+  width: 100vw;
+  max-width: 100%;
+  height: 90%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+  /* flex: 0 0 auto; */
 }
 
 svg {
-  box-shadow: 12px 12px 12px rgba(0, 0, 0, 0.2);
+  height: 100%;
+  filter: drop-shadow(3px 3px 12px rgba(0, 0, 0, 0.15));
+  /* box-shadow: 12px 12px 12px rgba(0, 0, 0, 0.2); */
+}
+
+.controls-container {
+  position: fixed;
+  bottom: 5%;
 }
