@@ -1,163 +1,91 @@
-import encodedFonts from "./fonts.js";
+import glyphs from "./assets/Montserrat/MontserratGlyphs.js";
+
+PDFDocument.prototype.addSVG = function (svg, x, y, options, lang) {
+  return SVGtoPDF(this, svg, x, y, options), this;
+};
 
 class MultiPageCalendar {
-  constructor(firstMonthIndex, year, parentContainer, controlsContainer) {
+  constructor(firstMonthIndex, year, parentContainer, controlsContainer, lang) {
     this.firstMonthIndex = firstMonthIndex;
     this.year = year;
     this.parentContainer = parentContainer;
     this.controlsContainer = controlsContainer;
+    this.lang = lang;
 
-    this.monthNamesList = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+    // Dimensions of document (px)
+    this.outputDimensions = {
+      A5: { width: 1748, height: 2480 },
+      A4: { width: 2480, height: 3508 },
+      A3: { width: 3508, height: 4961 },
+    };
+    this.currentSize = "A4";
 
-    this.weekDaysList = [];
-
+    // Mockup pre-defined dimensions
     this.dayCellHeight = 15;
     this.dayCellWidth = 25;
 
-    this.imagePlaceholderWidth = 178.3;
-    this.imagePlaceholderHeight = 150;
+    this.imagePlaceholderWidth = 183.3;
+    this.imagePlaceholderHeight = 155;
     this.imagePlaceholderX = 10.9;
     this.imagePlaceholderY = 11.4;
 
+    // Month counters
     this.monthCounter = this.firstMonthIndex;
-
     this.currentMonth = 0;
 
     this.initDOMSVG();
     this.initControls();
     this.initControlsEvents();
 
+    this.pagesArray = [...this.calendarInner.querySelectorAll("svg")];
   }
 
   initDOMSVG() {
-    this.calendarWrapper = document.createElement('div');
-    this.calendarWrapper.classList.add('calendar-wrapper');
+    this.calendarWrapper = document.createElement("div");
+    this.calendarWrapper.classList.add("calendar-wrapper");
 
-    this.calendarInner = document.createElement('div');
-    this.calendarInner.classList.add('calendar-inner');
+    this.calendarInner = document.createElement("div");
+    this.calendarInner.classList.add("calendar-inner");
 
     this.setVisibleMonth();
 
+    // Create months templates
     for (let i = 0; i < 12; i++) {
-      const monthContainer = document.createElement('div');
+      const monthContainer = document.createElement("div");
 
-      monthContainer.classList.add('month-container');
+      monthContainer.classList.add("month-container");
       monthContainer.id = `month-${i}-container`;
 
+      // Basic month mockup
       monthContainer.innerHTML = `
-      <svg svg xmlns = "http://www.w3.org/2000/svg" viewBox = "0 0 200 300" id="mockup-${i}" >
+      <svg xmlns = "http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox = "0 0 210 297" id="mockup-${i}" >
 
-        <defs>
-          <style type="text/css">
-            @font-face {
-              font-family: Poppins-Bold;
-              src: url('${encodedFonts.PoppinsBold}')
-            }
-            @font-face {
-              font-family: Poppins-Regular;
-              src: url('${encodedFonts.PoppinsRegular}')
-            }
-          </style>
-        </defs>
-      
         <rect
           id="background-rect-${i}"
-          width="200"
-          height="300"
-          style="fill: #fff"
-        />
+          width="210"
+          height="297"
+          style="fill: #fff"/>
    
         <g id="days-grid-${i}"></g>
         
         <g id="text-group-${i}">
 
-          <text
+          <g
             id="month-title-${i}"
-            transform="translate(30 183)"
-            style="
-              isolation: isolate;
-              font-size: 14px;
-              fill: #231f20;
-              font-family: Poppins-Bold;">
-              April
-          </text>
+            transform="translate(30 172.5) scale(0.5)">
+          </g>
 
-          <text
+          <g
             id="year-title-${i}"
-            transform="translate(140 183)"
-            style="
-              isolation: isolate;
-              font-size: 12px;
-              fill: #231f20;
-              font-family: Poppins-Bold;">
-            2020
-          </text>
+            transform="translate(150 174.4)">
+          </g>
 
           <g id="days-titles-${i}">
-            <text
-              transform="translate(17.72 192.79)"
-              style="
-                isolation: isolate;
-                font-size: 3.3px;
-                fill: #231f20;
-                font-family: Poppins-Bold;">
-              Monday
-            </text>
-            <text
-              transform="translate(42.72 192.79)"
-              style="
-                isolation: isolate;
-                font-size: 3.3px;
-                fill: #231f20;
-                font-family: Poppins-Bold;">
-              Tuesday
-            </text>
-            <text
-              transform="translate(64.72 192.79)"
-              style="
-                isolation: isolate;
-                font-size: 3.3px;
-                fill: #231f20;
-                font-family: Poppins-Bold;">
-              Wednesday
-            </text>
-            <text
-              transform="translate(91.72 192.79)"
-              style="
-                isolation: isolate;
-                font-size: 3.3px;
-                fill: #231f20;
-                font-family: Poppins-Bold;">
-              Thursday
-            </text>
-            <text
-              transform="translate(119.72 192.79)"
-              style="
-                isolation: isolate;
-                font-size: 3.3px;
-                fill: #231f20;
-                font-family: Poppins-Bold;">
-              Friday
-            </text>
-            <text
-              transform="translate(142 192.79)"
-              style="
-                isolation: isolate;
-                font-size: 3.3px;
-                fill: #231f20;
-                font-family: Poppins-Bold;">
-              Saturday
-            </text>
-            <text
-              transform="translate(168 192.79)"
-              style="
-                isolation: isolate;
-                font-size: 3.3px;
-                fill: #231f20;
-                font-family: Poppins-Bold;">
-              Sunday
-            </text>
+
+
+
           </g>
+
         </g>
 
         <g id="image-group-${i}">
@@ -165,21 +93,105 @@ class MultiPageCalendar {
         <rect id="image-placeholder-${i}"
           x="10.9"
           y="11.4"
-          width="178.3"
-          height="150"
+          width="188.3"
+          height="155"
           style="fill: #e8e8e8"/>
         </g>
+
       </svg >
   `;
+
+      const daysTitles = monthContainer.querySelector(`#days-titles-${i}`);
+
+      if (this.lang === "ru") {
+        daysTitles.innerHTML = `
+                    <g
+              transform="translate(18.5 190) scale(0.45)">
+              ${glyphs.weekDays.monday}
+            </g>
+
+            <g
+              transform="translate(48 190) scale(0.45)">
+              ${glyphs.weekDays.tuesday}
+            </g>
+
+            <g
+              transform="translate(74 190) scale(0.45)">
+              ${glyphs.weekDays.wednesday}
+            </g>
+
+            <g
+              transform="translate(97.2 190) scale(0.45)">
+              ${glyphs.weekDays.thursday}
+            </g>
+
+            <g
+              transform="translate(122 190) scale(0.45)">
+              ${glyphs.weekDays.friday}
+            </g>
+
+            <g
+              transform="translate(148 190) scale(0.45)">
+              ${glyphs.weekDays.saturday}
+            </g>
+
+            <g
+              transform="translate(169 190) scale(0.45)">
+              ${glyphs.weekDays.sunday}
+            </g>
+        `;
+      } else if (this.lang === "en") {
+        daysTitles.innerHTML = `
+            <g
+              transform="translate(22.72 190) scale(0.5)">
+              ${glyphs.weekDays.monday}
+            </g>
+
+            <g
+              transform="translate(47.72 190) scale(0.5)">
+              ${glyphs.weekDays.tuesday}
+            </g>
+
+            <g
+              transform="translate(69.72 190) scale(0.5)">
+              ${glyphs.weekDays.wednesday}
+            </g>
+
+            <g
+              transform="translate(96.72 190) scale(0.5)">
+              ${glyphs.weekDays.thursday}
+            </g>
+
+            <g
+              transform="translate(124.72 190) scale(0.5)">
+              ${glyphs.weekDays.friday}
+            </g>
+
+            <g
+              transform="translate(147 190) scale(0.5)">
+              ${glyphs.weekDays.saturday}
+            </g>
+
+            <g
+              transform="translate(173 190) scale(0.5)">
+              ${glyphs.weekDays.sunday}
+            </g>
+        `;
+      }
+
       const monthEl = monthContainer.querySelector(`#month-title-${i}`);
       const yearEl = monthContainer.querySelector(`#year-title-${i}`);
 
-      monthEl.textContent = this.monthNamesList[this.monthCounter];
-      yearEl.textContent = this.year;
+      monthEl.innerHTML = glyphs.months[this.monthCounter];
+      yearEl.innerHTML = glyphs.years[this.year];
+
+      // Insert year & month data on container
+      monthContainer.dataset.year = this.year;
+      monthContainer.dataset.month = this.monthCounter;
 
       this.monthCounter++;
 
-      if (this.monthCounter > this.monthNamesList.length - 1) {
+      if (this.monthCounter > 11) {
         this.monthCounter = 0;
         this.year++;
       }
@@ -197,37 +209,52 @@ class MultiPageCalendar {
     }
 
     this.calendarWrapper.append(this.calendarInner);
-    this.parentContainer.append(this.calendarWrapper)
+    this.parentContainer.append(this.calendarWrapper);
   }
 
   initControls() {
     this.controlsContainer.innerHTML = `
-      <button id="next-month">Next</button>
       <button id="prev-month">Prev</button>
-      <button id="svg-download">Download SVG</button>
+      <button id="next-month">Next</button>
+
+      <button id="pdf-download-current">Download current PDF</button>
+      <button id="pdf-download-all">Download All PDF</button>
       <button id="png-download">Download PNG</button>
-      <label for="upload-input" id="upload-btn" class="upload-btn"
-        >Upload</label
-      >
+  
+        <select id="format-select">
+          <option value="A5">A5</option>
+          <option value="A4" selected>A4</option>
+          <option value="A3">A3</option>
+       </select>
+
 
     <input
       type="file"
       id="upload-input"
       accept="image/jpeg, image/png, image/jpg"
       hidden
-    />
+      onclick="this.value=null;"/>
+          <label for="upload-input" id="upload-btn" class="upload-btn"
+        >Upload Image</label>
     `;
 
-    this.nextBtn = this.controlsContainer.querySelector('#next-month');
-    this.prevBtn = this.controlsContainer.querySelector('#prev-month');
-    this.svgDownloadBtn = this.controlsContainer.querySelector('#svg-download');
-    this.pngDownloadBtn = this.controlsContainer.querySelector('#png-download');
-    this.uploadImgBtn = this.controlsContainer.querySelector('#upload-btn');
-    this.uploadImgInput = this.controlsContainer.querySelector('#upload-input');
+    this.nextBtn = this.controlsContainer.querySelector("#next-month");
+    this.prevBtn = this.controlsContainer.querySelector("#prev-month");
+    this.currentPDFDownloadBtn = this.controlsContainer.querySelector(
+      "#pdf-download-current"
+    );
+    this.allPDFDownloadBtn =
+      this.controlsContainer.querySelector("#pdf-download-all");
+    this.pngDownloadBtn = this.controlsContainer.querySelector("#png-download");
+    this.uploadImgBtn = this.controlsContainer.querySelector("#upload-btn");
+    this.formatSelectBtn =
+      this.controlsContainer.querySelector("#format-select");
+
+    this.uploadImgInput = this.controlsContainer.querySelector("#upload-input");
   }
 
   initControlsEvents() {
-    this.nextBtn.addEventListener('click', () => {
+    this.nextBtn.addEventListener("click", () => {
       this.currentMonth++;
       if (this.currentMonth > 11) {
         this.currentMonth = 0;
@@ -236,7 +263,7 @@ class MultiPageCalendar {
       this.setVisibleMonth();
     });
 
-    this.prevBtn.addEventListener('click', () => {
+    this.prevBtn.addEventListener("click", () => {
       this.currentMonth--;
       if (this.currentMonth < 0) {
         this.currentMonth = 11;
@@ -245,112 +272,185 @@ class MultiPageCalendar {
       this.setVisibleMonth();
     });
 
-    this.svgDownloadBtn.addEventListener('click', () => {
-      this.downloadCurrentMonthSVG()
+    this.currentPDFDownloadBtn.addEventListener("click", () => {
+      this.downloadPDF("current");
     });
 
-    this.pngDownloadBtn.addEventListener('click', () => {
+    this.allPDFDownloadBtn.addEventListener("click", () => {
+      this.downloadPDF("all");
+    });
+
+    this.pngDownloadBtn.addEventListener("click", () => {
       this.downloadCurrentMonthPNG();
     });
 
-    this.uploadImgInput.addEventListener('change', (e) => {
+    this.uploadImgInput.addEventListener("input", (e) => {
       this.uploadImgCurrentMonth(e);
-    })
-  }
-
-  uploadImgCurrentMonth(e) {
-
-    const reader = new FileReader();
-    reader.onload = (e) => {
-
-      const imageGroup = this.calendarInner.querySelector(`#image-group-${this.currentMonth}`);
-
-      imageGroup.innerHTML = '';
-
-      const imageEl = document.createElementNS('http://www.w3.org/2000/svg', 'image');
-
-      imageEl.setAttribute('height', this.imagePlaceholderHeight);
-      imageEl.setAttribute('width', this.imagePlaceholderWidth);
-      imageEl.setAttribute('x', this.imagePlaceholderX);
-      imageEl.setAttribute('y', this.imagePlaceholderY);
-
-      imageEl.setAttributeNS('http://www.w3.org/1999/xlink', 'href', e.target.result);
-      // imageEl.setAttribute('clip-path', "url(#image-clip)");
-
-      imageGroup.appendChild(imageEl);
-      console.log('...image uploaded!');
-      // console.log(getComputedStyle(imageEl).transform);
-      // console.log(imageEl.getBoundingClientRect());
-
-      // Here to mess with cropper
-      // const temp = document.createElement('div');
-      // temp.style.position = 'absolute';
-      // temp.style.left = `${imageEl.getBoundingClientRect().left}px`;
-      // temp.style.top = `${imageEl.getBoundingClientRect().top}px`;
-      // temp.style.width = `${imageEl.getBoundingClientRect().width}px`;
-      // temp.style.height = `${imageEl.getBoundingClientRect().height}px`;
-
-
-      // document.body.append(temp);
-    }
-    reader.readAsDataURL(e.target.files[0]);
-    console.log('start upload image...');
-  };
-
-  downloadCurrentMonthSVG() {
-
-    const svg = this.calendarInner.querySelector(
-      `#month-${this.currentMonth}-container svg`);
-
-    const base64doc = btoa(decodeURIComponent(encodeURIComponent(svg.outerHTML)));
-
-    const a = document.createElement('a');
-    const e = new MouseEvent('click');
-
-    a.download = 'download.svg';
-    a.href = 'data:image/svg+xml;base64,' + base64doc;
-    a.dispatchEvent(e);
-  }
-
-  downloadCurrentMonthPNG(e) {
-    const svg = this.calendarInner.querySelector(
-      `#month-${this.currentMonth}-container svg`);
-
-    const svgData = new XMLSerializer().serializeToString(svg);
-
-    const canvas = document.createElement("canvas");
-    canvas.width = 2000;
-    canvas.height = 3000;
-    const ctx = canvas.getContext("2d");
-
-    //display image
-    const img = document.createElement("img");
-    img.setAttribute("src", "data:image/svg+xml;base64," + btoa(svgData));
-
-
-    img.onload = function () {
-      ctx.drawImage(img, 0, 0);
-
-      const dataURL = canvas.toDataURL('image/png');
-      if (window.navigator.msSaveBlob) {
-        window.navigator.msSaveBlob(canvas.msToBlob(), "download.png");
-        e.preventDefault();
-      } else {
-        const a = document.createElement('a');
-        const my_evt = new MouseEvent('click');
-        a.download = 'download.png';
-        a.href = dataURL;
-        a.dispatchEvent(my_evt);
-      }
-    };
+    });
+    this.formatSelectBtn.addEventListener("input", (e) => {
+      this.currentSize = e.target.value;
+    });
   }
 
   setVisibleMonth() {
     this.calendarInner.style.left = `-${this.currentMonth * 100}%`;
   }
 
+  downloadPDF(amount) {
+    let pagesArray = [];
+
+    const doc = new PDFDocument({ size: this.currentSize });
+    const stream = doc.pipe(blobStream());
+
+    if (amount === "current") {
+      const currentMonthContainer = this.calendarInner.querySelector(
+        `#month-${this.currentMonth}-container`
+      );
+      pagesArray.push(currentMonthContainer.querySelector("svg"));
+
+      doc.info["Title"] = this.getFileName();
+    }
+
+    if (amount === "all") {
+      pagesArray = this.pagesArray;
+      doc.info["Title"] = this.getFileName(true);
+    }
+
+    pagesArray.forEach((page, i) => {
+      doc.addSVG(page, 0, 0);
+
+      if (i !== pagesArray.length - 1) doc.addPage();
+    });
+
+    doc.end();
+
+    stream.on("finish", function () {
+      const url = stream.toBlobURL("application/pdf");
+
+      const a = document.createElement("a");
+      const my_evt = new MouseEvent("click");
+      a.download = doc.info["Title"];
+      a.href = url;
+      a.dispatchEvent(my_evt);
+    });
+  }
+
+  downloadCurrentMonthPNG(e) {
+    const svg = this.calendarInner.querySelector(
+      `#month-${this.currentMonth}-container svg`
+    );
+
+    const svgData = new XMLSerializer().serializeToString(svg);
+
+    const canvas = document.createElement("canvas");
+    canvas.width = this.outputDimensions[this.currentSize].width;
+    canvas.height = this.outputDimensions[this.currentSize].height;
+
+    const ctx = canvas.getContext("2d");
+
+    const img = document.createElement("img");
+    img.setAttribute("src", "data:image/svg+xml;base64," + btoa(svgData));
+
+    img.onload = () => {
+      ctx.drawImage(img, 0, 0);
+      const dataURL = canvas.toDataURL("image/png");
+      const fileName = this.getFileName();
+
+      if (window.navigator.msSaveBlob) {
+        window.navigator.msSaveBlob(canvas.msToBlob(), fileName);
+        e.preventDefault();
+      } else {
+        const a = document.createElement("a");
+        const my_evt = new MouseEvent("click");
+        a.download = fileName;
+        a.href = dataURL;
+        a.dispatchEvent(my_evt);
+      }
+    };
+  }
+
+  getFileName(span) {
+    if (span) {
+      const firstMonth = this.pagesArray[0].parentElement.dataset.month;
+      const firstMonthYear = this.pagesArray[0].parentElement.dataset.year;
+      const date1 = new Date(+firstMonthYear, +firstMonth);
+      const firstMonthName = date1.toLocaleString("default", { month: "long" });
+
+      const lastMonth =
+        this.pagesArray[this.pagesArray.length - 1].parentElement.dataset.month;
+      const lastMonthYear =
+        this.pagesArray[this.pagesArray.length - 1].parentElement.dataset.year;
+      const date2 = new Date(+lastMonthYear, +lastMonth);
+      const lastMonthName = date2.toLocaleString("default", {
+        month: "long",
+      });
+
+      return `${firstMonthName}_${firstMonthYear}-${lastMonthName}_${lastMonthYear}`;
+    }
+
+    const currentMonthContainer = this.calendarInner.querySelector(
+      `#month-${this.currentMonth}-container`
+    );
+
+    const year = currentMonthContainer.dataset.year;
+    const month = currentMonthContainer.dataset.month;
+    const date = new Date(+year, +month);
+    const monthName = date.toLocaleString("default", { month: "long" });
+
+    return `${monthName}_${year}`;
+  }
+
+  uploadImgCurrentMonth(e) {
+    if (!e.target.files[0]) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const imageGroup = this.calendarInner.querySelector(
+        `#image-group-${this.currentMonth}`
+      );
+
+      imageGroup.innerHTML = "";
+
+      const imageEl = document.createElementNS(
+        "http://www.w3.org/2000/svg",
+        "image"
+      );
+
+      imageEl.setAttribute("height", this.imagePlaceholderHeight);
+      imageEl.setAttribute("width", this.imagePlaceholderWidth);
+      imageEl.setAttribute("x", this.imagePlaceholderX);
+      imageEl.setAttribute("y", this.imagePlaceholderY);
+
+      imageEl.setAttributeNS(
+        "http://www.w3.org/1999/xlink",
+        "href",
+        e.target.result
+      );
+      // imageEl.setAttribute('clip-path', "url(#image-clip)");
+
+      imageGroup.appendChild(imageEl);
+      console.log("...image uploaded!");
+
+      // console.log(getComputedStyle(imageEl).transform);
+      // console.log(imageEl.getBoundingClientRect());
+
+      // Here to mess with cropper
+      // const temp = document.createElement("div");
+      // temp.style.position = "absolute";
+      // temp.style.left = `${imageEl.getBoundingClientRect().left}px`;
+      // temp.style.top = `${imageEl.getBoundingClientRect().top}px`;
+      // temp.style.width = `${imageEl.getBoundingClientRect().width}px`;
+      // temp.style.height = `${imageEl.getBoundingClientRect().height}px`;
+
+      // document.body.append(temp);
+    };
+
+    reader.readAsDataURL(e.target.files[0]);
+    console.log("start upload image...");
+  }
+
   createMonthGrid(monthGrid, startIndex, totalDays, prevMonthDaysNumber) {
-    let x = 12;
+    let x = 17;
     let y = 195.8;
 
     let currentDayIndex = startIndex;
@@ -363,46 +463,41 @@ class MultiPageCalendar {
         x += this.dayCellWidth;
       } else {
         monthGrid.appendChild(this.createDayCell(x, y, i));
-        x = 12;
+        x = 17;
         y += this.dayCellHeight;
       }
     }
 
     // All text elements in generated cells
-    const cellsTextFields = monthGrid.querySelectorAll("g text");
+    const cellsTextFields = monthGrid.querySelectorAll("g .cell-digit");
 
     // Set days digits in cells
     for (let i = 1; i < totalDays + 1; i++) {
-      cellsTextFields[currentDayIndex].textContent = i;
+      // cellsTextFields[currentDayIndex].textContent = i;
+      cellsTextFields[currentDayIndex].innerHTML = glyphs.digits[i - 1];
       currentDayIndex++;
     }
 
     // Prepend previous month
     if (startIndex !== 0) {
       for (let i = startIndex - 1; i >= 0; i--) {
-        cellsTextFields[i].textContent = prevMonthDaysCount;
+        cellsTextFields[i].innerHTML =
+          glyphs.secondaryDigits[prevMonthDaysCount - 1];
         prevMonthDaysCount--;
-
-        cellsTextFields[i].setAttribute("style",
-          `fill: #999999; font-family: Poppins-Regular; font-size: 7px; font-weight: 400; text-anchor: middle;
-    dominant-baseline: middle;`);
       }
     }
 
     // Extend on next month
     if (currentDayIndex <= 42) {
       for (let i = 1; currentDayIndex < 42; currentDayIndex++) {
-        cellsTextFields[currentDayIndex].textContent = i;
-        cellsTextFields[currentDayIndex].setAttribute("style",
-          `fill: #999999; font-family: Poppins-Regular; font-size: 7px; font-weight: 400; text-anchor: middle;
-    dominant-baseline: middle;`);
+        cellsTextFields[currentDayIndex].innerHTML =
+          glyphs.secondaryDigits[i - 1];
         i++;
       }
     }
   }
 
   createDayCell(x, y, cellNumber) {
-
     let dayGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
 
     dayGroup.setAttribute("width", this.dayCellWidth);
@@ -413,12 +508,9 @@ class MultiPageCalendar {
      <rect x="${x}" y="${y}" width="${this.dayCellWidth}" height="${this.dayCellHeight}"
             style="fill: none; stroke: #999999; stroke-miterlimit: 10; stroke-width: .5px;"></rect>
 
-      <text
-        transform="translate(${x + this.dayCellWidth / 2} 
-        ${y + this.dayCellHeight / 2 + 0.5})"
-        style="fill: #231f20; font-family: Poppins-Bold; font-size: 7px; font-weight: 700; text-anchor: middle;
-        dominant-baseline: middle;">
-      </text>;
+      <g class="cell-digit"
+        transform="translate(${x} ${y})">
+      </g>;
     `;
     return dayGroup;
   }
@@ -428,364 +520,33 @@ class MultiPageCalendar {
   }
 
   getFirstDay(month, year) {
-
     let index = new Date(year, month, 1);
     if (index.getDay() === 0) {
       return 7;
     }
     return index.getDay();
   }
-
-
 }
-
-// let daysGrid;
-// const dayCellWidth = 25;
-// const dayCellHeight = 15;
-
-// function createMonthGrid(startIndex, totalDays, prevMonthDaysNumber) {
-//   let x = 12;
-//   let y = 195.8;
-
-//   let currentDayIndex = startIndex;
-//   let prevMonthDaysCount = prevMonthDaysNumber;
-
-//   // Set empty grid
-//   for (let i = 1; i < 43; i++) {
-//     if (i % 7 !== 0) {
-//       daysGrid.appendChild(createDayCell(x, y, i));
-//       x += dayCellWidth;
-//     } else {
-//       daysGrid.appendChild(createDayCell(x, y, i));
-//       x = 12;
-//       y += dayCellHeight;
-//     }
-//   }
-
-//   // All text elements in generated cells
-//   const cellsTextFields = daysGrid.querySelectorAll("g text");
-
-//   // Set days digits in cells
-//   for (let i = 1; i < totalDays + 1; i++) {
-//     cellsTextFields[currentDayIndex].textContent = i;
-//     currentDayIndex++;
-//   }
-
-//   // Prepend previous month
-//   if (startIndex !== 0) {
-//     for (let i = startIndex - 1; i >= 0; i--) {
-//       cellsTextFields[i].textContent = prevMonthDaysCount;
-//       prevMonthDaysCount--;
-
-//       cellsTextFields[i].setAttribute("style",
-//         `fill: #999999; font-family: Poppins-Regular; font-size: 7px; font-weight: 400; text-anchor: middle;
-//     dominant-baseline: middle;`);
-//     }
-//   }
-
-//   // Extend on next month
-//   if (currentDayIndex <= 42) {
-//     for (let i = 1; currentDayIndex < 42; currentDayIndex++) {
-//       cellsTextFields[currentDayIndex].textContent = i;
-//       cellsTextFields[currentDayIndex].setAttribute("style",
-//         `fill: #999999; font-family: Poppins-Regular; font-size: 7px; font-weight: 400; text-anchor: middle;
-//     dominant-baseline: middle;`);
-//       i++;
-//     }
-//   }
-// }
-
-// function createDayCell(x, y, cellNumber) {
-
-//   let dayGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
-
-//   dayGroup.setAttribute("width", dayCellWidth);
-//   dayGroup.setAttribute("height", dayCellHeight);
-//   dayGroup.setAttribute("id", `day-${cellNumber}-cell`);
-
-//   dayGroup.innerHTML = `
-//      <rect x="${x}" y="${y}" width="${dayCellWidth}" height="${dayCellHeight}"
-//             style="fill: none; stroke: #999999; stroke-miterlimit: 10; stroke-width: .5px;"></rect>
-
-//       <text
-//         transform="translate(${x + dayCellWidth / 2} 
-//         ${y + dayCellHeight / 2 + 0.5})"
-//         style="fill: #231f20; font-family: Poppins-Bold; font-size: 7px; font-weight: 700; text-anchor: middle;
-//         dominant-baseline: middle;">
-//       </text>;
-//     `;
-//   return dayGroup;
-// }
-
 
 const getButton = document.querySelector("#get-button");
 const monthInput = document.querySelector("#month-input");
 const yearInput = document.querySelector("#year-input");
 
 const calendarContainer = document.querySelector(".calendar-container");
-const controlsContainer = document.querySelector('.controls-container');
+const controlsContainer = document.querySelector(".controls-container");
 
 let currentCalendar;
 getButton.addEventListener("click", () => {
   const year = +yearInput.value;
   const month = +monthInput.value;
 
-  calendarContainer.innerHTML = '';
-  currentCalendar = new MultiPageCalendar(month, year, calendarContainer, controlsContainer);
+  calendarContainer.innerHTML = "";
 
-  //   calendarContainer.innerHTML = `
-  // <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 300">
-
-  //   <defs>
-  //     <style type="text/css">
-  //       @font-face {
-  //         font-family: Poppins-Bold;
-  //         src: url('${encodedFonts.PoppinsBold}')
-  //       }
-  //       @font-face {
-  //         font-family: Poppins-Regular;
-  //         src: url('${encodedFonts.PoppinsRegular}')
-  //       }
-  //     </style>
-  //   </defs>
-
-  //         <rect
-  //           id="background-rect"
-  //           width="200"
-  //           height="300"
-  //           style="fill: #fff"
-  //         />
-
-  //         <g id="days-grid"></g>
-
-  //         <g id="text-group">
-
-  //           <text
-  //             id="month-title"
-  //             transform="translate(30 183)"
-  //             style="
-  //               isolation: isolate;
-  //               font-size: 14px;
-  //               fill: #231f20;
-  //               font-family: Poppins-Bold;">
-  //               April
-  //           </text>
-
-  //           <text
-  //             id="year-title"
-  //             transform="translate(140 183)"
-  //             style="
-  //               isolation: isolate;
-  //               font-size: 12px;
-  //               fill: #231f20;
-  //               font-family: Poppins-Bold;">
-  //             2020
-  //           </text>
-
-  //           <g id="days-titles">
-  //             <text
-  //               transform="translate(17.72 192.79)"
-  //               style="
-  //                 isolation: isolate;
-  //                 font-size: 3.3px;
-  //                 fill: #231f20;
-  //                 font-family: Poppins-Bold;">
-  //               Monday
-  //             </text>
-  //             <text
-  //               transform="translate(42.72 192.79)"
-  //               style="
-  //                 isolation: isolate;
-  //                 font-size: 3.3px;
-  //                 fill: #231f20;
-  //                 font-family: Poppins-Bold;">
-  //               Tuesday
-  //             </text>
-  //             <text
-  //               transform="translate(64.72 192.79)"
-  //               style="
-  //                 isolation: isolate;
-  //                 font-size: 3.3px;
-  //                 fill: #231f20;
-  //                 font-family: Poppins-Bold;">
-  //               Wednesday
-  //             </text>
-  //             <text
-  //               transform="translate(91.72 192.79)"
-  //               style="
-  //                 isolation: isolate;
-  //                 font-size: 3.3px;
-  //                 fill: #231f20;
-  //                 font-family: Poppins-Bold;">
-  //               Thursday
-  //             </text>
-  //             <text
-  //               transform="translate(119.72 192.79)"
-  //               style="
-  //                 isolation: isolate;
-  //                 font-size: 3.3px;
-  //                 fill: #231f20;
-  //                 font-family: Poppins-Bold;">
-  //               Friday
-  //             </text>
-  //             <text
-  //               transform="translate(142 192.79)"
-  //               style="
-  //                 isolation: isolate;
-  //                 font-size: 3.3px;
-  //                 fill: #231f20;
-  //                 font-family: Poppins-Bold;">
-  //               Saturday
-  //             </text>
-  //             <text
-  //               transform="translate(168 192.79)"
-  //               style="
-  //                 isolation: isolate;
-  //                 font-size: 3.3px;
-  //                 fill: #231f20;
-  //                 font-family: Poppins-Bold;">
-  //               Sunday
-  //             </text>
-  //           </g>
-  //         </g>
-
-  //         <g id="image-group">
-
-  //         <rect id="image-placeholder"
-  //           x="10.9"
-  //           y="11.4"
-  //           width="178.3"
-  //           height="150"
-  //           style="fill: #e8e8e8"/>
-  //         </g>
-
-  //       </svg>
-  //   `;
-
-  //   const monthEl = document.querySelector("#month-title");
-  //   const yearEl = document.querySelector("#year-title");
-
-  //   yearEl.textContent = yearInput.value;
-  //   monthEl.textContent =
-  //     monthInput.options[monthInput.selectedIndex].dataset.name;
-
-  //   daysGrid = document.querySelector("#days-grid");
-  //   createMonthGrid(
-  //     getFirstDay(month - 1, year) - 1,
-  //     daysInMonth(month, year),
-  //     daysInMonth(month - 1, year)
-  //   );
+  currentCalendar = new MultiPageCalendar(
+    month,
+    year,
+    calendarContainer,
+    controlsContainer,
+    "ru"
+  );
 });
-
-// function daysInMonth(month, year) {
-//   return new Date(year, month, 0).getDate();
-// }
-
-// function getFirstDay(month, year) {
-//   let index = new Date(year, month, 1);
-//   if (index.getDay() === 0) {
-//     return 7;
-//   }
-//   return index.getDay();
-// }
-
-
-function uploadImg(e) {
-
-  var reader = new FileReader();
-  reader.onload = function (e) {
-
-    const imageGroup = document.querySelector('#image-group');
-    const imagePlaceholder = imageGroup.querySelector('#image-placeholder');
-
-    const elHeight = +imagePlaceholder.getAttribute('height');
-    const elWidth = +imagePlaceholder.getAttribute('width');
-    const elX = +imagePlaceholder.getAttribute('x');
-    const elY = +imagePlaceholder.getAttribute('y');
-
-
-    imagePlaceholder.remove();
-
-    const imageEl = document.createElementNS('http://www.w3.org/2000/svg', 'image');
-
-    imageEl.setAttribute('height', elHeight);
-    imageEl.setAttribute('width', elWidth);
-    imageEl.setAttribute('x', elX);
-    imageEl.setAttribute('y', elY);
-
-    imageEl.setAttributeNS('http://www.w3.org/1999/xlink', 'href', e.target.result);
-    // imageEl.setAttribute('clip-path', "url(#image-clip)");
-
-    imageGroup.appendChild(imageEl);
-    console.log(getComputedStyle(imageEl).transform);
-    console.log(imageEl.getBoundingClientRect());
-
-    // Here to mess with cropper
-    const temp = document.createElement('div');
-    temp.style.position = 'absolute';
-    temp.style.left = `${imageEl.getBoundingClientRect().left}px`;
-    temp.style.top = `${imageEl.getBoundingClientRect().top}px`;
-    temp.style.width = `${imageEl.getBoundingClientRect().width}px`;
-    temp.style.height = `${imageEl.getBoundingClientRect().height}px`;
-
-
-    document.body.append(temp);
-
-  };
-
-  reader.readAsDataURL(this.files[0]);
-}
-
-// Download
-// function downloadSVGAsText() {
-
-//   const svg = document.querySelector('svg');
-//   const base64doc = btoa(decodeURIComponent(encodeURIComponent(svg.outerHTML)));
-
-//   const a = document.createElement('a');
-//   const e = new MouseEvent('click');
-
-//   a.download = 'download.svg';
-//   a.href = 'data:image/svg+xml;base64,' + base64doc;
-//   a.dispatchEvent(e);
-// }
-
-// function downloadSVGAsPNG(e) {
-//   var svg = document.querySelector('svg');
-//   var svgData = new XMLSerializer().serializeToString(svg);
-
-//   var canvas = document.createElement("canvas");
-//   canvas.width = 2000;
-//   canvas.height = 3000;
-//   var ctx = canvas.getContext("2d");
-
-//   //display image
-//   var img = document.createElement("img");
-//   img.setAttribute("src", "data:image/svg+xml;base64," + btoa(svgData));
-
-
-//   img.onload = function () {
-//     ctx.drawImage(img, 0, 0);
-
-//     const dataURL = canvas.toDataURL('image/png');
-//     if (window.navigator.msSaveBlob) {
-//       window.navigator.msSaveBlob(canvas.msToBlob(), "download.png");
-//       e.preventDefault();
-//     } else {
-//       const a = document.createElement('a');
-//       const my_evt = new MouseEvent('click');
-//       a.download = 'download.png';
-//       a.href = dataURL;
-//       a.dispatchEvent(my_evt);
-//     }
-//   };
-// }
-
-
-// const downloadSvgBtn = document.querySelector('#svg-download');
-// const downloadPngBtn = document.querySelector('#png-download');
-// const uploadImgInput = document.querySelector('#upload-input');
-
-// downloadSvgBtn.addEventListener('click', downloadSVGAsText)
-// downloadPngBtn.addEventListener('click', downloadSVGAsPNG)
-// uploadImgInput.addEventListener('change', uploadImg)
