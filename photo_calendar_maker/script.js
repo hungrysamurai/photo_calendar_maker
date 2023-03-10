@@ -24,7 +24,7 @@ class MultiPageCalendar {
     this.dayCellHeight = 15;
     this.dayCellWidth = 25;
 
-    this.imagePlaceholderWidth = 183.3;
+    this.imagePlaceholderWidth = 188.3;
     this.imagePlaceholderHeight = 155;
     this.imagePlaceholderX = 10.9;
     this.imagePlaceholderY = 11.4;
@@ -214,12 +214,21 @@ class MultiPageCalendar {
 
   initControls() {
     this.controlsContainer.innerHTML = `
-      <button id="prev-month">Prev</button>
-      <button id="next-month">Next</button>
+      <button id="prev-month">
+      <img src='./photo_calendar_maker/assets/icons/prev.svg'/>
+      </button>
 
-      <button id="pdf-download-current">Download current PDF</button>
-      <button id="pdf-download-all">Download All PDF</button>
-      <button id="png-download">Download PNG</button>
+
+      <button id="pdf-download-current">
+      <img src='./photo_calendar_maker/assets/icons/pdf-single.svg'/>
+      </button>
+      <button id="pdf-download-all">
+      <img src='./photo_calendar_maker/assets/icons/pdf-multi.svg'/>
+      </button>
+
+      <button id="png-download">
+      <img src='./photo_calendar_maker/assets/icons/png.svg'/>
+      </button>
   
         <select id="format-select">
           <option value="A5">A5</option>
@@ -228,14 +237,20 @@ class MultiPageCalendar {
        </select>
 
 
+
     <input
       type="file"
       id="upload-input"
       accept="image/jpeg, image/png, image/jpg"
       hidden
       onclick="this.value=null;"/>
-          <label for="upload-input" id="upload-btn" class="upload-btn"
-        >Upload Image</label>
+          <label for="upload-input" id="upload-btn" class="upload-btn">
+          <img src='./photo_calendar_maker/assets/icons/upload.svg'/>
+          </label>
+
+              <button id="next-month">
+      <img src='./photo_calendar_maker/assets/icons/next.svg'/>
+      </button>
     `;
 
     this.nextBtn = this.controlsContainer.querySelector("#next-month");
