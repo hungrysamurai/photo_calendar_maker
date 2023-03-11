@@ -74,6 +74,7 @@ body {
 }
 
 .month-container {
+  position: relative;
   width: 100vw;
   max-width: 100%;
   height: 95%;
@@ -86,6 +87,24 @@ body {
 svg {
   height: 100%;
   filter: drop-shadow(3px 3px 12px rgba(0, 0, 0, 0.33));
+}
+
+.cropper-outer-container {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+  /* display: flex;
+  align-items: center; */
+  /* aspect-ratio: 1 / 1; */
+  position: relative;
+}
+
+.image-element {
+  display: block;
+  max-height: 100%;
+  max-width: 100%;
+  margin: 0 auto;
 }
 
 .controls-container {
@@ -138,6 +157,29 @@ svg {
 .controls-container select option {
   font-family: inherit;
   font-weight: inherit;
+}
+
+.crop-controls-container {
+  position: fixed;
+  bottom: calc(60px + 1.5rem);
+  right: 5%;
+}
+
+.crop-controls-container button {
+  padding: 0.5rem;
+  border-radius: 50%;
+  cursor: pointer;
+  filter: drop-shadow(3px 3px 12px rgba(0, 0, 0, 0.33));
+  border: none;
+}
+
+.crop-controls-container img {
+  width: 2rem;
+  height: 2rem;
+}
+
+.crop-controls-container.hide {
+  visibility: hidden;
 }
 
 @media (max-width: 768px) {
