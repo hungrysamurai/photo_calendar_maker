@@ -1,9 +1,264 @@
-import glyphs from "./assets/Montserrat/MontserratGlyphs.js";
+import { glyphsMP, glyphsSP } from "./assets/Montserrat/MontserratGlyphs.js";
 import Cropper from "./assets/cropperjs/cropper.esm.js";
 
 PDFDocument.prototype.addSVG = function (svg, x, y, options, lang) {
   return SVGtoPDF(this, svg, x, y, options), this;
 };
+
+class SinglePageCalendar {
+  constructor(
+    firstMonthIndex,
+    year,
+    parentContainer,
+    controlsContainer,
+    cropControlsContainer,
+    lang
+  ) {
+    this.firstMonthIndex = firstMonthIndex;
+    this.year = year;
+    this.parentContainer = parentContainer;
+    this.controlsContainer = controlsContainer;
+    this.cropControlsContainer = cropControlsContainer;
+    this.lang = lang;
+
+    // Dimensions of document (px)
+    this.outputDimensions = {
+      A5: { width: 1748, height: 2480 },
+      A4: { width: 2480, height: 3508 },
+      A3: { width: 3508, height: 4961 },
+    };
+    this.currentSize = "A4";
+
+    // Mockup pre-defined dimensions
+    this.dayCellHeight = 44.35;
+    this.dayCellWidth = 65.49;
+
+    this.monthCellHeight = 375;
+    this.monthCellWidth = 457.22;
+
+    this.imagePlaceholderWidth = 188.3;
+    this.imagePlaceholderHeight = 155;
+    this.imagePlaceholderX = 10.9;
+    this.imagePlaceholderY = 11.4;
+
+    this.monthsList = [
+      "January",
+      "February",
+      "March",
+      "April",
+      "May",
+      "June",
+      "July",
+      "August",
+      "September",
+      "October",
+      "November",
+      "December",
+    ];
+    // Month counters
+    this.monthCounter = this.firstMonthIndex;
+
+    this.initDOMSVG();
+  }
+
+  initDOMSVG() {
+    this.calendarWrapper = document.createElement("div");
+    this.calendarWrapper.classList.add("calendar-wrapper");
+
+    this.calendarInner = document.createElement("div");
+    this.calendarInner.classList.add("calendar-inner");
+
+    const mockupContainer = document.createElement("div");
+
+    mockupContainer.classList.add("mockup-container");
+
+    mockupContainer.innerHTML = `
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2100 2970">
+  
+  <rect id="background-rect" width="2100" height="2970" style="fill: #fff"/>
+
+  <g id="image-group">
+
+    <rect id="image-placeholder" x="109" y="114" width="1883" height="1550" style="fill: #e8e8e8"/>
+
+  </g>
+
+</svg>
+    `;
+
+    let x = 80;
+    let y = 1748.63;
+
+    // Global loop
+    for (let i = 0; i < 12; i++) {
+      // Create month container
+      const monthContainer = document.createElementNS(
+        "http://www.w3.org/2000/svg",
+        "svg"
+      );
+      monthContainer.id = `month-container-${i}`;
+
+      // if new row...
+      if (i === 4 || i === 8) {
+        // Increment y-movement
+        y += this.monthCellHeight;
+        x = 80;
+      }
+
+      monthContainer.setAttribute("x", x);
+      monthContainer.setAttribute("y", y);
+
+      monthContainer.setAttribute("width", this.monthCellWidth);
+      monthContainer.setAttribute("height", this.monthCellHeight);
+
+      // Increment x-movement
+      x += this.monthCellWidth + 23;
+
+      // Populate current month
+      monthContainer.innerHTML = `
+      <g id="month-title">
+          <g transform="translate(24 12)">
+          ${glyphsSP.months[this.monthCounter]}
+          </g>
+        </g>
+
+        <g id="year-title">
+          <g transform="translate(360 18)">
+          ${glyphsSP.years[this.year]}
+          </g>
+        </g>
+
+        <g id="week-days-titles">
+          <g transform="translate(18 67.5)">
+          ${glyphsSP.weekDays.monday}
+          </g>
+          <g transform="translate(85.5 67.5)">
+          ${glyphsSP.weekDays.tuesday}
+          </g>
+          <g transform="translate(146.13 67.5)">
+          ${glyphsSP.weekDays.wednesday}
+          </g>
+          <g transform="translate(214.95 67.5)">
+          ${glyphsSP.weekDays.thursday}
+          </g>
+          <g transform="translate(284.96 67.5)">
+          ${glyphsSP.weekDays.friday}
+          </g>
+          <g transform="translate(351.06 67.5)">
+          ${glyphsSP.weekDays.saturday}
+          </g>
+          <g transform="translate(414 67.5)">
+           ${glyphsSP.weekDays.sunday}
+          </g>
+        </g>
+
+          <g id="days-grid"></g>
+        `;
+
+      this.monthCounter++;
+
+      if (this.monthCounter > 11) {
+        this.monthCounter = 0;
+        this.year++;
+      }
+
+      const currentMonthGrid = monthContainer.querySelector("#days-grid");
+      console.log(this.daysInMonth(this.monthCounter, this.year), this.year);
+
+      this.createMonthGrid(
+        currentMonthGrid,
+        this.getFirstDay(this.monthCounter - 1, this.year) - 1,
+        this.daysInMonth(this.monthCounter, this.year),
+        this.daysInMonth(this.monthCounter - 1, this.year) - 1
+      );
+
+      // Append to main SVG
+      mockupContainer.querySelector("svg").appendChild(monthContainer);
+    }
+
+    // Insert to DOM
+    this.calendarInner.append(mockupContainer);
+
+    this.calendarWrapper.append(this.calendarInner);
+    this.parentContainer.append(this.calendarWrapper);
+  }
+
+  createMonthGrid(monthGrid, startIndex, totalDays, prevMonthDaysNumber) {
+    let x = 0;
+    let y = 86.42;
+
+    let currentDayIndex = startIndex;
+    let prevMonthDaysCount = prevMonthDaysNumber;
+
+    // Set empty grid
+    for (let i = 1; i < 43; i++) {
+      if (i % 7 !== 0) {
+        monthGrid.appendChild(this.createDayCell(x, y, i));
+        x += this.dayCellWidth;
+      } else {
+        monthGrid.appendChild(this.createDayCell(x, y, i));
+        x = 0;
+        y += this.dayCellHeight;
+      }
+    }
+
+    // All text elements in generated cells
+    const cellsTextFields = monthGrid.querySelectorAll("g .cell-digit");
+
+    // Set days digits in cells
+    for (let i = 1; i < totalDays + 1; i++) {
+      cellsTextFields[currentDayIndex].innerHTML = glyphsSP.digits[i - 1];
+      currentDayIndex++;
+    }
+
+    // Prepend previous month
+    if (startIndex !== 0) {
+      for (let i = startIndex - 1; i >= 0; i--) {
+        cellsTextFields[i].innerHTML =
+          glyphsSP.secondaryDigits[prevMonthDaysCount - 1];
+        prevMonthDaysCount--;
+      }
+    }
+
+    // Extend on next month
+    if (currentDayIndex <= 42) {
+      for (let i = 1; currentDayIndex < 42; currentDayIndex++) {
+        cellsTextFields[currentDayIndex].innerHTML =
+          glyphsSP.secondaryDigits[i - 1];
+        i++;
+      }
+    }
+  }
+
+  createDayCell(x, y, cellNumber) {
+    let dayGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+
+    dayGroup.setAttribute("width", this.dayCellWidth);
+    dayGroup.setAttribute("height", this.dayCellHeight);
+    dayGroup.setAttribute("id", `day-${cellNumber}-cell`);
+
+    dayGroup.innerHTML = `
+      <rect y="${y}" x="${x}" width="65.49" height="44.35" style="fill: none"/>
+              
+        <g class="cell-digit"
+        transform="translate(${x} ${y})">
+      </g>;
+    `;
+    return dayGroup;
+  }
+
+  daysInMonth(month, year) {
+    return new Date(year, month, 0).getDate();
+  }
+
+  getFirstDay(month, year) {
+    let index = new Date(year, month, 1);
+    if (index.getDay() === 0) {
+      return 7;
+    }
+    return index.getDay();
+  }
+}
 
 class MultiPageCalendar {
   constructor(
@@ -68,7 +323,7 @@ class MultiPageCalendar {
 
       // Basic month mockup
       monthContainer.innerHTML = `
-      <svg xmlns = "http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox = "0 0 210 297" id="mockup-${i}" >
+      <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 210 297" id="mockup-${i}">
 
         <rect
           id="background-rect-${i}"
@@ -105,92 +360,92 @@ class MultiPageCalendar {
           style="fill: #e8e8e8"/>
         </g>
 
-      </svg >
-  `;
+      </svg>
+      `;
 
       const daysTitles = monthContainer.querySelector(`#days-titles-${i}`);
 
       if (this.lang === "ru") {
         daysTitles.innerHTML = `
-                    <g
-              transform="translate(18.5 190) scale(0.45)">
-              ${glyphs.weekDays.monday}
-            </g>
+      <g
+    transform= "translate(18.5 190) scale(0.45)">
+      ${glyphsMP.weekDays.monday}
+            </g >
 
             <g
               transform="translate(48 190) scale(0.45)">
-              ${glyphs.weekDays.tuesday}
+              ${glyphsMP.weekDays.tuesday}
             </g>
 
             <g
               transform="translate(74 190) scale(0.45)">
-              ${glyphs.weekDays.wednesday}
+              ${glyphsMP.weekDays.wednesday}
             </g>
 
             <g
               transform="translate(97.2 190) scale(0.45)">
-              ${glyphs.weekDays.thursday}
+              ${glyphsMP.weekDays.thursday}
             </g>
 
             <g
               transform="translate(122 190) scale(0.45)">
-              ${glyphs.weekDays.friday}
+              ${glyphsMP.weekDays.friday}
             </g>
 
             <g
               transform="translate(148 190) scale(0.45)">
-              ${glyphs.weekDays.saturday}
+              ${glyphsMP.weekDays.saturday}
             </g>
 
             <g
               transform="translate(169 190) scale(0.45)">
-              ${glyphs.weekDays.sunday}
+              ${glyphsMP.weekDays.sunday}
             </g>
-        `;
+    `;
       } else if (this.lang === "en") {
         daysTitles.innerHTML = `
-            <g
-              transform="translate(22.72 190) scale(0.5)">
-              ${glyphs.weekDays.monday}
-            </g>
+      <g
+    transform="translate(22.72 190) scale(0.5)" >
+      ${glyphsMP.weekDays.monday}
+            </g >
 
             <g
               transform="translate(47.72 190) scale(0.5)">
-              ${glyphs.weekDays.tuesday}
+              ${glyphsMP.weekDays.tuesday}
             </g>
 
             <g
               transform="translate(69.72 190) scale(0.5)">
-              ${glyphs.weekDays.wednesday}
+              ${glyphsMP.weekDays.wednesday}
             </g>
 
             <g
               transform="translate(96.72 190) scale(0.5)">
-              ${glyphs.weekDays.thursday}
+              ${glyphsMP.weekDays.thursday}
             </g>
 
             <g
               transform="translate(124.72 190) scale(0.5)">
-              ${glyphs.weekDays.friday}
+              ${glyphsMP.weekDays.friday}
             </g>
 
             <g
               transform="translate(147 190) scale(0.5)">
-              ${glyphs.weekDays.saturday}
+              ${glyphsMP.weekDays.saturday}
             </g>
 
             <g
               transform="translate(173 190) scale(0.5)">
-              ${glyphs.weekDays.sunday}
+              ${glyphsMP.weekDays.sunday}
             </g>
-        `;
+    `;
       }
 
       const monthEl = monthContainer.querySelector(`#month-title-${i}`);
       const yearEl = monthContainer.querySelector(`#year-title-${i}`);
 
-      monthEl.innerHTML = glyphs.months[this.monthCounter];
-      yearEl.innerHTML = glyphs.years[this.year];
+      monthEl.innerHTML = glyphsMP.months[this.monthCounter];
+      yearEl.innerHTML = glyphsMP.years[this.year];
 
       // Insert year & month data on container
       monthContainer.dataset.year = this.year;
@@ -221,8 +476,8 @@ class MultiPageCalendar {
 
   initControls() {
     this.controlsContainer.innerHTML = `
-      <button id="prev-month">
-      <img src='./photo_calendar_maker/assets/icons/prev.svg'/>
+      <button id ="prev-month">
+        <img src='./photo_calendar_maker/assets/icons/prev.svg' />
       </button>
 
 
@@ -257,7 +512,7 @@ class MultiPageCalendar {
           <img src='./photo_calendar_maker/assets/icons/upload.svg'/>
           </label>
 
-              <button id="next-month">
+          <button id="next-month">
       <img src='./photo_calendar_maker/assets/icons/next.svg'/>
       </button>
     `;
@@ -285,6 +540,7 @@ class MultiPageCalendar {
       }
 
       this.currentMonth++;
+
       if (this.currentMonth > 11) {
         this.currentMonth = 0;
       }
@@ -449,7 +705,7 @@ class MultiPageCalendar {
         month: "long",
       });
 
-      return `${firstMonthName}_${firstMonthYear}-${lastMonthName}_${lastMonthYear}`;
+      return `${firstMonthName}_${firstMonthYear}-${lastMonthName}_${lastMonthYear} `;
     }
 
     const currentMonthContainer = this.calendarInner.querySelector(
@@ -570,7 +826,7 @@ class MultiPageCalendar {
 
   applyCrop(currentImageElement) {
     // const currentImageElement = this.calendarInner.querySelector(
-    //   `#month-${this.currentMonth}-container image`
+    //   `#month - ${ this.currentMonth } -container image`
     // );
     // console.log(this.cropper);
     const canvas = this.cropper.getCroppedCanvas();
@@ -608,12 +864,12 @@ class MultiPageCalendar {
 
   initCropperControls() {
     this.cropControlsContainer.innerHTML = `
-    <button id="apply-crop">
-    <img src='./photo_calendar_maker/assets/icons/done.svg'/>
+      <button id="apply-crop">
+        <img src='./photo_calendar_maker/assets/icons/done.svg'/>
     </button>
-    <button id="cancel-crop">
-    <img src='./photo_calendar_maker/assets/icons/cancel.svg'/>
-    </button>
+      <button id="cancel-crop">
+        <img src='./photo_calendar_maker/assets/icons/cancel.svg'/>
+      </button>
     `;
 
     this.applyCropBtn = this.cropControlsContainer.querySelector("#apply-crop");
@@ -650,7 +906,7 @@ class MultiPageCalendar {
     // Set days digits in cells
     for (let i = 1; i < totalDays + 1; i++) {
       // cellsTextFields[currentDayIndex].textContent = i;
-      cellsTextFields[currentDayIndex].innerHTML = glyphs.digits[i - 1];
+      cellsTextFields[currentDayIndex].innerHTML = glyphsMP.digits[i - 1];
       currentDayIndex++;
     }
 
@@ -658,7 +914,7 @@ class MultiPageCalendar {
     if (startIndex !== 0) {
       for (let i = startIndex - 1; i >= 0; i--) {
         cellsTextFields[i].innerHTML =
-          glyphs.secondaryDigits[prevMonthDaysCount - 1];
+          glyphsMP.secondaryDigits[prevMonthDaysCount - 1];
         prevMonthDaysCount--;
       }
     }
@@ -667,7 +923,7 @@ class MultiPageCalendar {
     if (currentDayIndex <= 42) {
       for (let i = 1; currentDayIndex < 42; currentDayIndex++) {
         cellsTextFields[currentDayIndex].innerHTML =
-          glyphs.secondaryDigits[i - 1];
+          glyphsMP.secondaryDigits[i - 1];
         i++;
       }
     }
@@ -681,8 +937,8 @@ class MultiPageCalendar {
     dayGroup.setAttribute("id", `day-${cellNumber}-cell`);
 
     dayGroup.innerHTML = `
-     <rect x="${x}" y="${y}" width="${this.dayCellWidth}" height="${this.dayCellHeight}"
-            style="fill: none; stroke: #999999; stroke-miterlimit: 10; stroke-width: .5px;"></rect>
+      <rect x = "${x}" y = "${y}" width="${this.dayCellWidth}" height="${this.dayCellHeight}"
+    style = "fill: none; stroke: #999999; stroke-miterlimit: 10; stroke-width: .5px;" ></rect >
 
       <g class="cell-digit"
         transform="translate(${x} ${y})">
@@ -723,7 +979,15 @@ getButton.addEventListener("click", () => {
   if (document.querySelector(".cropper-outer-container")) {
     document.querySelector(".cropper-outer-container").remove();
   }
-  currentCalendar = new MultiPageCalendar(
+  // currentCalendar = new MultiPageCalendar(
+  //   month,
+  //   year,
+  //   calendarContainer,
+  //   controlsContainer,
+  //   cropControlsContainer,
+  //   "ru"
+  // );
+  currentCalendar = new SinglePageCalendar(
     month,
     year,
     calendarContainer,
