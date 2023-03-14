@@ -24,6 +24,28 @@ body {
   z-index: 2;
 }
 
+.new-calendar-controls .mode-radio {
+  color: #fff;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-around;
+  margin-right: 1rem;
+  padding: 0.1rem;
+  flex-direction: column;
+  height: 100%;
+}
+
+.new-calendar-controls .mode-radio div {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.new-calendar-controls .mode-radio label {
+  margin-left: 0.5rem;
+  margin-top: 0.1rem;
+}
+
 .new-calendar-controls select {
   font-size: 1.5rem;
   padding: 0.5rem;
@@ -97,7 +119,7 @@ svg > svg {
   width: 100%;
   height: 100%;
   margin: 0;
-  overflow: hidden;
+  /* overflow: hidden; */
   /* display: flex;
   align-items: center; */
   /* aspect-ratio: 1 / 1; */
@@ -197,6 +219,11 @@ svg > svg {
 } */
 
 @media (max-width: 768px) {
+  .new-calendar-controls .mode-radio {
+    font-size: 0.75rem;
+    justify-content: center;
+  }
+
   .new-calendar-controls select {
     font-size: 0.75rem;
     padding: 0.25rem;

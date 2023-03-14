@@ -15,6 +15,9 @@ import monthsSP from "./SP/months.js";
 import weekDaysSP from "./SP/weekDays.js";
 import yearsSP from "./SP/years.js";
 
+import weekDaysCyrSP from "./SP/weekDays_cyr.js";
+import monhsCyrSP from "./SP/months_cyr.js";
+
 const glyphsMP = {
   months: monthsCyrMP,
   // months: monthsMP,
@@ -28,8 +31,10 @@ const glyphsMP = {
 const glyphsSP = {
   digits: digitsSP,
   secondaryDigits: secondaryDigitsSP,
-  months: monthsSP,
-  weekDays: weekDaysSP,
+  // months: monthsSP,
+  months: monhsCyrSP,
+  // weekDays: weekDaysSP,
+  weekDays: weekDaysCyrSP,
   years: yearsSP,
 };
 
