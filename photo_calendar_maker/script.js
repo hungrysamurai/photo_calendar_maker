@@ -1,11 +1,7 @@
 import { glyphsMP, glyphsSP } from "./assets/Montserrat/MontserratGlyphs.js";
 import Cropper from "./assets/cropperjs/cropper.esm.js";
 
-PDFDocument.prototype.addSVG = function (svg, x, y, options, lang) {
-  return SVGtoPDF(this, svg, x, y, options), this;
-};
-
-class SinglePageCalendar {
+class Calendar {
   constructor(
     firstMonthIndex,
     year,
@@ -29,6 +25,28 @@ class SinglePageCalendar {
     };
     this.currentSize = "A4";
 
+    // Month counters
+    this.monthCounter = this.firstMonthIndex;
+  }
+}
+
+class SinglePageCalendar extends Calendar {
+  constructor(
+    firstMonthIndex,
+    year,
+    parentContainer,
+    controlsContainer,
+    cropControlsContainer,
+    lang
+  ) {
+    super(
+      firstMonthIndex,
+      year,
+      parentContainer,
+      controlsContainer,
+      cropControlsContainer,
+      lang
+    );
     // Mockup pre-defined dimensions
     this.dayCellHeight = 44.35;
     this.dayCellWidth = 65.49;
@@ -57,7 +75,6 @@ class SinglePageCalendar {
     this.calendarInner.classList.add("calendar-inner");
 
     const mockupContainer = document.createElement("div");
-
     mockupContainer.classList.add("mockup-container");
 
     mockupContainer.innerHTML = `
@@ -189,8 +206,6 @@ class SinglePageCalendar {
         `;
       }
 
-
-
       this.monthCounter++;
 
       if (this.monthCounter > 11) {
@@ -224,8 +239,8 @@ class SinglePageCalendar {
       <img src='./photo_calendar_maker/assets/icons/pdf-single.svg'/>
       </button>
      
-      <button id="png-download">
-      <img src='./photo_calendar_maker/assets/icons/png.svg'/>
+      <button id="jpg-download">
+      <img src='./photo_calendar_maker/assets/icons/jpg.svg'/>
       </button>
   
         <select id="format-select">
@@ -253,7 +268,7 @@ class SinglePageCalendar {
       "#pdf-download-current"
     );
 
-    this.pngDownloadBtn = this.controlsContainer.querySelector("#png-download");
+    this.jpgDownloadBtn = this.controlsContainer.querySelector("#jpg-download");
     this.uploadImgBtn = this.controlsContainer.querySelector("#upload-btn");
     this.formatSelectBtn =
       this.controlsContainer.querySelector("#format-select");
@@ -272,12 +287,12 @@ class SinglePageCalendar {
       this.downloadPDF("current");
     });
 
-    this.pngDownloadBtn.addEventListener("click", () => {
+    this.jpgDownloadBtn.addEventListener("click", () => {
       if (this.cropper) {
         this.removeCropper();
       }
 
-      this.downloadCurrentMonthPNG();
+      this.downloadCurrentJPG();
     });
 
     this.cropBtn.addEventListener("click", () => {
@@ -323,7 +338,7 @@ class SinglePageCalendar {
     }
 
     pagesArray.forEach((page, i) => {
-      doc.addSVG(page, 0, 0);
+      SVGtoPDF(doc, page, 0, 0);
 
       if (i !== pagesArray.length - 1) doc.addPage();
     });
@@ -363,7 +378,7 @@ class SinglePageCalendar {
 
   }
 
-  downloadCurrentMonthPNG(e) {
+  downloadCurrentJPG(e) {
     const svg = this.calendarInner.querySelector('#mockup');
 
     const svgData = new XMLSerializer().serializeToString(svg);
@@ -513,7 +528,7 @@ class SinglePageCalendar {
     const ctx = canvas.getContext("2d");
     ctx.drawImage(canvas, 0, 0);
 
-    const resultURL = canvas.toDataURL("image/png");
+    const resultURL = canvas.toDataURL("image/jpeg");
 
     currentImageElement.setAttributeNS(
       "http://www.w3.org/1999/xlink",
@@ -633,7 +648,7 @@ class SinglePageCalendar {
   }
 }
 
-class MultiPageCalendar {
+class MultiPageCalendar extends Calendar {
   constructor(
     firstMonthIndex,
     year,
@@ -642,20 +657,14 @@ class MultiPageCalendar {
     cropControlsContainer,
     lang
   ) {
-    this.firstMonthIndex = firstMonthIndex;
-    this.year = year;
-    this.parentContainer = parentContainer;
-    this.controlsContainer = controlsContainer;
-    this.cropControlsContainer = cropControlsContainer;
-    this.lang = lang;
-
-    // Dimensions of document (px)
-    this.outputDimensions = {
-      A5: { width: 1748, height: 2480 },
-      A4: { width: 2480, height: 3508 },
-      A3: { width: 3508, height: 4961 },
-    };
-    this.currentSize = "A4";
+    super(
+      firstMonthIndex,
+      year,
+      parentContainer,
+      controlsContainer,
+      cropControlsContainer,
+      lang
+    );
 
     // Mockup pre-defined dimensions
     this.dayCellHeight = 15;
@@ -666,14 +675,11 @@ class MultiPageCalendar {
     this.imagePlaceholderX = 10.9;
     this.imagePlaceholderY = 11.4;
 
-    // Month counters
-    this.monthCounter = this.firstMonthIndex;
     this.currentMonth = 0;
 
     this.initDOMSVG();
     this.initControls();
     this.initControlsEvents();
-    // this.initCropperControls();
 
     this.pagesArray = [...this.calendarInner.querySelectorAll("svg")];
   }
@@ -861,8 +867,8 @@ class MultiPageCalendar {
       <img src='./photo_calendar_maker/assets/icons/pdf-multi.svg'/>
       </button>
 
-      <button id="png-download">
-      <img src='./photo_calendar_maker/assets/icons/png.svg'/>
+      <button id="jpg-download">
+      <img src='./photo_calendar_maker/assets/icons/jpg.svg'/>
       </button>
   
         <select id="format-select">
@@ -897,7 +903,7 @@ class MultiPageCalendar {
     );
     this.allPDFDownloadBtn =
       this.controlsContainer.querySelector("#pdf-download-all");
-    this.pngDownloadBtn = this.controlsContainer.querySelector("#png-download");
+    this.jpgDownloadBtn = this.controlsContainer.querySelector("#jpg-download");
     this.uploadImgBtn = this.controlsContainer.querySelector("#upload-btn");
     this.formatSelectBtn =
       this.controlsContainer.querySelector("#format-select");
@@ -950,12 +956,12 @@ class MultiPageCalendar {
       this.downloadPDF("all");
     });
 
-    this.pngDownloadBtn.addEventListener("click", () => {
+    this.jpgDownloadBtn.addEventListener("click", () => {
       if (this.cropper) {
         this.removeCropper();
       }
 
-      this.downloadCurrentMonthPNG();
+      this.downloadCurrentJPG();
     });
 
     this.cropBtn.addEventListener("click", () => {
@@ -1010,7 +1016,8 @@ class MultiPageCalendar {
     }
 
     pagesArray.forEach((page, i) => {
-      doc.addSVG(page, 0, 0);
+      // doc.addSVG(page, 0, 0);
+      SVGtoPDF(doc, page, 0, 0);
 
       if (i !== pagesArray.length - 1) doc.addPage();
     });
@@ -1028,7 +1035,7 @@ class MultiPageCalendar {
     });
   }
 
-  downloadCurrentMonthPNG(e) {
+  downloadCurrentJPG(e) {
     const svg = this.calendarInner.querySelector(
       `#month-${this.currentMonth}-container svg`
     );
@@ -1046,9 +1053,9 @@ class MultiPageCalendar {
 
     img.onload = () => {
       ctx.drawImage(img, 0, 0);
-      const dataURL = canvas.toDataURL("image/png");
+      const dataURL = canvas.toDataURL("image/jpeg");
       const fileName = this.getFileName();
-
+      console.log(dataURL);
       if (window.navigator.msSaveBlob) {
         window.navigator.msSaveBlob(canvas.msToBlob(), fileName);
         e.preventDefault();
@@ -1095,7 +1102,6 @@ class MultiPageCalendar {
 
   uploadImgCurrentMonth(e) {
     if (!e.target.files[0]) return;
-
     const imageFile = e.target.files[0];
 
     const reader = new FileReader();
@@ -1104,9 +1110,6 @@ class MultiPageCalendar {
       const imageGroup = this.calendarInner.querySelector(
         `#image-group-${this.currentMonth}`
       );
-
-      imageGroup.innerHTML = "";
-
       const imageEl = document.createElementNS(
         "http://www.w3.org/2000/svg",
         "image"
@@ -1117,18 +1120,30 @@ class MultiPageCalendar {
       imageEl.setAttribute("x", this.imagePlaceholderX);
       imageEl.setAttribute("y", this.imagePlaceholderY);
 
-      imageEl.setAttributeNS(
-        "http://www.w3.org/1999/xlink",
-        "href",
-        e.target.result
+      // Image optimization
+      const reduced = reduce_image_file_size(
+        e.target.result,
+        this.imagePlaceholderWidth * 20,
+        this.imagePlaceholderHeight * 20
       );
 
-      imageGroup.appendChild(imageEl);
+      // console.log(e.target.result);
+      // console.log(reduced);
+
+      reduced.then(reducedImage => {
+        const resultImage = reducedImage ? reducedImage : e.target.result;
+
+        imageEl.setAttributeNS(
+          "http://www.w3.org/1999/xlink",
+          "href",
+          resultImage
+        );
+        imageGroup.innerHTML = "";
+        imageGroup.appendChild(imageEl);
+      })
+
       console.log("...image uploaded!");
-
-      // this.initCropper(imageEl);
     };
-
     reader.readAsDataURL(imageFile);
     console.log("start upload image...");
   }
@@ -1192,7 +1207,7 @@ class MultiPageCalendar {
 
             this.cropper.zoomRatio = this.cropper.getCanvasData().width / this.cropper.getCanvasData().naturalWidth;
 
-            if (this.cropper.zoomRatio > this.cropper.initialZoomRatio + 0.1) {
+            if (this.cropper.zoomRatio > this.cropper.initialZoomRatio) {
               this.cropper.setDragMode("move");
               this.cropper.options.viewMode = 3
             } else {
@@ -1217,7 +1232,7 @@ class MultiPageCalendar {
     });
     ctx.drawImage(canvas, 0, 0);
 
-    const resultURL = canvas.toDataURL("image/png");
+    const resultURL = canvas.toDataURL("image/jpeg");
 
     currentImageElement.setAttributeNS(
       "http://www.w3.org/1999/xlink",
@@ -1344,7 +1359,6 @@ class MultiPageCalendar {
 const getButton = document.querySelector("#get-button");
 const monthInput = document.querySelector("#month-input");
 const yearInput = document.querySelector("#year-input");
-
 const multiModeBtn = document.querySelector('#multi-page');
 
 const calendarContainer = document.querySelector(".calendar-container");
@@ -1389,3 +1403,38 @@ getButton.addEventListener("click", () => {
 
 
 });
+
+
+async function reduce_image_file_size(base64Str, MAX_WIDTH, MAX_HEIGHT) {
+  let resized_base64 = await new Promise((resolve, reject) => {
+    let img = new Image()
+    img.src = base64Str
+    img.onload = () => {
+      let width = img.width
+      let height = img.height
+
+      if (width <= MAX_WIDTH || height <= MAX_HEIGHT) {
+        resolve();
+      }
+
+      let canvas = document.createElement('canvas')
+      if (width > height) {
+        if (width > MAX_WIDTH) {
+          height *= MAX_WIDTH / width
+          width = MAX_WIDTH
+        }
+      } else {
+        if (height > MAX_HEIGHT) {
+          width *= MAX_HEIGHT / height
+          height = MAX_HEIGHT
+        }
+      }
+      canvas.width = width
+      canvas.height = height
+      let ctx = canvas.getContext('2d')
+      ctx.drawImage(img, 0, 0, width, height)
+      resolve(canvas.toDataURL("image/jpeg")) // this will return base64 image results after resize
+    }
+  });
+  return resized_base64;
+}
