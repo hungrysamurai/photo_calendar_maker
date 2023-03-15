@@ -28,6 +28,181 @@ class Calendar {
     // Month counters
     this.monthCounter = this.firstMonthIndex;
   }
+
+  initBasicControls() {
+
+    this.controlsContainer.innerHTML = `
+      <button id="pdf-download-current">
+        <img src='./photo_calendar_maker/assets/icons/pdf-single.svg'/>
+      </button>
+     
+      <button id="jpg-download">
+        <img src='./photo_calendar_maker/assets/icons/jpg.svg'/>
+      </button>
+  
+        <select id="format-select">
+          <option value="A5">A5</option>
+          <option value="A4" selected>A4</option>
+          <option value="A3">A3</option>
+       </select>
+
+    <button id="crop-btn">
+      <img src='./photo_calendar_maker/assets/icons/crop.svg'/>
+    </button>
+
+    <input
+      type="file"
+      id="upload-input"
+      accept="image/jpeg, image/png, image/jpg"
+      hidden
+      onclick="this.value=null;"/>
+          
+      <label for="upload-input" id="upload-btn" class="upload-btn">
+        <img src='./photo_calendar_maker/assets/icons/upload.svg'/>
+      </label>
+    `;
+
+    this.currentPDFDownloadBtn = this.controlsContainer.querySelector(
+      "#pdf-download-current"
+    );
+    this.jpgDownloadBtn = this.controlsContainer.querySelector("#jpg-download");
+    this.uploadImgBtn = this.controlsContainer.querySelector("#upload-btn");
+    this.formatSelectBtn =
+      this.controlsContainer.querySelector("#format-select");
+    this.cropBtn = this.controlsContainer.querySelector("#crop-btn");
+    this.uploadImgInput = this.controlsContainer.querySelector("#upload-input");
+  }
+
+  initBasicControlsEvents() {
+
+    this.currentPDFDownloadBtn.addEventListener("click", () => {
+      if (this.cropper) {
+        this.removeCropper();
+      }
+
+      this.downloadPDF("current");
+    });
+
+    this.jpgDownloadBtn.addEventListener("click", () => {
+      if (this.cropper) {
+        this.removeCropper();
+      }
+
+      this.downloadCurrentJPG();
+    });
+
+    this.cropBtn.addEventListener("click", () => {
+      if (this.cropper) return;
+
+      const currentImageElement = this.calendarInner.querySelector(
+        this.getCurrentImageElement()
+      );
+
+      if (currentImageElement) {
+        this.initCropper(currentImageElement);
+        this.cropControlsContainer.classList.remove("hide");
+      }
+    });
+
+    this.uploadImgInput.addEventListener("input", (e) => {
+      if (this.cropper) {
+        this.removeCropper();
+      }
+
+      this.uploadImgCurrentMonth(e);
+    });
+
+    this.formatSelectBtn.addEventListener("input", (e) => {
+      this.currentSize = e.target.value;
+    });
+  }
+
+  getCurrentImageElement() {
+    if (this instanceof MultiPageCalendar) {
+      return `#month-${this.currentMonth}-container image`;
+    } else if (this instanceof SinglePageCalendar) {
+      return '#mockup image';
+    }
+  }
+
+  createMonthGrid(monthGrid, startIndex, totalDays, prevMonthDaysNumber, initialX, initialY, glyphsSet, cellStyles) {
+    let x = initialX;
+    let y = initialY;
+
+    let currentDayIndex = startIndex;
+    let prevMonthDaysCount = prevMonthDaysNumber;
+
+    // Set empty grid
+    for (let i = 1; i < 43; i++) {
+      if (i % 7 !== 0) {
+        monthGrid.appendChild(this.createDayCell(x, y, i, cellStyles));
+        x += this.dayCellWidth;
+      } else {
+        monthGrid.appendChild(this.createDayCell(x, y, i, cellStyles));
+        x = initialX;
+        y += this.dayCellHeight;
+      }
+    }
+
+    // All text elements in generated cells
+    const cellsTextFields = monthGrid.querySelectorAll("g .cell-digit");
+
+    // Set days digits in cells
+    for (let i = 1; i < totalDays + 1; i++) {
+      cellsTextFields[currentDayIndex].innerHTML = glyphsSet.digits[i - 1];
+      currentDayIndex++;
+    }
+
+    // Prepend previous month
+    if (startIndex !== 0) {
+      for (let i = startIndex - 1; i >= 0; i--) {
+        cellsTextFields[i].innerHTML =
+          glyphsSet.secondaryDigits[prevMonthDaysCount - 1];
+        prevMonthDaysCount--;
+      }
+    }
+
+    // Extend on next month
+    if (currentDayIndex <= 42) {
+      for (let i = 1; currentDayIndex < 42; currentDayIndex++) {
+        cellsTextFields[currentDayIndex].innerHTML =
+          glyphsSet.secondaryDigits[i - 1];
+        i++;
+      }
+    }
+  }
+
+  createDayCell(x, y, cellNumber, cellStyles) {
+    let dayGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+
+    dayGroup.setAttribute("width", this.dayCellWidth);
+    dayGroup.setAttribute("height", this.dayCellHeight);
+    dayGroup.setAttribute("id", `day-${cellNumber}-cell`);
+
+    dayGroup.innerHTML = `
+      <rect y="${y}" x="${x}" 
+      width="${this.dayCellWidth}" 
+      height="${this.dayCellHeight}"
+      style="${cellStyles}"/></rect>
+              
+        <g class="cell-digit"
+        transform="translate(${x} ${y})">
+      </g>;
+    `;
+    return dayGroup;
+  }
+
+  daysInMonth(month, year) {
+    return new Date(year, month, 0).getDate();
+  }
+
+  getFirstDay(month, year) {
+    let index = new Date(year, month, 1);
+    if (index.getDay() === 0) {
+      return 7;
+    }
+    return index.getDay();
+  }
 }
 
 class SinglePageCalendar extends Calendar {
@@ -47,6 +222,7 @@ class SinglePageCalendar extends Calendar {
       cropControlsContainer,
       lang
     );
+
     // Mockup pre-defined dimensions
     this.dayCellHeight = 44.35;
     this.dayCellWidth = 65.49;
@@ -63,8 +239,8 @@ class SinglePageCalendar extends Calendar {
     this.monthCounter = this.firstMonthIndex;
 
     this.initDOMSVG();
-    this.initControls();
-    this.initControlsEvents();
+    this.initBasicControls();
+    this.initBasicControlsEvents();
   }
 
   initDOMSVG() {
@@ -219,7 +395,11 @@ class SinglePageCalendar extends Calendar {
         currentMonthGrid,
         this.getFirstDay(this.monthCounter - 1, this.year) - 1,
         this.daysInMonth(this.monthCounter, this.year),
-        this.daysInMonth(this.monthCounter - 1, this.year) - 1
+        this.daysInMonth(this.monthCounter - 1, this.year) - 1,
+        0,
+        86.42,
+        glyphsSP,
+        'fill: none;stroke: none; stroke-width: 0; stroke-miterlimit: 0;'
       );
 
       // Append to main SVG
@@ -233,93 +413,6 @@ class SinglePageCalendar extends Calendar {
     this.parentContainer.append(this.calendarWrapper);
   }
 
-  initControls() {
-    this.controlsContainer.innerHTML = `
-      <button id="pdf-download-current">
-      <img src='./photo_calendar_maker/assets/icons/pdf-single.svg'/>
-      </button>
-     
-      <button id="jpg-download">
-      <img src='./photo_calendar_maker/assets/icons/jpg.svg'/>
-      </button>
-  
-        <select id="format-select">
-          <option value="A5">A5</option>
-          <option value="A4" selected>A4</option>
-          <option value="A3">A3</option>
-       </select>
-
-    <button id="crop-btn">
-          <img src='./photo_calendar_maker/assets/icons/crop.svg'/>
-    </button>
-
-    <input
-      type="file"
-      id="upload-input"
-      accept="image/jpeg, image/png, image/jpg"
-      hidden
-      onclick="this.value=null;"/>
-          <label for="upload-input" id="upload-btn" class="upload-btn">
-          <img src='./photo_calendar_maker/assets/icons/upload.svg'/>
-          </label>
-    `;
-
-    this.currentPDFDownloadBtn = this.controlsContainer.querySelector(
-      "#pdf-download-current"
-    );
-
-    this.jpgDownloadBtn = this.controlsContainer.querySelector("#jpg-download");
-    this.uploadImgBtn = this.controlsContainer.querySelector("#upload-btn");
-    this.formatSelectBtn =
-      this.controlsContainer.querySelector("#format-select");
-
-    this.cropBtn = this.controlsContainer.querySelector("#crop-btn");
-    this.uploadImgInput = this.controlsContainer.querySelector("#upload-input");
-  }
-
-  initControlsEvents() {
-
-    this.currentPDFDownloadBtn.addEventListener("click", () => {
-      if (this.cropper) {
-        this.removeCropper();
-      }
-
-      this.downloadPDF("current");
-    });
-
-    this.jpgDownloadBtn.addEventListener("click", () => {
-      if (this.cropper) {
-        this.removeCropper();
-      }
-
-      this.downloadCurrentJPG();
-    });
-
-    this.cropBtn.addEventListener("click", () => {
-      if (this.cropper) return;
-
-      const currentImageElement = this.calendarInner.querySelector('#mockup image');
-
-      if (currentImageElement) {
-        // this.initCropperControls();
-        this.initCropper(currentImageElement);
-        this.cropControlsContainer.classList.remove("hide");
-      }
-    });
-
-    this.uploadImgInput.addEventListener("input", (e) => {
-      if (this.cropper) {
-        this.removeCropper();
-      }
-
-      this.uploadImgCurrentMonth(e);
-    });
-
-    this.formatSelectBtn.addEventListener("input", (e) => {
-      this.currentSize = e.target.value;
-    });
-  }
-
   downloadPDF(amount) {
     let pagesArray = [];
 
@@ -328,7 +421,6 @@ class SinglePageCalendar extends Calendar {
 
     if (amount === "current") {
       pagesArray.push(this.calendarInner.querySelector("#mockup"));
-
       doc.info["Title"] = this.getFileName();
     }
 
@@ -394,7 +486,7 @@ class SinglePageCalendar extends Calendar {
 
     img.onload = () => {
       ctx.drawImage(img, 0, 0);
-      const dataURL = canvas.toDataURL("image/png");
+      const dataURL = canvas.toDataURL("image/jpeg");
       const fileName = this.getFileName();
 
       if (window.navigator.msSaveBlob) {
@@ -570,82 +662,6 @@ class SinglePageCalendar extends Calendar {
       this.removeCropper();
     });
   }
-
-  createMonthGrid(monthGrid, startIndex, totalDays, prevMonthDaysNumber) {
-    let x = 0;
-    let y = 86.42;
-
-    let currentDayIndex = startIndex;
-    let prevMonthDaysCount = prevMonthDaysNumber;
-
-    // Set empty grid
-    for (let i = 1; i < 43; i++) {
-      if (i % 7 !== 0) {
-        monthGrid.appendChild(this.createDayCell(x, y, i));
-        x += this.dayCellWidth;
-      } else {
-        monthGrid.appendChild(this.createDayCell(x, y, i));
-        x = 0;
-        y += this.dayCellHeight;
-      }
-    }
-
-    // All text elements in generated cells
-    const cellsTextFields = monthGrid.querySelectorAll("g .cell-digit");
-
-    // Set days digits in cells
-    for (let i = 1; i < totalDays + 1; i++) {
-      cellsTextFields[currentDayIndex].innerHTML = glyphsSP.digits[i - 1];
-      currentDayIndex++;
-    }
-
-    // Prepend previous month
-    if (startIndex !== 0) {
-      for (let i = startIndex - 1; i >= 0; i--) {
-        cellsTextFields[i].innerHTML =
-          glyphsSP.secondaryDigits[prevMonthDaysCount - 1];
-        prevMonthDaysCount--;
-      }
-    }
-
-    // Extend on next month
-    if (currentDayIndex <= 42) {
-      for (let i = 1; currentDayIndex < 42; currentDayIndex++) {
-        cellsTextFields[currentDayIndex].innerHTML =
-          glyphsSP.secondaryDigits[i - 1];
-        i++;
-      }
-    }
-  }
-
-  createDayCell(x, y, cellNumber) {
-    let dayGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
-
-    dayGroup.setAttribute("width", this.dayCellWidth);
-    dayGroup.setAttribute("height", this.dayCellHeight);
-    dayGroup.setAttribute("id", `day-${cellNumber}-cell`);
-
-    dayGroup.innerHTML = `
-      <rect y="${y}" x="${x}" width="65.49" height="44.35" style="fill: none"/>
-              
-        <g class="cell-digit"
-        transform="translate(${x} ${y})">
-      </g>;
-    `;
-    return dayGroup;
-  }
-
-  daysInMonth(month, year) {
-    return new Date(year, month, 0).getDate();
-  }
-
-  getFirstDay(month, year) {
-    let index = new Date(year, month, 1);
-    if (index.getDay() === 0) {
-      return 7;
-    }
-    return index.getDay();
-  }
 }
 
 class MultiPageCalendar extends Calendar {
@@ -678,8 +694,10 @@ class MultiPageCalendar extends Calendar {
     this.currentMonth = 0;
 
     this.initDOMSVG();
-    this.initControls();
-    this.initControlsEvents();
+    this.initBasicControls();
+    this.initMultiPageControls();
+    this.initBasicControlsEvents();
+    this.initMultiPageControlsEvents();
 
     this.pagesArray = [...this.calendarInner.querySelectorAll("svg")];
   }
@@ -845,7 +863,11 @@ class MultiPageCalendar extends Calendar {
         currentMonthGrid,
         this.getFirstDay(this.monthCounter - 1, this.year) - 1,
         this.daysInMonth(this.monthCounter, this.year),
-        this.daysInMonth(this.monthCounter - 1, this.year)
+        this.daysInMonth(this.monthCounter - 1, this.year),
+        17,
+        195.8,
+        glyphsMP,
+        'fill: none; stroke:#999999; stroke-miterlimit: 10; stroke-width: .5px;'
       );
     }
 
@@ -853,66 +875,26 @@ class MultiPageCalendar extends Calendar {
     this.parentContainer.append(this.calendarWrapper);
   }
 
-  initControls() {
-    this.controlsContainer.innerHTML = `
-      <button id ="prev-month">
-        <img src='./photo_calendar_maker/assets/icons/prev.svg' />
-      </button>
+  initMultiPageControls() {
+    this.prevBtn = document.createElement('button');
+    this.prevBtn.id = 'prev-month';
+    this.prevBtn.innerHTML = `<img src='./photo_calendar_maker/assets/icons/prev.svg'/>`;
 
+    this.nextBtn = document.createElement('button');
+    this.nextBtn.id = 'next-month';
+    this.nextBtn.innerHTML = `<img src='./photo_calendar_maker/assets/icons/next.svg'/>`;
 
-      <button id="pdf-download-current">
-      <img src='./photo_calendar_maker/assets/icons/pdf-single.svg'/>
-      </button>
-      <button id="pdf-download-all">
-      <img src='./photo_calendar_maker/assets/icons/pdf-multi.svg'/>
-      </button>
+    this.allPDFDownloadBtn = document.createElement('button');
+    this.allPDFDownloadBtn.id = 'pdf-download-all';
+    this.allPDFDownloadBtn.innerHTML = `<img src='./photo_calendar_maker/assets/icons/pdf-multi.svg'/>`;
 
-      <button id="jpg-download">
-      <img src='./photo_calendar_maker/assets/icons/jpg.svg'/>
-      </button>
-  
-        <select id="format-select">
-          <option value="A5">A5</option>
-          <option value="A4" selected>A4</option>
-          <option value="A3">A3</option>
-       </select>
+    this.controlsContainer.insertAdjacentElement('afterbegin', this.allPDFDownloadBtn)
+    this.controlsContainer.insertAdjacentElement('afterbegin', this.prevBtn)
 
-    <button id="crop-btn">
-          <img src='./photo_calendar_maker/assets/icons/crop.svg'/>
-    </button>
-
-    <input
-      type="file"
-      id="upload-input"
-      accept="image/jpeg, image/png, image/jpg"
-      hidden
-      onclick="this.value=null;"/>
-          <label for="upload-input" id="upload-btn" class="upload-btn">
-          <img src='./photo_calendar_maker/assets/icons/upload.svg'/>
-          </label>
-
-          <button id="next-month">
-      <img src='./photo_calendar_maker/assets/icons/next.svg'/>
-      </button>
-    `;
-
-    this.nextBtn = this.controlsContainer.querySelector("#next-month");
-    this.prevBtn = this.controlsContainer.querySelector("#prev-month");
-    this.currentPDFDownloadBtn = this.controlsContainer.querySelector(
-      "#pdf-download-current"
-    );
-    this.allPDFDownloadBtn =
-      this.controlsContainer.querySelector("#pdf-download-all");
-    this.jpgDownloadBtn = this.controlsContainer.querySelector("#jpg-download");
-    this.uploadImgBtn = this.controlsContainer.querySelector("#upload-btn");
-    this.formatSelectBtn =
-      this.controlsContainer.querySelector("#format-select");
-
-    this.cropBtn = this.controlsContainer.querySelector("#crop-btn");
-    this.uploadImgInput = this.controlsContainer.querySelector("#upload-input");
+    this.controlsContainer.insertAdjacentElement('beforeend', this.nextBtn)
   }
 
-  initControlsEvents() {
+  initMultiPageControlsEvents() {
     this.nextBtn.addEventListener("click", () => {
       if (this.cropper) {
         this.removeCropper();
@@ -940,13 +922,6 @@ class MultiPageCalendar extends Calendar {
       this.setVisibleMonth();
     });
 
-    this.currentPDFDownloadBtn.addEventListener("click", () => {
-      if (this.cropper) {
-        this.removeCropper();
-      }
-
-      this.downloadPDF("current");
-    });
 
     this.allPDFDownloadBtn.addEventListener("click", () => {
       if (this.cropper) {
@@ -954,40 +929,6 @@ class MultiPageCalendar extends Calendar {
       }
 
       this.downloadPDF("all");
-    });
-
-    this.jpgDownloadBtn.addEventListener("click", () => {
-      if (this.cropper) {
-        this.removeCropper();
-      }
-
-      this.downloadCurrentJPG();
-    });
-
-    this.cropBtn.addEventListener("click", () => {
-      if (this.cropper) return;
-
-      const currentImageElement = this.calendarInner.querySelector(
-        `#month-${this.currentMonth}-container image`
-      );
-
-      if (currentImageElement) {
-        // this.initCropperControls();
-        this.initCropper(currentImageElement);
-        this.cropControlsContainer.classList.remove("hide");
-      }
-    });
-
-    this.uploadImgInput.addEventListener("input", (e) => {
-      if (this.cropper) {
-        this.removeCropper();
-      }
-
-      this.uploadImgCurrentMonth(e);
-    });
-
-    this.formatSelectBtn.addEventListener("input", (e) => {
-      this.currentSize = e.target.value;
     });
   }
 
@@ -1006,7 +947,6 @@ class MultiPageCalendar extends Calendar {
         `#month-${this.currentMonth}-container`
       );
       pagesArray.push(currentMonthContainer.querySelector("svg"));
-
       doc.info["Title"] = this.getFileName();
     }
 
@@ -1275,84 +1215,6 @@ class MultiPageCalendar extends Calendar {
     this.cancelCropBtn.addEventListener("click", () => {
       this.removeCropper();
     });
-  }
-
-  createMonthGrid(monthGrid, startIndex, totalDays, prevMonthDaysNumber) {
-    let x = 17;
-    let y = 195.8;
-
-    let currentDayIndex = startIndex;
-    let prevMonthDaysCount = prevMonthDaysNumber;
-
-    // Set empty grid
-    for (let i = 1; i < 43; i++) {
-      if (i % 7 !== 0) {
-        monthGrid.appendChild(this.createDayCell(x, y, i));
-        x += this.dayCellWidth;
-      } else {
-        monthGrid.appendChild(this.createDayCell(x, y, i));
-        x = 17;
-        y += this.dayCellHeight;
-      }
-    }
-
-    // All text elements in generated cells
-    const cellsTextFields = monthGrid.querySelectorAll("g .cell-digit");
-
-    // Set days digits in cells
-    for (let i = 1; i < totalDays + 1; i++) {
-      // cellsTextFields[currentDayIndex].textContent = i;
-      cellsTextFields[currentDayIndex].innerHTML = glyphsMP.digits[i - 1];
-      currentDayIndex++;
-    }
-
-    // Prepend previous month
-    if (startIndex !== 0) {
-      for (let i = startIndex - 1; i >= 0; i--) {
-        cellsTextFields[i].innerHTML =
-          glyphsMP.secondaryDigits[prevMonthDaysCount - 1];
-        prevMonthDaysCount--;
-      }
-    }
-
-    // Extend on next month
-    if (currentDayIndex <= 42) {
-      for (let i = 1; currentDayIndex < 42; currentDayIndex++) {
-        cellsTextFields[currentDayIndex].innerHTML =
-          glyphsMP.secondaryDigits[i - 1];
-        i++;
-      }
-    }
-  }
-
-  createDayCell(x, y, cellNumber) {
-    let dayGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
-
-    dayGroup.setAttribute("width", this.dayCellWidth);
-    dayGroup.setAttribute("height", this.dayCellHeight);
-    dayGroup.setAttribute("id", `day-${cellNumber}-cell`);
-
-    dayGroup.innerHTML = `
-      <rect x = "${x}" y = "${y}" width="${this.dayCellWidth}" height="${this.dayCellHeight}"
-    style = "fill: none; stroke: #999999; stroke-miterlimit: 10; stroke-width: .5px;" ></rect >
-
-      <g class="cell-digit"
-        transform="translate(${x} ${y})">
-      </g>;
-    `;
-    return dayGroup;
-  }
-
-  daysInMonth(month, year) {
-    return new Date(year, month, 0).getDate();
-  }
-
-  getFirstDay(month, year) {
-    let index = new Date(year, month, 1);
-    if (index.getDay() === 0) {
-      return 7;
-    }
-    return index.getDay();
   }
 }
 
