@@ -281,7 +281,7 @@ export default class Calendar {
  }
 
  getFileName(span) {
-  if (span || this.type === 'multi-page') {
+  if (span || this.type === 'single-page') {
    const firstMonth = this.firstMonth;
    const firstMonthYear = this.startYear;
 

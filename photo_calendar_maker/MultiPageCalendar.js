@@ -236,10 +236,41 @@ export default class MultiPageCalendar extends Calendar {
   this.allPDFDownloadBtn.id = 'pdf-download-all';
   this.allPDFDownloadBtn.innerHTML = `<img src='./photo_calendar_maker/assets/icons/pdf-multi.svg'/>`;
 
-  this.controlsContainer.insertAdjacentElement('afterbegin', this.allPDFDownloadBtn)
-  this.controlsContainer.insertAdjacentElement('afterbegin', this.prevBtn)
 
-  this.controlsContainer.insertAdjacentElement('beforeend', this.nextBtn)
+  this.multipleImagesInput = document.createElement('input');
+  this.multipleImagesInput.setAttribute('type', 'file');
+  this.multipleImagesInput.setAttribute('multiple', 'multiple');
+  this.multipleImagesInput.setAttribute('accept', 'image/jpeg, image/png, image/jpg');
+  this.multipleImagesInput.id = 'upload-multiple-input';
+  this.multipleImagesInput.hidden = true;
+  // this.multipleImagesInput.onclick = function(){
+  //  this.value = null;
+  // }
+
+
+  this.uploadMultipleImgsBtn = document.createElement('label');
+  this.uploadMultipleImgsBtn.setAttribute('for', 'upload-multiple-input')
+  this.uploadMultipleImgsBtn.id = 'upload-multiple';
+  this.uploadMultipleImgsBtn.innerHTML = `<img src='./photo_calendar_maker/assets/icons/upload-multi.svg'/>`;
+
+  `    <input
+      type="file"
+      id="upload-input"
+      accept="image/jpeg, image/png, image/jpg"
+      hidden
+      onclick="this.value=null;"/>
+          
+      <label for="upload-input" id="upload-btn" class="upload-btn">
+        <img src='./photo_calendar_maker/assets/icons/upload.svg'/>
+      </label>`
+
+
+  this.controlsContainer.insertAdjacentElement('afterbegin', this.allPDFDownloadBtn);
+  this.controlsContainer.insertAdjacentElement('afterbegin', this.prevBtn);
+
+  this.controlsContainer.insertAdjacentElement('beforeend', this.multipleImagesInput);
+  this.controlsContainer.insertAdjacentElement('beforeend', this.uploadMultipleImgsBtn);
+  this.controlsContainer.insertAdjacentElement('beforeend', this.nextBtn);
  }
 
  initMultiPageControlsEvents() {
@@ -270,7 +301,12 @@ export default class MultiPageCalendar extends Calendar {
    this.setVisibleMonth();
   });
 
-
+  this.multipleImagesInput.addEventListener('change', (e) => {
+   if (this.cropper) {
+    this.removeCropper();
+   }
+   this.uploadMultipleImages(e);
+  })
   this.allPDFDownloadBtn.addEventListener("click", () => {
    if (this.cropper) {
     this.removeCropper();
@@ -282,5 +318,57 @@ export default class MultiPageCalendar extends Calendar {
 
  setVisibleMonth() {
   this.calendarInner.style.left = `-${this.currentMonth * 100}%`;
+ }
+
+ uploadMultipleImages(e) {
+  if (!e.target.files[0]) return;
+
+  let files = [...e.target.files];
+
+
+  for (let i = 0; i < files.length; i++) {
+   const reader = new FileReader();
+
+   reader.onload = (e) => {
+
+    const imageGroup = this.calendarInner.querySelector(`#month-${i}-container #image-group`);
+    const imageEl = document.createElementNS(
+     "http://www.w3.org/2000/svg",
+     "image"
+    );
+
+    imageEl.setAttribute("height", this.imagePlaceholderHeight);
+    imageEl.setAttribute("width", this.imagePlaceholderWidth);
+    imageEl.setAttribute("x", this.imagePlaceholderX);
+    imageEl.setAttribute("y", this.imagePlaceholderY);
+
+    // Image optimization
+    const reduced = this.reduceImageSize(
+     e.target.result,
+     this.imagePlaceholderWidth * this.reduceRate,
+     this.imagePlaceholderHeight * this.reduceRate
+    );
+
+    reduced.then(reducedImage => {
+     const resultImage = reducedImage ? reducedImage : e.target.result;
+     imageEl.setAttributeNS(
+      "http://www.w3.org/1999/xlink",
+      "href",
+      resultImage
+     );
+     imageGroup.innerHTML = "";
+     imageGroup.appendChild(imageEl);
+    })
+
+    console.log("...image uploaded!");
+   };
+
+   reader.readAsDataURL(files[i]);
+   console.log("start upload image...");
+
+   if (i === 11) {
+    break;
+   }
+  }
  }
 }
