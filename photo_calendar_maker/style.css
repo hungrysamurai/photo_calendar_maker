@@ -96,7 +96,7 @@ body {
 }
 
 .month-container,
-.mockup-container {
+#mockup-container {
   position: relative;
   width: 100vw;
   max-width: 100%;

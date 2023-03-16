@@ -27,6 +27,11 @@ class Calendar {
 
     // Month counters
     this.monthCounter = this.firstMonthIndex;
+
+    this.firstMonth = this.firstMonthIndex;
+    this.startYear = this.year;
+    this.lastMonth;
+    this.endYear;
   }
 
   initBasicControls() {
@@ -94,9 +99,7 @@ class Calendar {
     this.cropBtn.addEventListener("click", () => {
       if (this.cropper) return;
 
-      const currentImageElement = this.calendarInner.querySelector(
-        this.getCurrentImageElement()
-      );
+      const currentImageElement = this.getCurrentMockup('image');
 
       if (currentImageElement) {
         this.initCropper(currentImageElement);
@@ -109,7 +112,7 @@ class Calendar {
         this.removeCropper();
       }
 
-      this.uploadImgCurrentMonth(e);
+      this.uploadImg(e);
     });
 
     this.formatSelectBtn.addEventListener("input", (e) => {
@@ -117,11 +120,329 @@ class Calendar {
     });
   }
 
-  getCurrentImageElement() {
+  uploadImg(e) {
+    if (!e.target.files[0]) return;
+    const imageFile = e.target.files[0];
+
+    const reader = new FileReader();
+
+    reader.onload = (e) => {
+      const imageGroup = this.getCurrentMockup('#image-group');
+
+      const imageEl = document.createElementNS(
+        "http://www.w3.org/2000/svg",
+        "image"
+      );
+
+      imageEl.setAttribute("height", this.imagePlaceholderHeight);
+      imageEl.setAttribute("width", this.imagePlaceholderWidth);
+      imageEl.setAttribute("x", this.imagePlaceholderX);
+      imageEl.setAttribute("y", this.imagePlaceholderY);
+
+      // Image optimization
+      const reduced = this.reduceImageSize(
+        e.target.result,
+        this.imagePlaceholderWidth * this.reduceRate,
+        this.imagePlaceholderHeight * this.reduceRate
+      );
+
+      reduced.then(reducedImage => {
+        const resultImage = reducedImage ? reducedImage : e.target.result;
+        console.log(e.target.result);
+        console.log(reducedImage);
+        imageEl.setAttributeNS(
+          "http://www.w3.org/1999/xlink",
+          "href",
+          resultImage
+        );
+        imageGroup.innerHTML = "";
+        imageGroup.appendChild(imageEl);
+      })
+
+      console.log("...image uploaded!");
+    };
+
+    reader.readAsDataURL(imageFile);
+    console.log("start upload image...");
+  }
+
+  // Reduce image file size & resolution
+  async reduceImageSize(base64Str, maxWidth, maxHeight) {
+
+    let resized_base64 = await new Promise((resolve) => {
+
+      let img = new Image()
+      img.src = base64Str
+      img.onload = () => {
+        let width = img.width
+        let height = img.height
+        // console.log(maxWidth, maxHeight, width, height);
+        if (width <= maxWidth || height <= maxHeight) {
+          // If resolution of image is less than actual placeholder size
+          resolve();
+        }
+
+        let canvas = document.createElement('canvas')
+        if (width > height) {
+          if (width > maxWidth) {
+            height *= maxWidth / width;
+            width = maxWidth;
+          }
+        } else {
+          if (height > maxHeight) {
+            width *= maxHeight / height;
+            height = maxHeight;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        let ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+        // Return reduced image
+        resolve(canvas.toDataURL("image/jpeg"))
+      }
+    });
+    return resized_base64;
+  }
+
+  downloadCurrentJPG() {
+    const svg = this.getCurrentMockup('svg');
+    const svgData = new XMLSerializer().serializeToString(svg);
+
+    const canvas = document.createElement("canvas");
+    canvas.width = this.outputDimensions[this.currentSize].width;
+    canvas.height = this.outputDimensions[this.currentSize].height;
+    const ctx = canvas.getContext("2d");
+
+    // SVG attributes fix for proper rasterization
+    let properAttributes;
     if (this instanceof MultiPageCalendar) {
-      return `#month-${this.currentMonth}-container image`;
+      properAttributes =
+        svgData.replace(`viewBox="0 0 210 297"`, `width="210" height="297" version="1.1"`);
     } else if (this instanceof SinglePageCalendar) {
-      return '#mockup image';
+      properAttributes =
+        svgData.replace(`viewBox="0 0 2100 2970"`, `width="2100" height="2970" version="1.1"`);
+    }
+
+    const img = new Image();
+    img.setAttribute("src", "data:image/svg+xml;base64," + btoa(properAttributes));
+
+    img.onload = () => {
+
+      // Draw svg-to-img on canvas
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      const dataURL = canvas.toDataURL("image/jpeg");
+      const fileName = this.getFileName();
+
+      const a = document.createElement("a");
+      a.download = fileName;
+      a.href = dataURL;
+      a.click();
+      a.remove();
+
+    };
+  }
+
+  downloadPDF(amount) {
+    let pagesArray = [];
+
+    const doc = new PDFDocument({ size: this.currentSize });
+    const stream = doc.pipe(blobStream());
+
+    if (amount === "current") {
+      pagesArray.push(this.getCurrentMockup('svg'));
+      doc.info["Title"] = this.getFileName();
+    }
+
+    if (amount === "all") {
+      pagesArray = this.pagesArray;
+      doc.info["Title"] = this.getFileName(true);
+    }
+
+    pagesArray.forEach((page, i) => {
+      SVGtoPDF(doc, page, 0, 0);
+
+      if (i !== pagesArray.length - 1) doc.addPage();
+    });
+
+    doc.end();
+
+    stream.on("finish", function () {
+      const url = stream.toBlobURL("application/pdf");
+
+      const a = document.createElement("a");
+      const my_evt = new MouseEvent("click");
+      a.download = doc.info["Title"];
+      a.href = url;
+      a.dispatchEvent(my_evt);
+    });
+  }
+
+  getFileName(span) {
+    if (span || this instanceof SinglePageCalendar) {
+      const firstMonth = this.firstMonth;
+      const firstMonthYear = this.startYear;
+
+      const date1 = new Date(+firstMonthYear, +firstMonth);
+      const firstMonthName = date1.toLocaleString("default", { month: "long" });
+
+      const lastMonth = this.lastMonth;
+      const lastMonthYear = this.endYear;
+
+      const date2 = new Date(+lastMonthYear, +lastMonth);
+      const lastMonthName = date2.toLocaleString("default", {
+        month: "long",
+      });
+
+      return `${firstMonthName}_${firstMonthYear}-${lastMonthName}_${lastMonthYear}`;
+    }
+
+    const currentMonthContainer = this.getCurrentMockup()
+
+    const year = currentMonthContainer.dataset.year;
+    const month = currentMonthContainer.dataset.month;
+
+    const date = new Date(+year, +month);
+    const monthName = date.toLocaleString("default", { month: "long" });
+
+    return `${monthName}_${year}`;
+  }
+
+  initCropper(currentImageElement) {
+    const imageFile = currentImageElement.getAttribute("href");
+
+    fetch(imageFile)
+      .then((res) => res.blob())
+      .then((imageFile) => {
+        this.cropperOuter = document.createElement("div");
+        this.cropperOuter.classList.add("cropper-outer-container");
+
+        this.cropperOuter.style.position = "absolute";
+        this.cropperOuter.style.left = `${currentImageElement.getBoundingClientRect().left
+          }px`;
+        this.cropperOuter.style.top = `${currentImageElement.getBoundingClientRect().top
+          }px`;
+        this.cropperOuter.style.width = `${currentImageElement.getBoundingClientRect().width
+          }px`;
+        this.cropperOuter.style.height = `${currentImageElement.getBoundingClientRect().height
+          }px`;
+
+        const imageElement = document.createElement("img");
+        imageElement.classList.add("image-element");
+        imageElement.src = URL.createObjectURL(imageFile);
+
+        this.cropperOuter.appendChild(imageElement);
+
+        document.body.append(this.cropperOuter);
+        currentImageElement.style.display = "none";
+
+        this.cropper = new Cropper(imageElement, {
+          viewMode: 0,
+          dragMode: "none",
+          modal: false,
+          background: false,
+          autoCropArea: 1,
+          ready: () => {
+            this.initCropperControls();
+
+            this.applyCropBtn.addEventListener("click", () => {
+              this.applyCrop(currentImageElement);
+            });
+
+            this.cropper.initialZoomRatio = this.cropper.getCanvasData().width / this.cropper.getCanvasData().naturalWidth;
+          },
+
+          zoom: (e) => {
+
+            if (e.detail.ratio < e.detail.oldRatio) {
+              if (
+                this.cropper.canvasData.width - 10 <
+                this.cropper.initialCanvasData.width
+              ) {
+                this.cropper.reset();
+              }
+            }
+
+            this.cropper.setAspectRatio(0);
+
+            this.cropper.zoomRatio = this.cropper.getCanvasData().width / this.cropper.getCanvasData().naturalWidth;
+
+            if (this.cropper.zoomRatio > this.cropper.initialZoomRatio) {
+              this.cropper.setDragMode("move");
+              this.cropper.options.viewMode = 3
+            } else {
+              this.cropper.setDragMode("none");
+              this.cropper.options.viewMode = 0
+            }
+          },
+        });
+      });
+  }
+
+  applyCrop(currentImageElement) {
+    const canvas = this.cropper.getCroppedCanvas({
+      minWidth: 256,
+      minHeight: 256,
+      maxWidth: 4096,
+      maxHeight: 4096,
+    });
+
+    const ctx = canvas.getContext("2d", {
+      willReadFrequently: true,
+    });
+    ctx.drawImage(canvas, 0, 0);
+
+    const resultURL = canvas.toDataURL("image/jpeg");
+
+    currentImageElement.setAttributeNS(
+      "http://www.w3.org/1999/xlink",
+      "href",
+      resultURL
+    );
+
+    currentImageElement.style.display = "block";
+    this.removeCropper();
+  }
+
+  removeCropper() {
+    const currentImageElement = this.getCurrentMockup('image');
+
+    currentImageElement.style.display = "block";
+    this.cropper.destroy();
+    this.cropper = undefined;
+    this.cropperOuter.remove();
+    this.cropperOuter = undefined;
+
+    this.cropControlsContainer.innerHTML = "";
+  }
+
+  initCropperControls() {
+    this.cropControlsContainer.innerHTML = `
+      <button id="apply-crop">
+        <img src='./photo_calendar_maker/assets/icons/done.svg'/>
+    </button>
+      <button id="cancel-crop">
+        <img src='./photo_calendar_maker/assets/icons/cancel.svg'/>
+      </button>
+    `;
+
+    this.applyCropBtn = this.cropControlsContainer.querySelector("#apply-crop");
+    this.cancelCropBtn =
+      this.cropControlsContainer.querySelector("#cancel-crop");
+
+    this.cancelCropBtn.addEventListener("click", () => {
+      this.removeCropper();
+    });
+  }
+
+  getCurrentMockup(element = '') {
+    if (this instanceof MultiPageCalendar) {
+      return this.calendarInner.querySelector(
+        `#month-${this.currentMonth}-container ${element}`
+      );
+    } else if (this instanceof SinglePageCalendar) {
+      return this.calendarInner.querySelector(`#mockup-container ${element}`);
     }
   }
 
@@ -235,8 +556,7 @@ class SinglePageCalendar extends Calendar {
     this.imagePlaceholderX = 109;
     this.imagePlaceholderY = 114;
 
-    // Month counters
-    this.monthCounter = this.firstMonthIndex;
+    this.reduceRate = 1.5;
 
     this.initDOMSVG();
     this.initBasicControls();
@@ -251,7 +571,7 @@ class SinglePageCalendar extends Calendar {
     this.calendarInner.classList.add("calendar-inner");
 
     const mockupContainer = document.createElement("div");
-    mockupContainer.classList.add("mockup-container");
+    mockupContainer.id = "mockup-container";
 
     mockupContainer.innerHTML = `
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2100 2970" id="mockup">
@@ -382,6 +702,11 @@ class SinglePageCalendar extends Calendar {
         `;
       }
 
+      if (i === 11) {
+        this.lastMonth = this.monthCounter;
+        this.endYear = this.year;
+      }
+
       this.monthCounter++;
 
       if (this.monthCounter > 11) {
@@ -412,256 +737,6 @@ class SinglePageCalendar extends Calendar {
     this.calendarWrapper.append(this.calendarInner);
     this.parentContainer.append(this.calendarWrapper);
   }
-
-  downloadPDF(amount) {
-    let pagesArray = [];
-
-    const doc = new PDFDocument({ size: this.currentSize });
-    const stream = doc.pipe(blobStream());
-
-    if (amount === "current") {
-      pagesArray.push(this.calendarInner.querySelector("#mockup"));
-      doc.info["Title"] = this.getFileName();
-    }
-
-    if (amount === "all") {
-      pagesArray = this.pagesArray;
-      doc.info["Title"] = this.getFileName(true);
-    }
-
-    pagesArray.forEach((page, i) => {
-      SVGtoPDF(doc, page, 0, 0);
-
-      if (i !== pagesArray.length - 1) doc.addPage();
-    });
-
-    doc.end();
-
-    stream.on("finish", function () {
-      const url = stream.toBlobURL("application/pdf");
-
-      const a = document.createElement("a");
-      const my_evt = new MouseEvent("click");
-      a.download = doc.info["Title"];
-      a.href = url;
-      a.dispatchEvent(my_evt);
-    });
-  }
-
-  getFileName() {
-    const allMonths = document.querySelectorAll('#mockup svg');
-
-    const firstMonth = allMonths[0].dataset.month;
-    const firstMonthYear = allMonths[0].dataset.year;
-
-    const date1 = new Date(+firstMonthYear, +firstMonth);
-    const firstMonthName = date1.toLocaleString("default", { month: "long" });
-
-    const lastMonth =
-      allMonths[allMonths.length - 1].dataset.month;
-    const lastMonthYear =
-      allMonths[allMonths.length - 1].dataset.year;
-    const date2 = new Date(+lastMonthYear, +lastMonth);
-    const lastMonthName = date2.toLocaleString("default", {
-      month: "long",
-    });
-
-    return `${firstMonthName}_${firstMonthYear}-${lastMonthName}_${lastMonthYear}`;
-
-  }
-
-  downloadCurrentJPG(e) {
-    const svg = this.calendarInner.querySelector('#mockup');
-
-    const svgData = new XMLSerializer().serializeToString(svg);
-
-    const canvas = document.createElement("canvas");
-    canvas.width = this.outputDimensions[this.currentSize].width;
-    canvas.height = this.outputDimensions[this.currentSize].height;
-
-    const ctx = canvas.getContext("2d");
-
-    const img = document.createElement("img");
-    img.setAttribute("src", "data:image/svg+xml;base64," + btoa(svgData));
-
-    img.onload = () => {
-      ctx.drawImage(img, 0, 0);
-      const dataURL = canvas.toDataURL("image/jpeg");
-      const fileName = this.getFileName();
-
-      if (window.navigator.msSaveBlob) {
-        window.navigator.msSaveBlob(canvas.msToBlob(), fileName);
-        e.preventDefault();
-      } else {
-        const a = document.createElement("a");
-        const my_evt = new MouseEvent("click");
-        a.download = fileName;
-        a.href = dataURL;
-        a.dispatchEvent(my_evt);
-      }
-    };
-  }
-
-  uploadImgCurrentMonth(e) {
-    if (!e.target.files[0]) return;
-
-    const imageFile = e.target.files[0];
-
-    const reader = new FileReader();
-
-    reader.onload = (e) => {
-      const imageGroup = this.calendarInner.querySelector('#image-group');
-
-      imageGroup.innerHTML = "";
-
-      const imageEl = document.createElementNS(
-        "http://www.w3.org/2000/svg",
-        "image"
-      );
-
-      imageEl.setAttribute("height", this.imagePlaceholderHeight);
-      imageEl.setAttribute("width", this.imagePlaceholderWidth);
-      imageEl.setAttribute("x", this.imagePlaceholderX);
-      imageEl.setAttribute("y", this.imagePlaceholderY);
-
-      imageEl.setAttributeNS(
-        "http://www.w3.org/1999/xlink",
-        "href",
-        e.target.result
-      );
-
-      imageGroup.appendChild(imageEl);
-      console.log("...image uploaded!");
-    };
-
-    reader.readAsDataURL(imageFile);
-    console.log("start upload image...");
-  }
-
-  initCropper(currentImageElement) {
-    const imageFile = currentImageElement.getAttribute("href");
-
-    fetch(imageFile)
-      .then((res) => res.blob())
-      .then((imageFile) => {
-        this.cropperOuter = document.createElement("div");
-        this.cropperOuter.classList.add("cropper-outer-container");
-
-        this.cropperOuter.style.position = "absolute";
-        this.cropperOuter.style.left = `${currentImageElement.getBoundingClientRect().left
-          }px`;
-        this.cropperOuter.style.top = `${currentImageElement.getBoundingClientRect().top
-          }px`;
-        this.cropperOuter.style.width = `${currentImageElement.getBoundingClientRect().width
-          }px`;
-        this.cropperOuter.style.height = `${currentImageElement.getBoundingClientRect().height
-          }px`;
-
-        const imageElement = document.createElement("img");
-        imageElement.classList.add("image-element");
-        imageElement.src = URL.createObjectURL(imageFile);
-
-        this.cropperOuter.appendChild(imageElement);
-
-        document.body.append(this.cropperOuter);
-        currentImageElement.style.display = "none";
-
-        this.cropper = new Cropper(imageElement, {
-          viewMode: 0,
-          dragMode: "none",
-          modal: false,
-          background: false,
-          autoCropArea: 1,
-          ready: () => {
-            this.initCropperControls();
-
-            this.applyCropBtn.addEventListener("click", () => {
-              this.applyCrop(currentImageElement);
-            });
-
-            this.cropper.initialZoomRatio = this.cropper.getCanvasData().width / this.cropper.getCanvasData().naturalWidth;
-          },
-
-          zoom: (e) => {
-
-            if (e.detail.ratio < e.detail.oldRatio) {
-              if (
-                this.cropper.canvasData.width - 10 <
-                this.cropper.initialCanvasData.width
-              ) {
-                this.cropper.reset();
-              }
-            }
-
-            this.cropper.setAspectRatio(0);
-
-            this.cropper.zoomRatio = this.cropper.getCanvasData().width / this.cropper.getCanvasData().naturalWidth;
-
-            if (this.cropper.zoomRatio > this.cropper.initialZoomRatio) {
-              this.cropper.setDragMode("move");
-              this.cropper.options.viewMode = 3
-            } else {
-              this.cropper.setDragMode("none");
-              this.cropper.options.viewMode = 0
-            }
-          },
-        });
-      });
-  }
-
-  applyCrop(currentImageElement) {
-    const canvas = this.cropper.getCroppedCanvas({
-      minWidth: 256,
-      minHeight: 256,
-      maxWidth: 4096,
-      maxHeight: 4096,
-    });
-
-    const ctx = canvas.getContext("2d");
-    ctx.drawImage(canvas, 0, 0);
-
-    const resultURL = canvas.toDataURL("image/jpeg");
-
-    currentImageElement.setAttributeNS(
-      "http://www.w3.org/1999/xlink",
-      "href",
-      resultURL
-    );
-
-    currentImageElement.style.display = "block";
-    this.removeCropper();
-  }
-
-  removeCropper() {
-    const currentImageElement = this.calendarInner.querySelector(`#mockup image`);
-
-    currentImageElement.style.display = "block";
-    this.cropper.destroy();
-    this.cropper = undefined;
-    this.cropperOuter.remove();
-    this.cropperOuter = undefined;
-
-    this.cropControlsContainer.innerHTML = "";
-  }
-
-  initCropperControls() {
-    this.cropControlsContainer.innerHTML = `
-      <button id="apply-crop">
-        <img src='./photo_calendar_maker/assets/icons/done.svg'/>
-    </button>
-      <button id="cancel-crop">
-        <img src='./photo_calendar_maker/assets/icons/cancel.svg'/>
-      </button>
-    `;
-
-    this.applyCropBtn = this.cropControlsContainer.querySelector("#apply-crop");
-    this.cancelCropBtn =
-      this.cropControlsContainer.querySelector("#cancel-crop");
-
-    this.cancelCropBtn.addEventListener("click", () => {
-      this.removeCropper();
-    });
-  }
 }
 
 class MultiPageCalendar extends Calendar {
@@ -690,6 +765,8 @@ class MultiPageCalendar extends Calendar {
     this.imagePlaceholderHeight = 155;
     this.imagePlaceholderX = 10.9;
     this.imagePlaceholderY = 11.4;
+
+    this.reduceRate = 15;
 
     this.currentMonth = 0;
 
@@ -747,7 +824,7 @@ class MultiPageCalendar extends Calendar {
 
         </g>
 
-        <g id="image-group-${i}">
+        <g id="image-group">
 
         <rect id="image-placeholder-${i}"
           x="10.9"
@@ -848,6 +925,11 @@ class MultiPageCalendar extends Calendar {
       monthContainer.dataset.year = this.year;
       monthContainer.dataset.month = this.monthCounter;
 
+      if (i === 11) {
+        this.lastMonth = this.monthCounter;
+        this.endYear = this.year;
+      }
+
       this.monthCounter++;
 
       if (this.monthCounter > 11) {
@@ -869,6 +951,8 @@ class MultiPageCalendar extends Calendar {
         glyphsMP,
         'fill: none; stroke:#999999; stroke-miterlimit: 10; stroke-width: .5px;'
       );
+
+
     }
 
     this.calendarWrapper.append(this.calendarInner);
@@ -936,286 +1020,6 @@ class MultiPageCalendar extends Calendar {
     this.calendarInner.style.left = `-${this.currentMonth * 100}%`;
   }
 
-  downloadPDF(amount) {
-    let pagesArray = [];
-
-    const doc = new PDFDocument({ size: this.currentSize });
-    const stream = doc.pipe(blobStream());
-
-    if (amount === "current") {
-      const currentMonthContainer = this.calendarInner.querySelector(
-        `#month-${this.currentMonth}-container`
-      );
-      pagesArray.push(currentMonthContainer.querySelector("svg"));
-      doc.info["Title"] = this.getFileName();
-    }
-
-    if (amount === "all") {
-      pagesArray = this.pagesArray;
-      doc.info["Title"] = this.getFileName(true);
-    }
-
-    pagesArray.forEach((page, i) => {
-      // doc.addSVG(page, 0, 0);
-      SVGtoPDF(doc, page, 0, 0);
-
-      if (i !== pagesArray.length - 1) doc.addPage();
-    });
-
-    doc.end();
-
-    stream.on("finish", function () {
-      const url = stream.toBlobURL("application/pdf");
-
-      const a = document.createElement("a");
-      const my_evt = new MouseEvent("click");
-      a.download = doc.info["Title"];
-      a.href = url;
-      a.dispatchEvent(my_evt);
-    });
-  }
-
-  downloadCurrentJPG(e) {
-    const svg = this.calendarInner.querySelector(
-      `#month-${this.currentMonth}-container svg`
-    );
-
-    const svgData = new XMLSerializer().serializeToString(svg);
-
-    const canvas = document.createElement("canvas");
-    canvas.width = this.outputDimensions[this.currentSize].width;
-    canvas.height = this.outputDimensions[this.currentSize].height;
-
-    const ctx = canvas.getContext("2d");
-
-    const img = document.createElement("img");
-    img.setAttribute("src", "data:image/svg+xml;base64," + btoa(svgData));
-
-    img.onload = () => {
-      ctx.drawImage(img, 0, 0);
-      const dataURL = canvas.toDataURL("image/jpeg");
-      const fileName = this.getFileName();
-      console.log(dataURL);
-      if (window.navigator.msSaveBlob) {
-        window.navigator.msSaveBlob(canvas.msToBlob(), fileName);
-        e.preventDefault();
-      } else {
-        const a = document.createElement("a");
-        const my_evt = new MouseEvent("click");
-        a.download = fileName;
-        a.href = dataURL;
-        a.dispatchEvent(my_evt);
-      }
-    };
-  }
-
-  getFileName(span) {
-    if (span) {
-      const firstMonth = this.pagesArray[0].parentElement.dataset.month;
-      const firstMonthYear = this.pagesArray[0].parentElement.dataset.year;
-      const date1 = new Date(+firstMonthYear, +firstMonth);
-      const firstMonthName = date1.toLocaleString("default", { month: "long" });
-
-      const lastMonth =
-        this.pagesArray[this.pagesArray.length - 1].parentElement.dataset.month;
-      const lastMonthYear =
-        this.pagesArray[this.pagesArray.length - 1].parentElement.dataset.year;
-      const date2 = new Date(+lastMonthYear, +lastMonth);
-      const lastMonthName = date2.toLocaleString("default", {
-        month: "long",
-      });
-
-      return `${firstMonthName}_${firstMonthYear}-${lastMonthName}_${lastMonthYear} `;
-    }
-
-    const currentMonthContainer = this.calendarInner.querySelector(
-      `#month-${this.currentMonth}-container`
-    );
-
-    const year = currentMonthContainer.dataset.year;
-    const month = currentMonthContainer.dataset.month;
-    const date = new Date(+year, +month);
-    const monthName = date.toLocaleString("default", { month: "long" });
-
-    return `${monthName}_${year}`;
-  }
-
-  uploadImgCurrentMonth(e) {
-    if (!e.target.files[0]) return;
-    const imageFile = e.target.files[0];
-
-    const reader = new FileReader();
-
-    reader.onload = (e) => {
-      const imageGroup = this.calendarInner.querySelector(
-        `#image-group-${this.currentMonth}`
-      );
-      const imageEl = document.createElementNS(
-        "http://www.w3.org/2000/svg",
-        "image"
-      );
-
-      imageEl.setAttribute("height", this.imagePlaceholderHeight);
-      imageEl.setAttribute("width", this.imagePlaceholderWidth);
-      imageEl.setAttribute("x", this.imagePlaceholderX);
-      imageEl.setAttribute("y", this.imagePlaceholderY);
-
-      // Image optimization
-      const reduced = reduce_image_file_size(
-        e.target.result,
-        this.imagePlaceholderWidth * 20,
-        this.imagePlaceholderHeight * 20
-      );
-
-      // console.log(e.target.result);
-      // console.log(reduced);
-
-      reduced.then(reducedImage => {
-        const resultImage = reducedImage ? reducedImage : e.target.result;
-
-        imageEl.setAttributeNS(
-          "http://www.w3.org/1999/xlink",
-          "href",
-          resultImage
-        );
-        imageGroup.innerHTML = "";
-        imageGroup.appendChild(imageEl);
-      })
-
-      console.log("...image uploaded!");
-    };
-    reader.readAsDataURL(imageFile);
-    console.log("start upload image...");
-  }
-
-  initCropper(currentImageElement) {
-    const imageFile = currentImageElement.getAttribute("href");
-
-    fetch(imageFile)
-      .then((res) => res.blob())
-      .then((imageFile) => {
-        this.cropperOuter = document.createElement("div");
-        this.cropperOuter.classList.add("cropper-outer-container");
-
-        this.cropperOuter.style.position = "absolute";
-        this.cropperOuter.style.left = `${currentImageElement.getBoundingClientRect().left
-          }px`;
-        this.cropperOuter.style.top = `${currentImageElement.getBoundingClientRect().top
-          }px`;
-        this.cropperOuter.style.width = `${currentImageElement.getBoundingClientRect().width
-          }px`;
-        this.cropperOuter.style.height = `${currentImageElement.getBoundingClientRect().height
-          }px`;
-
-        const imageElement = document.createElement("img");
-        imageElement.classList.add("image-element");
-        imageElement.src = URL.createObjectURL(imageFile);
-
-        this.cropperOuter.appendChild(imageElement);
-
-        document.body.append(this.cropperOuter);
-        currentImageElement.style.display = "none";
-
-        this.cropper = new Cropper(imageElement, {
-          viewMode: 0,
-          dragMode: "none",
-          modal: false,
-          background: false,
-          autoCropArea: 1,
-          ready: () => {
-            this.initCropperControls();
-
-            this.applyCropBtn.addEventListener("click", () => {
-              this.applyCrop(currentImageElement);
-            });
-
-            this.cropper.initialZoomRatio = this.cropper.getCanvasData().width / this.cropper.getCanvasData().naturalWidth;
-          },
-
-          zoom: (e) => {
-
-            if (e.detail.ratio < e.detail.oldRatio) {
-              if (
-                this.cropper.canvasData.width - 10 <
-                this.cropper.initialCanvasData.width
-              ) {
-                this.cropper.reset();
-              }
-            }
-
-            this.cropper.setAspectRatio(0);
-
-            this.cropper.zoomRatio = this.cropper.getCanvasData().width / this.cropper.getCanvasData().naturalWidth;
-
-            if (this.cropper.zoomRatio > this.cropper.initialZoomRatio) {
-              this.cropper.setDragMode("move");
-              this.cropper.options.viewMode = 3
-            } else {
-              this.cropper.setDragMode("none");
-              this.cropper.options.viewMode = 0
-            }
-          },
-        });
-      });
-  }
-
-  applyCrop(currentImageElement) {
-    const canvas = this.cropper.getCroppedCanvas({
-      minWidth: 256,
-      minHeight: 256,
-      maxWidth: 4096,
-      maxHeight: 4096,
-    });
-
-    const ctx = canvas.getContext("2d", {
-      willReadFrequently: true,
-    });
-    ctx.drawImage(canvas, 0, 0);
-
-    const resultURL = canvas.toDataURL("image/jpeg");
-
-    currentImageElement.setAttributeNS(
-      "http://www.w3.org/1999/xlink",
-      "href",
-      resultURL
-    );
-
-    currentImageElement.style.display = "block";
-    this.removeCropper();
-  }
-
-  removeCropper() {
-    const currentImageElement = this.calendarInner.querySelector(
-      `#month-${this.currentMonth}-container image`
-    );
-
-    currentImageElement.style.display = "block";
-    this.cropper.destroy();
-    this.cropper = undefined;
-    this.cropperOuter.remove();
-    this.cropperOuter = undefined;
-
-    this.cropControlsContainer.innerHTML = "";
-  }
-
-  initCropperControls() {
-    this.cropControlsContainer.innerHTML = `
-      <button id="apply-crop">
-        <img src='./photo_calendar_maker/assets/icons/done.svg'/>
-    </button>
-      <button id="cancel-crop">
-        <img src='./photo_calendar_maker/assets/icons/cancel.svg'/>
-      </button>
-    `;
-
-    this.applyCropBtn = this.cropControlsContainer.querySelector("#apply-crop");
-    this.cancelCropBtn =
-      this.cropControlsContainer.querySelector("#cancel-crop");
-
-    this.cancelCropBtn.addEventListener("click", () => {
-      this.removeCropper();
-    });
-  }
 }
 
 const getButton = document.querySelector("#get-button");
@@ -1260,43 +1064,5 @@ getButton.addEventListener("click", () => {
       cropControlsContainer,
       "ru"
     );
-
   }
-
-
 });
-
-
-async function reduce_image_file_size(base64Str, MAX_WIDTH, MAX_HEIGHT) {
-  let resized_base64 = await new Promise((resolve, reject) => {
-    let img = new Image()
-    img.src = base64Str
-    img.onload = () => {
-      let width = img.width
-      let height = img.height
-
-      if (width <= MAX_WIDTH || height <= MAX_HEIGHT) {
-        resolve();
-      }
-
-      let canvas = document.createElement('canvas')
-      if (width > height) {
-        if (width > MAX_WIDTH) {
-          height *= MAX_WIDTH / width
-          width = MAX_WIDTH
-        }
-      } else {
-        if (height > MAX_HEIGHT) {
-          width *= MAX_HEIGHT / height
-          height = MAX_HEIGHT
-        }
-      }
-      canvas.width = width
-      canvas.height = height
-      let ctx = canvas.getContext('2d')
-      ctx.drawImage(img, 0, 0, width, height)
-      resolve(canvas.toDataURL("image/jpeg")) // this will return base64 image results after resize
-    }
-  });
-  return resized_base64;
-}
