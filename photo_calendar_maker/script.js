@@ -318,15 +318,7 @@ class Calendar {
         this.cropperOuter = document.createElement("div");
         this.cropperOuter.classList.add("cropper-outer-container");
 
-        this.cropperOuter.style.position = "absolute";
-        this.cropperOuter.style.left = `${currentImageElement.getBoundingClientRect().left
-          }px`;
-        this.cropperOuter.style.top = `${currentImageElement.getBoundingClientRect().top
-          }px`;
-        this.cropperOuter.style.width = `${currentImageElement.getBoundingClientRect().width
-          }px`;
-        this.cropperOuter.style.height = `${currentImageElement.getBoundingClientRect().height
-          }px`;
+        this.updateCropperPosition(currentImageElement);
 
         const imageElement = document.createElement("img");
         imageElement.classList.add("image-element");
@@ -335,7 +327,7 @@ class Calendar {
         this.cropperOuter.appendChild(imageElement);
 
         document.body.append(this.cropperOuter);
-        currentImageElement.style.display = "none";
+        // currentImageElement.style.display = "none";
 
         this.cropper = new Cropper(imageElement, {
           viewMode: 0,
@@ -351,10 +343,17 @@ class Calendar {
             });
 
             this.cropper.initialZoomRatio = this.cropper.getCanvasData().width / this.cropper.getCanvasData().naturalWidth;
+
+            window.onresize = () => {
+              this.updateCropperPosition(currentImageElement);
+            }
           },
 
           zoom: (e) => {
+            this.cropper.setAspectRatio(0);
+            this.cropper.crop()
 
+            // Reset cropbox if zoomed out
             if (e.detail.ratio < e.detail.oldRatio) {
               if (
                 this.cropper.canvasData.width - 10 <
@@ -364,20 +363,33 @@ class Calendar {
               }
             }
 
-            this.cropper.setAspectRatio(0);
-
             this.cropper.zoomRatio = this.cropper.getCanvasData().width / this.cropper.getCanvasData().naturalWidth;
 
-            if (this.cropper.zoomRatio > this.cropper.initialZoomRatio) {
+            if ((this.cropper.zoomRatio.toFixed(5)) > (this.cropper.initialZoomRatio).toFixed(5)) {
               this.cropper.setDragMode("move");
-              this.cropper.options.viewMode = 3
+              this.cropper.options.viewMode = 3;
+              console.log('move');
             } else {
               this.cropper.setDragMode("none");
-              this.cropper.options.viewMode = 0
+              this.cropper.options.viewMode = 0;
+              console.log('none');
             }
           },
         });
       });
+  }
+
+  updateCropperPosition(currentImageElement) {
+    console.log(currentImageElement);
+    this.cropperOuter.style.position = "absolute";
+    this.cropperOuter.style.left = `${currentImageElement.getBoundingClientRect().left
+      }px`;
+    this.cropperOuter.style.top = `${currentImageElement.getBoundingClientRect().top
+      }px`;
+    this.cropperOuter.style.width = `${currentImageElement.getBoundingClientRect().width
+      }px`;
+    this.cropperOuter.style.height = `${currentImageElement.getBoundingClientRect().height
+      }px`;
   }
 
   applyCrop(currentImageElement) {
@@ -386,6 +398,7 @@ class Calendar {
       minHeight: 256,
       maxWidth: 4096,
       maxHeight: 4096,
+      fillColor: 'white'
     });
 
     const ctx = canvas.getContext("2d", {
@@ -401,7 +414,7 @@ class Calendar {
       resultURL
     );
 
-    currentImageElement.style.display = "block";
+    // currentImageElement.style.display = "block";
     this.removeCropper();
   }
 
