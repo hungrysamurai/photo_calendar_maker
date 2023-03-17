@@ -1,3 +1,10 @@
+:root {
+  touch-action: pan-x pan-y;
+  height: 100%;
+  --dark: #231f20;
+  --primary: #ff0073;
+}
+
 * {
   margin: 0;
   padding: 0;
@@ -11,6 +18,36 @@ body {
   font-family: "Courier New", Courier, monospace;
   font-weight: bold;
 }
+.new-project-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 60px;
+  background-color: #231f20;
+  position: fixed;
+  top: 0;
+  z-index: 3;
+  transition: all 0.2s ease;
+}
+
+.new-project-container button {
+  font-size: 1rem;
+  padding: 0.5rem;
+  font-family: inherit;
+  font-weight: inherit;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.new-project-container button:hover {
+  transform: scale(0.95);
+}
+
+.new-project-container button:active {
+  transform: scale(0.85);
+}
 
 .new-calendar-controls {
   display: flex;
@@ -18,7 +55,7 @@ body {
   justify-content: center;
   width: 100%;
   height: 60px;
-  background-color: rgb(20, 20, 20);
+  background-color: #231f20;
   position: fixed;
   top: 0;
   z-index: 2;
@@ -33,6 +70,7 @@ body {
   padding: 0.1rem;
   flex-direction: column;
   height: 100%;
+  cursor: pointer;
 }
 
 .new-calendar-controls .mode-radio div {
@@ -44,6 +82,7 @@ body {
 .new-calendar-controls .mode-radio label {
   margin-left: 0.5rem;
   margin-top: 0.1rem;
+  cursor: pointer;
 }
 
 .new-calendar-controls select {
@@ -52,6 +91,7 @@ body {
   font-family: inherit;
   font-weight: inherit;
   margin-right: 1rem;
+  cursor: pointer;
 }
 
 .new-calendar-controls select option {
@@ -65,6 +105,19 @@ body {
   font-family: inherit;
   font-weight: inherit;
   border: none;
+  cursor: pointer;
+}
+
+.new-calendar-controls button:focus {
+  outline: none;
+}
+
+.new-calendar-controls button:hover {
+  transform: scale(0.95);
+}
+
+.new-calendar-controls button:active {
+  transform: scale(0.85);
 }
 
 .calendar-container {
@@ -72,10 +125,6 @@ body {
   top: 60px;
   width: 100%;
   height: calc(100% - 120px);
-}
-
-.new-calendar-controls button:focus {
-  outline: none;
 }
 
 .calendar-wrapper {
@@ -115,14 +164,33 @@ svg > svg {
   filter: initial;
 }
 
+.loading-screen {
+  position: absolute;
+  top: 60px;
+  width: 100%;
+  height: calc(100% - 120px);
+  left: 0;
+  background-color: #fff;
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.loading-screen img {
+  width: 150px;
+  height: 150px;
+}
+
+.loading-screen.hide {
+  display: none;
+}
+
 .cropper-outer-container {
   width: 100%;
   height: 100%;
   margin: 0;
-  /* overflow: hidden; */
-  /* display: flex;
-  align-items: center; */
-  /* aspect-ratio: 1 / 1; */
   position: relative;
 }
 
@@ -138,7 +206,7 @@ svg > svg {
   bottom: 0;
   height: 60px;
   z-index: 2;
-  background-color: #202020;
+  background-color: #231f20;
   width: 100%;
   display: flex;
   align-items: center;
@@ -158,12 +226,25 @@ svg > svg {
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: transform 0.2s ease;
 }
 
 .controls-container button img,
 .controls-container label img {
   width: 40px;
   height: 40px;
+  transition: transform 0.2s ease;
+}
+
+.controls-container button:hover,
+.controls-container label:hover {
+  transform: scale(0.95);
+  background-color: var(--primary);
+}
+
+.controls-container button:active,
+.controls-container label:active {
+  transform: scale(0.85);
 }
 
 .controls-container button:focus {
@@ -200,6 +281,7 @@ svg > svg {
   border-radius: 50%;
   cursor: pointer;
   filter: drop-shadow(3px 3px 12px rgba(0, 0, 0, 0.33));
+  background-color: #fff;
   border: none;
   width: 2.5rem;
   height: 2.5rem;
@@ -207,6 +289,15 @@ svg > svg {
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: transform 0.2s ease;
+}
+
+.crop-controls-container button:hover {
+  transform: scale(0.95);
+}
+
+.crop-controls-container button:active {
+  transform: scale(0.85);
 }
 
 .crop-controls-container img {
@@ -219,6 +310,9 @@ svg > svg {
 } */
 
 @media (max-width: 768px) {
+  .new-project-container button {
+    font-size: 0.75rem;
+  }
   .new-calendar-controls .mode-radio {
     font-size: 0.75rem;
     justify-content: center;

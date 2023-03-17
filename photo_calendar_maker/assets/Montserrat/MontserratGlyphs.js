@@ -19,22 +19,22 @@ import weekDaysCyrSP from "./SP/weekDays_cyr.js";
 import monhsCyrSP from "./SP/months_cyr.js";
 
 const glyphsMP = {
-  months: monthsCyrMP,
-  // months: monthsMP,
+  monthsRu: monthsCyrMP,
+  monthsEn: monthsMP,
   years: yearsMP,
   digits: digitsMP,
   secondaryDigits: secondaryDigitsMP,
-  weekDays: weekDaysCyrMP,
-  // weekDays:weekDaysMP
+  weekDaysRu: weekDaysCyrMP,
+  weekDaysEn: weekDaysMP
 };
 
 const glyphsSP = {
   digits: digitsSP,
   secondaryDigits: secondaryDigitsSP,
-  // months: monthsSP,
-  months: monhsCyrSP,
-  // weekDays: weekDaysSP,
-  weekDays: weekDaysCyrSP,
+  monthsEn: monthsSP,
+  monthsRu: monhsCyrSP,
+  weekDaysEn: weekDaysSP,
+  weekDaysRu: weekDaysCyrSP,
   years: yearsSP,
 };
 

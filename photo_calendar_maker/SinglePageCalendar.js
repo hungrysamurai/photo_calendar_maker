@@ -2,55 +2,56 @@ import Calendar from "./Calendar.js";
 import { glyphsSP } from "./assets/Montserrat/MontserratGlyphs.js";
 
 export default class SinglePageCalendar extends Calendar {
- constructor(
-  firstMonthIndex,
-  year,
-  parentContainer,
-  controlsContainer,
-  cropControlsContainer,
-  lang,
-  type
- ) {
-  super(
-   firstMonthIndex,
-   year,
-   parentContainer,
-   controlsContainer,
-   cropControlsContainer,
-   lang,
-   type
-  );
+  constructor(
+    firstMonthIndex,
+    year,
+    parentContainer,
+    controlsContainer,
+    cropControlsContainer,
+    lang,
+    type
+  ) {
+    super(
+      firstMonthIndex,
+      year,
+      parentContainer,
+      controlsContainer,
+      cropControlsContainer,
+      lang,
+      type
+    );
 
-  // Mockup pre-defined dimensions
-  this.dayCellHeight = 44.35;
-  this.dayCellWidth = 65.49;
+    // Mockup pre-defined dimensions
+    this.dayCellHeight = 44.35;
+    this.dayCellWidth = 65.49;
 
-  this.monthCellHeight = 375;
-  this.monthCellWidth = 457.22;
+    this.monthCellHeight = 375;
+    this.monthCellWidth = 457.22;
 
-  this.imagePlaceholderWidth = 1883;
-  this.imagePlaceholderHeight = 1550;
-  this.imagePlaceholderX = 109;
-  this.imagePlaceholderY = 114;
+    this.imagePlaceholderWidth = 1883;
+    this.imagePlaceholderHeight = 1550;
+    this.imagePlaceholderX = 109;
+    this.imagePlaceholderY = 114;
 
-  this.reduceRate = 1.5;
+    this.reduceRate = 1.5;
 
-  this.initDOMSVG();
-  this.initBasicControls();
-  this.initBasicControlsEvents();
- }
+    this.createLoader();
+    this.initDOMSVG();
+    this.initBasicControls();
+    this.initBasicControlsEvents();
+  }
 
- initDOMSVG() {
-  this.calendarWrapper = document.createElement("div");
-  this.calendarWrapper.classList.add("calendar-wrapper");
+  initDOMSVG() {
+    this.calendarWrapper = document.createElement("div");
+    this.calendarWrapper.classList.add("calendar-wrapper");
 
-  this.calendarInner = document.createElement("div");
-  this.calendarInner.classList.add("calendar-inner");
+    this.calendarInner = document.createElement("div");
+    this.calendarInner.classList.add("calendar-inner");
 
-  const mockupContainer = document.createElement("div");
-  mockupContainer.id = "mockup-container";
+    const mockupContainer = document.createElement("div");
+    mockupContainer.id = "mockup-container";
 
-  mockupContainer.innerHTML = `
+    mockupContainer.innerHTML = `
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2100 2970" id="mockup">
   
   <rect id="background-rect" width="2100" height="2970" style="fill: #fff"/>
@@ -64,44 +65,44 @@ export default class SinglePageCalendar extends Calendar {
 </svg>
     `;
 
-  let x = 95;
-  let y = 1700;
+    let x = 95;
+    let y = 1700;
 
-  // Global loop
-  for (let i = 0; i < 12; i++) {
-   // Create month container
-   const monthContainer = document.createElementNS(
-    "http://www.w3.org/2000/svg",
-    "svg"
-   );
-   monthContainer.id = `month-container-${i}`;
+    // Global loop
+    for (let i = 0; i < 12; i++) {
+      // Create month container
+      const monthContainer = document.createElementNS(
+        "http://www.w3.org/2000/svg",
+        "svg"
+      );
+      monthContainer.id = `month-container-${i}`;
 
-   // if new row...
-   if (i === 4 || i === 8) {
-    // Increment y-movement
-    y += this.monthCellHeight + 23;
-    x = 100;
-   }
+      // if new row...
+      if (i === 4 || i === 8) {
+        // Increment y-movement
+        y += this.monthCellHeight + 23;
+        x = 100;
+      }
 
-   monthContainer.setAttribute("x", x);
-   monthContainer.setAttribute("y", y);
+      monthContainer.setAttribute("x", x);
+      monthContainer.setAttribute("y", y);
 
-   monthContainer.setAttribute("width", this.monthCellWidth);
-   monthContainer.setAttribute("height", this.monthCellHeight);
+      monthContainer.setAttribute("width", this.monthCellWidth);
+      monthContainer.setAttribute("height", this.monthCellHeight);
 
-   monthContainer.dataset.month = this.monthCounter;
-   monthContainer.dataset.year = this.year;
+      monthContainer.dataset.month = this.monthCounter;
+      monthContainer.dataset.year = this.year;
 
-   // Increment x-movement
-   x += this.monthCellWidth + 23;
+      // Increment x-movement
+      x += this.monthCellWidth + 23;
 
-   // Populate current month
+      // Populate current month
 
-   if (this.lang === "ru") {
-    monthContainer.innerHTML = `
+      if (this.lang === "ru") {
+        monthContainer.innerHTML = `
       <g id="month-title">
           <g transform="translate(24 12)">
-          ${glyphsSP.months[this.monthCounter]}
+          ${glyphsSP.monthsRu[this.monthCounter]}
           </g>
         </g>
 
@@ -113,35 +114,35 @@ export default class SinglePageCalendar extends Calendar {
 
         <g id="week-days-titles">
           <g transform="translate(21 67.5) scale(1.5)">
-          ${glyphsSP.weekDays.monday}
+          ${glyphsSP.weekDaysRu.monday}
           </g>
           <g transform="translate(87.8 67.5) scale(1.5)">
-          ${glyphsSP.weekDays.tuesday}
+          ${glyphsSP.weekDaysRu.tuesday}
           </g>
           <g transform="translate(149 67.5) scale(1.5)">
-          ${glyphsSP.weekDays.wednesday}
+          ${glyphsSP.weekDaysRu.wednesday}
           </g>
           <g transform="translate(217 67.5) scale(1.5)">
-          ${glyphsSP.weekDays.thursday}
+          ${glyphsSP.weekDaysRu.thursday}
           </g>
           <g transform="translate(283 67.5) scale(1.5)">
-          ${glyphsSP.weekDays.friday}
+          ${glyphsSP.weekDaysRu.friday}
           </g>
           <g transform="translate(346 67.5) scale(1.5)">
-          ${glyphsSP.weekDays.saturday}
+          ${glyphsSP.weekDaysRu.saturday}
           </g>
           <g transform="translate(411 67.5) scale(1.5)">
-           ${glyphsSP.weekDays.sunday}
+           ${glyphsSP.weekDaysRu.sunday}
           </g>
         </g>
 
           <g id="days-grid"></g>
         `;
-   } else if (this.lang === 'en') {
-    monthContainer.innerHTML = `
+      } else if (this.lang === 'en') {
+        monthContainer.innerHTML = `
       <g id="month-title">
           <g transform="translate(24 12)">
-          ${glyphsSP.months[this.monthCounter]}
+          ${glyphsSP.monthsEn[this.monthCounter]}
           </g>
         </g>
 
@@ -153,65 +154,64 @@ export default class SinglePageCalendar extends Calendar {
 
         <g id="week-days-titles">
           <g transform="translate(18 67.5)">
-          ${glyphsSP.weekDays.monday}
+          ${glyphsSP.weekDaysEn.monday}
           </g>
           <g transform="translate(85.5 67.5)">
-          ${glyphsSP.weekDays.tuesday}
+          ${glyphsSP.weekDaysEn.tuesday}
           </g>
           <g transform="translate(146.13 67.5)">
-          ${glyphsSP.weekDays.wednesday}
+          ${glyphsSP.weekDaysEn.wednesday}
           </g>
           <g transform="translate(214.95 67.5)">
-          ${glyphsSP.weekDays.thursday}
+          ${glyphsSP.weekDaysEn.thursday}
           </g>
           <g transform="translate(284.96 67.5)">
-          ${glyphsSP.weekDays.friday}
+          ${glyphsSP.weekDaysEn.friday}
           </g>
           <g transform="translate(351.06 67.5)">
-          ${glyphsSP.weekDays.saturday}
+          ${glyphsSP.weekDaysEn.saturday}
           </g>
           <g transform="translate(414 67.5)">
-           ${glyphsSP.weekDays.sunday}
+           ${glyphsSP.weekDaysEn.sunday}
           </g>
         </g>
 
           <g id="days-grid"></g>
         `;
-   }
+      }
 
-   if (i === 11) {
-    this.lastMonth = this.monthCounter;
-    this.endYear = this.year;
-   }
+      if (i === 11) {
+        this.lastMonth = this.monthCounter;
+        this.endYear = this.year;
+      }
 
-   this.monthCounter++;
+      this.monthCounter++;
 
-   if (this.monthCounter > 11) {
-    this.monthCounter = 0;
-    this.year++;
-   }
+      if (this.monthCounter > 11) {
+        this.monthCounter = 0;
+        this.year++;
+      }
 
-   const currentMonthGrid = monthContainer.querySelector("#days-grid");
+      const currentMonthGrid = monthContainer.querySelector("#days-grid");
 
-   this.createMonthGrid(
-    currentMonthGrid,
-    this.getFirstDay(this.monthCounter - 1, this.year) - 1,
-    this.daysInMonth(this.monthCounter, this.year),
-    this.daysInMonth(this.monthCounter - 1, this.year) - 1,
-    0,
-    86.42,
-    glyphsSP,
-    'fill: none;stroke: none; stroke-width: 0; stroke-miterlimit: 0;'
-   );
+      this.createMonthGrid(
+        currentMonthGrid,
+        this.getFirstDay(this.monthCounter - 1, this.year) - 1,
+        this.daysInMonth(this.monthCounter, this.year),
+        this.daysInMonth(this.monthCounter - 1, this.year) - 1,
+        0,
+        86.42,
+        glyphsSP,
+        'fill: none;stroke: none; stroke-width: 0; stroke-miterlimit: 0;'
+      );
 
-   // Append to main SVG
-   mockupContainer.querySelector("svg").appendChild(monthContainer);
+      // Append to main SVG
+      mockupContainer.querySelector("svg").appendChild(monthContainer);
+    }
+
+    // Insert to DOM
+    this.calendarInner.append(mockupContainer);
+    this.calendarWrapper.append(this.calendarInner);
+    this.parentContainer.append(this.calendarWrapper);
   }
-
-  // Insert to DOM
-  this.calendarInner.append(mockupContainer);
-
-  this.calendarWrapper.append(this.calendarInner);
-  this.parentContainer.append(this.calendarWrapper);
- }
 }
