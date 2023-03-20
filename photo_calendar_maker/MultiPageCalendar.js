@@ -32,7 +32,7 @@ export default class MultiPageCalendar extends Calendar {
 
     this.reduceRate = 15;
 
-    this.currentMonth = 0;
+    // this.currentMonth = 0;
 
     this.createLoader();
 
@@ -360,6 +360,9 @@ export default class MultiPageCalendar extends Calendar {
 
         reduced.then(reducedImage => {
           const resultImage = reducedImage ? reducedImage : e.target.result;
+
+          this.saveToIDB(resultImage, i);
+
           imageEl.setAttributeNS(
             "http://www.w3.org/1999/xlink",
             "href",
@@ -383,5 +386,45 @@ export default class MultiPageCalendar extends Calendar {
         break;
       }
     }
+  }
+
+  retrieveImages(imagesArr) {
+    this.loading('show');
+    let loadingCounter = 0;
+
+    imagesArr.forEach(imageItem => {
+      const currentMonthContainer = imageItem.id;
+
+      fetch(imageItem.image)
+        .then(res => {
+          const imgURL = res.url;
+
+          const imageGroup = document.querySelector(
+            `#month-${currentMonthContainer}-container #image-group`);
+
+          const imageEl = document.createElementNS(
+            "http://www.w3.org/2000/svg",
+            "image"
+          );
+
+          imageEl.setAttribute("height", this.imagePlaceholderHeight);
+          imageEl.setAttribute("width", this.imagePlaceholderWidth);
+          imageEl.setAttribute("x", this.imagePlaceholderX);
+          imageEl.setAttribute("y", this.imagePlaceholderY);
+          imageEl.setAttributeNS(
+            "http://www.w3.org/1999/xlink",
+            "href",
+            imgURL
+          );
+
+          imageGroup.innerHTML = "";
+          imageGroup.appendChild(imageEl);
+          loadingCounter++;
+
+          if (loadingCounter === imagesArr.length) {
+            this.loading('hide');
+          }
+        });
+    });
   }
 }

@@ -214,4 +214,32 @@ export default class SinglePageCalendar extends Calendar {
     this.calendarWrapper.append(this.calendarInner);
     this.parentContainer.append(this.calendarWrapper);
   }
+
+  retrieveImages(imagesArr) {
+    const imageFile = imagesArr[0].image;
+
+    fetch(imageFile)
+      .then(res => {
+        const imgURL = res.url;
+        const imageGroup = document.querySelector('#image-group');
+
+        const imageEl = document.createElementNS(
+          "http://www.w3.org/2000/svg",
+          "image"
+        );
+
+        imageEl.setAttribute("height", this.imagePlaceholderHeight);
+        imageEl.setAttribute("width", this.imagePlaceholderWidth);
+        imageEl.setAttribute("x", this.imagePlaceholderX);
+        imageEl.setAttribute("y", this.imagePlaceholderY);
+        imageEl.setAttributeNS(
+          "http://www.w3.org/1999/xlink",
+          "href",
+          imgURL
+        );
+
+        imageGroup.innerHTML = "";
+        imageGroup.appendChild(imageEl);
+      });
+  }
 }

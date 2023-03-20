@@ -25,6 +25,7 @@ export default class Calendar {
       A3: { width: 3508, height: 4961 },
     };
     this.currentSize = "A4";
+    this.currentMonth = 0;
 
     // Month counters
     this.monthCounter = this.firstMonthIndex;
@@ -34,7 +35,7 @@ export default class Calendar {
     this.lastMonth;
     this.endYear;
   }
-
+  // DOM insertion section
   initBasicControls() {
     this.controlsContainer.innerHTML = `
       <button id="pdf-download-current">
@@ -133,6 +134,7 @@ export default class Calendar {
     });
   }
 
+  // Upload/download section
   uploadImg(e) {
     if (!e.target.files[0]) return;
     const imageFile = e.target.files[0];
@@ -169,6 +171,8 @@ export default class Calendar {
         imageGroup.innerHTML = "";
         imageGroup.appendChild(imageEl);
         this.loading('hide');
+        // Save image to IDB
+        this.saveToIDB(resultImage);
       })
     };
     this.loading('show');
@@ -177,7 +181,6 @@ export default class Calendar {
 
   // Reduce image file size & resolution
   async reduceImageSize(base64Str, maxWidth, maxHeight) {
-
     let resized_base64 = await new Promise((resolve) => {
 
       let img = new Image()
@@ -291,6 +294,7 @@ export default class Calendar {
     });
   }
 
+  // Generate file name for file to save
   getFileName(span) {
     if (span || this.type === 'single-page') {
       const firstMonth = this.firstMonth;
@@ -321,6 +325,7 @@ export default class Calendar {
     return `${monthName}_${year}`;
   }
 
+  // Crop functionality section
   initCropper(currentImageElement) {
     const imageFile = currentImageElement.getAttribute("href");
 
@@ -425,8 +430,9 @@ export default class Calendar {
       "href",
       resultURL
     );
-
-    // currentImageElement.style.display = "block";
+    // Save cropped image to IDB
+    this.saveToIDB(resultURL);
+    // Get rit pf cropper
     this.removeCropper();
   }
 
@@ -443,6 +449,7 @@ export default class Calendar {
 
   }
 
+  // Init crop buttons
   initCropperControls() {
     this.cropControlsContainer.innerHTML = `
       <button id="apply-crop">
@@ -462,6 +469,7 @@ export default class Calendar {
     });
   }
 
+  // Get mockup to manipulate
   getCurrentMockup(element = '') {
     if (this.type === 'multi-page') {
       return this.calendarInner.querySelector(
@@ -472,6 +480,7 @@ export default class Calendar {
     }
   }
 
+  // Calendar grid generate section
   createMonthGrid(monthGrid, startIndex, totalDays, prevMonthDaysNumber, initialX, initialY, glyphsSet, cellStyles) {
     let x = initialX;
     let y = initialY;
@@ -519,6 +528,7 @@ export default class Calendar {
     }
   }
 
+  // Create individual cell
   createDayCell(x, y, cellNumber, cellStyles) {
     let dayGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
 
@@ -539,6 +549,7 @@ export default class Calendar {
     return dayGroup;
   }
 
+  // Date functions section
   daysInMonth(month, year) {
     return new Date(year, month, 0).getDate();
   }
@@ -551,8 +562,7 @@ export default class Calendar {
     return index.getDay();
   }
 
-
-
+  // Loader section
   createLoader() {
     this.loadingScreen = document.createElement("div");
     this.loadingScreen.classList.add("loading-screen");
@@ -572,5 +582,32 @@ export default class Calendar {
       this.loadingScreen.classList.remove("hide");
       this.controlsContainer.style.pointerEvents = "none";
     }
+  }
+
+  // Save image to IDB
+  saveToIDB(imageFile, id = this.currentMonth) {
+    const indexedDB =
+      window.indexedDB ||
+      window.mozIndexedDB ||
+      window.webkitIndexedDB ||
+      window.msIndexedDB ||
+      window.shimIndexedDB;
+
+    const request = indexedDB.open("Photo Calendar Project", 1);
+
+    request.onsuccess = () => {
+      const db = request.result;
+      const transaction = db.transaction("current_project_images", "readwrite");
+      const store = transaction.objectStore("current_project_images");
+
+      store.put({
+        id: id,
+        image: imageFile,
+      });
+
+      transaction.oncomplete = function () {
+        db.close();
+      };
+    };
   }
 }
