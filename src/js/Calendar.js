@@ -1,5 +1,5 @@
-// import Cropper from "../../node_modules/cropperjs/dist/cropper.esm.js";
 import Cropper from 'cropperjs';
+import SVGtoPDF from 'svg-to-pdfkit';
 
 export class Calendar {
   constructor(

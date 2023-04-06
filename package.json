@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Ptoto calendar templates generator",
   "browserslist": "> 0.5%, last 2 versions, not dead",
- "scripts": {
+ "scripts": { 
     "start": "parcel index.html --dist-dir ./build",
     "build": "parcel build index.html --dist-dir ./dist"
   },

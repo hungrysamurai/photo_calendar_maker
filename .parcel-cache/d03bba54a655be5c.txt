@@ -1,11 +1,11 @@
-5598
+5622
 99K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\terser\bin\package.json133252404677202846 0
 126K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\caniuse-lite\data\features\alternate-stylesheet.js133252404641562857 0
 157K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\@parcel\node-resolver-core\test\fixture\node_modules\package-browser-alias\foo.js133252404644512868 0
 123K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\caniuse-lite\data\features\css-marker-pseudo.js133252404717542871 0
-73K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\.gitignore133252392772110745 0
+73K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\.gitignore133252420879546674 0
 118K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\node-gyp-build-optional-packages\README.md133252404360851947 0
-75K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\package.json133252407872453696 0
+75K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\package.json133252460626090447 0
 113K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\caniuse-lite\data\features\css-all.js133252404701362861 0
 106K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\src\assets\Montserrat\MP\secondaryDigits.js133252357368740077 0
 110K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\msgpackr\dist\index-no-eval.min.js133252404367922241 0
@@ -23,15 +23,20 @@
 97K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\@parcel\namer-default133252404350041954 1
 105K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\svgo\plugins\removeDoctype.js133252404662062854 0
 93K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\@msgpackr-extract133252405063078198 1
-67K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\dist133252408122583691 1
+67K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\dist133252463733855685 1
 93K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\dotenv-expand\lib133252404357031953 1
-73K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\src\assets133252401771076635 1
+102K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\get-intrinsic\package.json133252377370370881 0
+68K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\build133252462736665688 1
+101K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\es-get-iterator\.eslintrc133252377355050548 0
+97K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\is-callable\README.md133252377380180900 0
+97K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\@parcel\graph\LICENSE133252404337511950 0
+96K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\yaml\browser\util.js133252404668312852 0
 84K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\boolbase133252404342921951 1
 96K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\json5\dist\index.mjs133252404631422851 0
 97K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\internal-slot\.github133252377384600888 1
 127K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\@parcel\core\test\fixtures\config-extends-not-found133252404475700641 1
 114K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\caniuse-lite\data\features\css-sel2.js133252404730882855 0
-73K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\index.html133252403886131934 0
+73K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\index.html133252457522529816 0
 106K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\htmlparser2\lib\FeedHandler.js133252404340441947 0
 82K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\semver133252404361521951 1
 75K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules133252405063148217 1
@@ -48,6 +53,7 @@
 89K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\yaml\index.js133252404369912257 0
 127K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\caniuse-lite\data\features\css-media-interaction.js133252404717962858 0
 88K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\src\assets\icons\next.svg133252357369800076 0
+73K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\src\assets133252401771076635 1
 99K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\object-is\.eslintignore133252377355030551 0
 98K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\brotli\build\encode.js133252377425260899 0
 123K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\abortcontroller-polyfill\src\abortcontroller.js133252404360321945 0
@@ -65,7 +71,7 @@
 114K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\posthtml-parser\dist\chunk.T6SARJYH.js133252404340811958 0
 92K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\which-collection133252377376960894 1
 93K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\stable\index.d.ts133252404339631952 0
-81K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\src\js\Calendar.js133252404925668209 0
+81K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\src\js\Calendar.js133252462660965688 0
 133K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\htmlnano\docs\versioned_docs\version-2.0.0\050-modules.md133252404680262849 0
 99K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\is-weakmap\CHANGELOG.md133252377368665735 0
 102K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\@parcel\watcher\src\shared133252404634832847 1
@@ -98,9 +104,6 @@
 89K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\dist\assets\icons\done.svg133252357369730066 0
 88K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\caniuse-lite133252405057058207 1
 79K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\src\js\script.js133252397085416628 0
-93K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\tslib\LICENSE.txt133252377387880899 0
-102K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\restructure\test\Buffer.js133252377380340903 0
-85K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\base64-js133252377366750543 1
 128K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\@jridgewell\sourcemap-codec\dist\sourcemap-codec.mjs133252404361641955 0
 87K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\terser\dist133252404677542865 1
 125K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\lmdb\dependencies\lmdb\libraries\liblmdb\mtest3.c133252404682532867 0
@@ -257,7 +260,7 @@
 96K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\crypto-js\enc-hex.js133252377385900891 0
 115K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\caniuse-lite\data\features\flow-root.js133252404999498203 0
 124K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\lmdb\dependencies\lmdb\libraries\liblmdb\tooltag133252404632882863 0
-85K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\dist\index.0555888f.js133252408116293692 0
+85K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\dist\index.0555888f.js133252463727505668 0
 102K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\utility-types\package.json133252404360971954 0
 105K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\react-refresh\build-info.json133252404365522253 0
 118K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\@parcel\core\src\serializerCore.browser.js133252404703822860 0
@@ -296,6 +299,7 @@
 118K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\utility-types\dist\aliases-and-guards.d.ts133252404602022870 0
 103K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\@parcel\utils\src\schema.js133252404681582857 0
 90K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\posthtml\types133252404357701950 1
+90K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\build\assets\icons\prev.svg133252357369940077 0
 114K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\@swc\helpers\src\_wrap_native_super.js133252377459526108 0
 85K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\@mischnic133252404310881949 1
 105K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\@swc\helpers\src\_inherits.js133252377454766108 0
@@ -314,6 +318,9 @@
 81K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\acorn133252404369942263 1
 115K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\css-tree\lib\syntax\node\Parentheses.js133252404696682845 0
 98K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\available-typed-arrays133252377380450904 1
+93K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\tslib\LICENSE.txt133252377387880899 0
+102K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\restructure\test\Buffer.js133252377380340903 0
+85K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\base64-js133252377366750543 1
 102K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\internal-slot\package.json133252377375560892 0
 82K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\braces133252404355651946 1
 107K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\pdfkit\js\data\Courier-Bold.afm133252377357390545 0
@@ -466,6 +473,7 @@
 115K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\type-fest\source\async-return-type.d.ts133252404351461954 0
 83K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\fontkit133252377456386096 1
 131K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\htmlnano\docs\versioned_docs\version-2.0.0\020-usage.md133252404675592853 0
+86K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\build\index.6f3ca159.js133252462675505687 0
 98K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\xxhash-wasm\LICENSE.md133252404366642243 0
 151K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\@parcel\node-resolver-core\test\fixture\node_modules\side-effects-false\src133252404672352918 1
 98K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\is-shared-array-buffer133252377380990892 1
@@ -803,6 +811,7 @@
 112K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\@parcel\transformer-babel\lib\jsx.js133252404457292288 0
 122K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\@parcel\transformer-react-refresh-wrap\LICENSE133252404337531935 0
 143K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\caniuse-lite\data\features\mdn-css-unicode-bidi-isolate-override.js133252405043258204 0
+86K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\build\assets\loader.gif133252357370050072 0
 114K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\type-fest\source\iterable-element.d.ts133252404633362864 0
 97K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\has-symbols\.eslintrc133252377355020552 0
 88K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\tiny-inflate133252377364430543 1
@@ -827,6 +836,7 @@
 90K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\weak-lru-cache133252404367132245 1
 101K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\tslib\CopyrightNotice.txt133252377386140895 0
 113K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\caniuse-lite\data\features\outline.js133252405046558206 0
+75K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\build\assets133252462736665688 1
 102K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\htmlnano\docs\netlify.toml133252404683022869 0
 107K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\caniuse-lite\data\regions\KG.js133252405041278218 0
 103K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\is-boolean-object\.eslintrc133252377357120555 0
@@ -986,9 +996,6 @@
 97K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\yaml\browser\types.js133252404660292853 0
 112K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\css-what\lib\commonjs\types.d.ts.map133252404631952862 0
 111K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\css-tree\lib\syntax\pseudo\index.js133252404682792867 0
-97K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\is-callable\README.md133252377380180900 0
-97K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\@parcel\graph\LICENSE133252404337511950 0
-96K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\yaml\browser\util.js133252404668312852 0
 102K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\yaml\browser\types\omap.js133252404482167384 0
 176K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\@parcel\node-resolver-core\test\fixture\node_modules\side-effects-package-redirect-down\package.json133252404699262845 0
 98K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\is-date-object\.github133252377385410953 1
@@ -1421,6 +1428,7 @@
 96K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\fill-range\README.md133252404349651944 0
 89K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\@parcel\utils133252404685042861 1
 99K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\browserslist\error.d.ts133252404369652243 0
+89K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\dist\index.8948c759.js.map133252463733715673 0
 108K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\htmlparser2\lib\FeedHandler.d.ts133252404457222287 0
 110K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\caniuse-lite\data\features\opus.js133252405046498214 0
 115K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\terser\node_modules\commander\Readme.md133252404355401943 0
@@ -1636,6 +1644,7 @@
 119K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\@parcel\workers\lib\process\ProcessChild.js133252404642522858 0
 105K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\@parcel\utils\src\debounce.js133252404582602871 0
 107K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\svgo\plugins\removeEmptyText.js133252404671892858 0
+90K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\build\assets\icons\crop.svg133252357369700070 0
 106K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\svgo\plugins\removeMetadata.js133252404672912849 0
 96K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\source-map\README.md133252404340821956 0
 107K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\@parcel\source-map\package.json133252404636042851 0
@@ -2075,6 +2084,7 @@
 128K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\@parcel\runtime-js\src\helpers\browser\css-loader.js133252404412822237 0
 124K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\caniuse-lite\data\features\css-grid-animation.js133252404714602854 0
 101K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\ordered-binary\index.d.ts133252404370532238 0
+86K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\build\index.ea16049c.js133252462669935688 0
 99K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\pdfkit\js\pdfkit.js.map133252377447160895 0
 106K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\pdfkit\js\pdfkit.standalone.js133252377436530903 0
 115K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\css-tree\lib\definition-syntax\index.js133252404678852863 0
@@ -2135,7 +2145,7 @@
 95K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\ordered-binary\dist133252404339761953 1
 111K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\caniuse-lite\data\features\xhtml.js133252405056448206 0
 99K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\ordered-binary\index.js133252404351441957 0
-89K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\dist\index.775132a2.js.map133252408122243698 0
+89K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\dist\index.775132a2.js.map133252463733725681 0
 150K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\@parcel\transformer-js\node_modules\@swc\helpers\lib\_wrap_native_super.js133252404688612860 0
 103K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\ordered-binary\package.json133252404362771959 0
 103K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\css-tree\lib\lexer\trace.js133252404702942859 0
@@ -2683,11 +2693,11 @@
 130K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\dom-serializer\node_modules\entities\lib\maps\xml.json133252404370402247 0
 110K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\htmlparser2\lib\Tokenizer.d.ts.map133252404370992249 0
 106K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\lines-and-columns\package.json133252404345131960 0
+88K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\dfa\index.js133252377368515736 0
 118K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\@jridgewell\gen-mapping\src\gen-mapping.ts133252404369842253 0
 177K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\@parcel\transformer-js\node_modules\@swc\helpers\src\_class_check_private_static_field_descriptor.mjs133252404699402860 0
-108K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\lines-and-columns\build\index.js133252404340461947 0
 112K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\@parcel\utils\test\sourcemap.test.js133252404682892849 0
-88K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\dfa\index.js133252377368515736 0
+108K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\lines-and-columns\build\index.js133252404340461947 0
 93K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\linebreak\LICENSE133252377355220535 0
 101K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\@swc\helpers\package.json133252377355220535 0
 96K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\fontkit\package.json133252377454756112 0
@@ -2891,7 +2901,7 @@
 152K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\@parcel\transformer-js\node_modules\@swc\helpers\src\_is_native_function.mjs133252404705622864 0
 91K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\is-map\index.js133252377371340907 0
 112K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\caniuse-lite\data\features\brotli.js133252404683592854 0
-90K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\dist\index.f86dca75.css.map133252408119663701 0
+90K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\dist\index.f86dca75.css.map133252463730665679 0
 95K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\is-map\package.json133252377378890899 0
 101K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\css-select\lib\types.d.ts133252404653182880 0
 87K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\is-map\test133252377374630896 1
@@ -3111,8 +3121,6 @@
 101K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\@parcel\markdown-ansi\lib133252404339851942 1
 97K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\get-intrinsic\LICENSE133252377357410550 0
 114K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\entities\lib\decode_codepoint.d.ts.map133252404482167384 0
-102K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\get-intrinsic\package.json133252377370370881 0
-101K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\es-get-iterator\.eslintrc133252377355050548 0
 98K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\dom-serializer\lib\esm133252404492677393 1
 99K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\get-intrinsic\README.md133252377377700892 0
 109K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\get-intrinsic\.github\FUNDING.yml133252377381720893 0
@@ -3256,6 +3264,7 @@
 104K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\fontkit\src\layout\Script.js133252377451236109 0
 116K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\css-what\lib\commonjs\stringify.d.ts.map133252404587542859 0
 101K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\fontkit\src\glyph\BBox.js133252377422480894 0
+91K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\build\index.37856913.css.map133252462669465686 0
 105K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\fontkit\src\glyph\CFFGlyph.js133252377427310892 0
 106K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\fontkit\src\glyph\COLRGlyph.js133252377434050889 0
 120K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\fontkit\src\glyph\GlyphVariationProcessor.js133252377443910903 0
@@ -3412,6 +3421,7 @@
 107K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\domutils\lib\traversal.d.ts.map133252404631142866 0
 101K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\domutils\lib\traversal.js133252404367412243 0
 100K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\@parcel\watcher\src\unix133252404372422243 1
+95K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\build\assets\icons\pdf-multi.svg133252357369820076 0
 90K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\domhandler\lib133252404366802255 1
 126K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\@parcel\runtime-js\src\helpers\node\html-loader.js133252404635352867 0
 99K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\domhandler\package.json133252404350561950 0
@@ -3848,6 +3858,7 @@
 104K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\cosmiconfig\dist\readFile.js133252404368482241 0
 108K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\cosmiconfig\dist\readFile.js.map133252404644652858 0
 89K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\acorn\LICENSE133252404340711944 0
+89K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\dist\index.70a697a3.js.map133252463733715673 0
 115K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\@parcel\packager-svg\src\SVGPackager.js133252404346911950 0
 101K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\cosmiconfig\dist\types.js133252404370162251 0
 119K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\caniuse-lite\data\features\text-emphasis.js133252405052288194 0
@@ -3877,7 +3888,6 @@
 126K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\@parcel\core\test\fixtures\custom-format-infer-ext133252404718042859 1
 92K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\chalk\index.d.ts133252404362341942 0
 109K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\caniuse-lite\data\features\u2f.js133252405053728204 0
-85K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\dist\index.dcd2d08d.js133252408117463747 0
 89K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\chalk\license133252404337791950 0
 104K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\@parcel\logger\lib\Logger.js133252404341551935 0
 131K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\@parcel\optimizer-image\parcel-image.linux-x64-gnu.node133252404690432858 0
@@ -4083,6 +4093,7 @@
 119K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\@parcel\core\src\requests\PackageRequest.js133252404689462857 0
 107K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\caniuse-lite\data\regions\VI.js133252405054688192 0
 116K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\@parcel\watcher\src\windows\win_utils.cc133252404590392859 0
+96K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\build\assets\icons\pdf-single.svg133252357369880077 0
 107K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\caniuse-lite\data\regions\VU.js133252405055048194 0
 107K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\caniuse-lite\data\regions\WF.js133252405056088206 0
 107K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\caniuse-lite\data\regions\WS.js133252405056338209 0
@@ -4643,7 +4654,7 @@
 130K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\@parcel\workers\test\integration\workerfarm\ipc-pid.js133252404634172867 0
 126K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\@parcel\workers\test\integration\workerfarm\ipc.js133252404635252848 0
 147K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\@parcel\workers\test\integration\workerfarm\resolve-shared-reference.js133252404647432851 0
-85K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\dist\index.775132a2.js133252408117473742 0
+85K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\dist\index.775132a2.js133252463729325732 0
 104K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\@parcel\workers\src\child.js133252404362021945 0
 104K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\@parcel\workers\src\index.js133252404633162862 0
 109K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\@parcel\workers\src\WorkerFarm.js133252404660342867 0
@@ -4808,6 +4819,7 @@
 145K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\@parcel\transformer-js\node_modules\@swc\helpers\src\_await_value.mjs133252404697182855 0
 168K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\@parcel\transformer-js\node_modules\@swc\helpers\src\_class_apply_descriptor_destructure.mjs133252404697732856 0
 160K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\@parcel\transformer-js\node_modules\@swc\helpers\src\_class_apply_descriptor_get.mjs133252404697902864 0
+87K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\build\index.6cff5bbb.css133252462672935679 0
 150K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\@parcel\transformer-js\node_modules\@swc\helpers\src\_class_call_check.mjs133252404698432862 0
 167K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\@parcel\transformer-js\node_modules\@swc\helpers\src\_class_check_private_static_access.mjs133252404699132850 0
 154K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\@parcel\transformer-js\node_modules\@swc\helpers\src\_class_name_tdz_error.mjs133252404699972856 0
@@ -5187,6 +5199,7 @@
 154K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\@parcel\node-resolver-core\test\fixture\node_modules\side-effects-false-glob\b133252404658552859 1
 165K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\@parcel\node-resolver-core\test\fixture\node_modules\side-effects-false-glob\package.json133252404697092857 0
 158K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\@parcel\node-resolver-core\test\fixture\node_modules\side-effects-false-glob\sub\a133252404661042843 1
+92K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\build\assets\icons\upload.svg133252357370010081 0
 158K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\@parcel\node-resolver-core\test\fixture\node_modules\side-effects-false-glob\sub\b133252404667642916 1
 165K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\@parcel\node-resolver-core\test\fixture\node_modules\side-effects-false-glob\sub\index.js133252404669492856 0
 167K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\@parcel\node-resolver-core\test\fixture\node_modules\side-effects-false-glob\sub\index.json133252404686762854 0
@@ -5558,6 +5571,7 @@
 106K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\@babel\code-frame\lib\index.js133252404345251962 0
 110K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\@babel\code-frame\lib\index.js.map133252404350611966 0
 86K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\.bin\acorn133252405057488216 0
+85K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\dist\index.8948c759.js133252463729225721 0
 90K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\.bin\acorn.cmd133252405057488216 0
 90K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\.bin\acorn.ps1133252405057488216 0
 97K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\.bin\browserslist.cmd133252405057488216 0
@@ -5582,18 +5596,28 @@
 87K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\.bin\terser133252405057578203 0
 91K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\.bin\terser.cmd133252405057578203 0
 91K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\node_modules\.bin\terser.ps1133252405057568189 0
-89K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\dist\index.0555888f.js.map133252408122223687 0
-86K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\dist\index.29d65f8e.css133252408116203721 0
-90K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\dist\index.29d65f8e.css.map133252408119663701 0
-85K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\dist\index.82d13b79.js133252408116203721 0
-89K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\dist\index.82d13b79.js.map133252408119663701 0
-85K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\dist\index.cb0994ea.js133252408117463747 0
-89K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\dist\index.cb0994ea.js.map133252408119663701 0
-89K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\dist\index.dcd2d08d.js.map133252408122223687 0
-86K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\dist\index.f86dca75.css133252408116203721 0
-78K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\dist\index.html133252408116203721 0
+89K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\dist\index.0555888f.js.map133252463730665679 0
+86K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\dist\index.29d65f8e.css133252463727505668 0
+90K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\dist\index.29d65f8e.css.map133252463730665679 0
+85K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\dist\index.70a697a3.js133252463729225721 0
+86K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\dist\index.f86dca75.css133252463727505668 0
+78K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\dist\index.html133252463727505668 0
 89K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\dist\assets\icons\next.svg133252357369800076 0
 95K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\dist\assets\icons\pdf-single.svg133252357369880077 0
 88K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\dist\assets\icons\png.svg133252357369910078 0
 89K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\dist\assets\icons\prev.svg133252357369940077 0
 91K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\dist\assets\icons\upload.svg133252357370010081 0
+86K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\build\index.1c7d0d34.js133252462673375676 0
+90K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\build\index.1c7d0d34.js.map133252462676395670 0
+87K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\build\index.37856913.css133252462668955695 0
+91K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\build\index.6cff5bbb.css.map133252462675865696 0
+90K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\build\index.6f3ca159.js.map133252462678735684 0
+90K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\build\index.ea16049c.js.map133252462670695686 0
+79K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\build\index.html133252462670575699 0
+81K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\build\assets\icons133252413467079684 1
+92K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\build\assets\icons\cancel.svg133252357369670073 0
+90K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\build\assets\icons\done.svg133252357369730066 0
+89K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\build\assets\icons\jpg.svg133252357369760072 0
+90K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\build\assets\icons\next.svg133252357369800076 0
+89K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\build\assets\icons\png.svg133252357369910078 0
+98K:\temp\_coding\work\Vanilla JS\7_Calendar_templates_generator\build\assets\icons\upload-multi.svg133252357369970072 0
