@@ -1,7 +1,5 @@
-import Cropper from "../../node_modules/cropperjs/dist/cropper.esm.js";
-// import PDFDocument from 'pdfkit';
-// const Cropper = require('cropperjs');
-// import Cropper from 'cropperjs';
+// import Cropper from "../../node_modules/cropperjs/dist/cropper.esm.js";
+import Cropper from 'cropperjs';
 
 export class Calendar {
   constructor(
