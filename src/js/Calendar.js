@@ -1,6 +1,9 @@
-import Cropper from "./assets/cropperjs/cropper.esm.js";
+import Cropper from "../../node_modules/cropperjs/dist/cropper.esm.js";
+// import PDFDocument from 'pdfkit';
+// const Cropper = require('cropperjs');
+// import Cropper from 'cropperjs';
 
-export default class Calendar {
+export class Calendar {
   constructor(
     firstMonthIndex,
     year,
@@ -39,11 +42,11 @@ export default class Calendar {
   initBasicControls() {
     this.controlsContainer.innerHTML = `
       <button id="pdf-download-current">
-        <img src='./photo_calendar_maker/assets/icons/pdf-single.svg'/>
+        <img src='./assets/icons/pdf-single.svg'/>
       </button>
      
       <button id="jpg-download">
-        <img src='./photo_calendar_maker/assets/icons/jpg.svg'/>
+        <img src='./assets/icons/jpg.svg'/>
       </button>
   
         <select id="format-select">
@@ -51,7 +54,7 @@ export default class Calendar {
        </select>
 
     <button id="crop-btn">
-      <img src='./photo_calendar_maker/assets/icons/crop.svg'/>
+      <img src='./assets/icons/crop.svg'/>
     </button>
 
     <input
@@ -62,7 +65,7 @@ export default class Calendar {
       onclick="this.value=null;"/>
           
       <label for="upload-input" id="upload-btn" class="upload-btn">
-        <img src='./photo_calendar_maker/assets/icons/upload.svg'/>
+        <img src='./assets/icons/upload.svg'/>
       </label>
     `;
 
@@ -453,10 +456,10 @@ export default class Calendar {
   initCropperControls() {
     this.cropControlsContainer.innerHTML = `
       <button id="apply-crop">
-        <img src='./photo_calendar_maker/assets/icons/done.svg'/>
+        <img src='./assets/icons/done.svg'/>
     </button>
       <button id="cancel-crop">
-        <img src='./photo_calendar_maker/assets/icons/cancel.svg'/>
+        <img src='./assets/icons/cancel.svg'/>
       </button>
     `;
 
@@ -569,7 +572,7 @@ export default class Calendar {
     this.loadingScreen.classList.add("hide");
 
     this.loadingScreen.innerHTML = `
-    <img src="./photo_calendar_maker/assets/loader.gif"/>`
+    <img src="./assets/loader.gif"/>`
 
     this.parentContainer.insertAdjacentElement("beforebegin", this.loadingScreen);
   }

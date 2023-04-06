@@ -1,5 +1,5 @@
-import SinglePageCalendar from "./SinglePageCalendar.js";
-import MultiPageCalendar from "./MultiPageCalendar.js";
+import { SinglePageCalendar } from "./SinglePageCalendar.js";
+import { MultiPageCalendar } from "./MultiPageCalendar.js";
 
 const newProjectBtn = document.querySelector('#new-project');
 const newProjectContainer = document.querySelector('.new-project-container');

@@ -353,3 +353,37 @@ svg > svg {
     height: 30px;
   }
 }
+
+/* Cropper styles */
+.cropper-view-box {
+  outline: 3px solid #fff;
+  outline-color: #231f20;
+}
+
+.cropper-dashed {
+  border: 0 dashed #231f20;
+}
+
+.cropper-center::before,
+.cropper-center::after {
+  background-color: #231f20;
+}
+
+.cropper-face {
+  background-color: #231f20;
+  opacity: 0;
+}
+
+.cropper-line {
+  background-color: #231f20;
+}
+
+.cropper-point {
+  background-color: #231f20;
+}
+
+@media (min-width: 1200px) {
+  .cropper-point.point-se::before {
+    background-color: #231f20;
+  }
+}

@@ -1,7 +1,7 @@
-import Calendar from "./Calendar.js";
-import { glyphsSP } from "./assets/Montserrat/MontserratGlyphs.js";
+import { Calendar } from "./Calendar.js";
+import { glyphsSP } from "../assets/Montserrat/MontserratGlyphs.js";
 
-export default class SinglePageCalendar extends Calendar {
+export class SinglePageCalendar extends Calendar {
   constructor(
     firstMonthIndex,
     year,

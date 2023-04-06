@@ -1,7 +1,7 @@
-import Calendar from "./Calendar.js";
-import { glyphsMP } from "./assets/Montserrat/MontserratGlyphs.js";
+import { Calendar } from "./Calendar.js";
+import { glyphsMP } from "../assets/Montserrat/MontserratGlyphs.js";
 
-export default class MultiPageCalendar extends Calendar {
+export class MultiPageCalendar extends Calendar {
   constructor(
     firstMonthIndex,
     year,
@@ -233,15 +233,15 @@ export default class MultiPageCalendar extends Calendar {
   initMultiPageControls() {
     this.prevBtn = document.createElement('button');
     this.prevBtn.id = 'prev-month';
-    this.prevBtn.innerHTML = `<img src='./photo_calendar_maker/assets/icons/prev.svg'/>`;
+    this.prevBtn.innerHTML = `<img src='./assets/icons/prev.svg'/>`;
 
     this.nextBtn = document.createElement('button');
     this.nextBtn.id = 'next-month';
-    this.nextBtn.innerHTML = `<img src='./photo_calendar_maker/assets/icons/next.svg'/>`;
+    this.nextBtn.innerHTML = `<img src='./assets/icons/next.svg'/>`;
 
     this.allPDFDownloadBtn = document.createElement('button');
     this.allPDFDownloadBtn.id = 'pdf-download-all';
-    this.allPDFDownloadBtn.innerHTML = `<img src='./photo_calendar_maker/assets/icons/pdf-multi.svg'/>`;
+    this.allPDFDownloadBtn.innerHTML = `<img src='./assets/icons/pdf-multi.svg'/>`;
 
 
     this.multipleImagesInput = document.createElement('input');
@@ -258,7 +258,7 @@ export default class MultiPageCalendar extends Calendar {
     this.uploadMultipleImgsBtn = document.createElement('label');
     this.uploadMultipleImgsBtn.setAttribute('for', 'upload-multiple-input')
     this.uploadMultipleImgsBtn.id = 'upload-multiple';
-    this.uploadMultipleImgsBtn.innerHTML = `<img src='./photo_calendar_maker/assets/icons/upload-multi.svg'/>`;
+    this.uploadMultipleImgsBtn.innerHTML = `<img src='./assets/icons/upload-multi.svg'/>`;
 
     `    <input
       type="file"
@@ -268,7 +268,7 @@ export default class MultiPageCalendar extends Calendar {
       onclick="this.value=null;"/>
           
       <label for="upload-input" id="upload-btn" class="upload-btn">
-        <img src='./photo_calendar_maker/assets/icons/upload.svg'/>
+        <img src='./assets/icons/upload.svg'/>
       </label>`
 
 
