@@ -1,4 +1,4 @@
 /templates
 /node_modules
 /build
-/.parcel-cache
+.parcel-cache
