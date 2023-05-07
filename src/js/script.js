@@ -1,17 +1,19 @@
 import { SinglePageCalendar } from "./SinglePageCalendar.js";
 import { MultiPageCalendar } from "./MultiPageCalendar.js";
 
-const newProjectBtn = document.querySelector('#new-project');
-const newProjectContainer = document.querySelector('.new-project-container');
+const newProjectBtn = document.querySelector("#new-project");
+const newProjectContainer = document.querySelector(".new-project-container");
 
-const newCalendarInputsContainer = document.querySelector('.new-calendar-controls');
+const newCalendarInputsContainer = document.querySelector(
+  ".new-calendar-controls"
+);
 
 const getButton = document.querySelector("#get-button");
 
 const monthInput = document.querySelector("#month-input");
 const yearInput = document.querySelector("#year-input");
-const multiModeBtn = document.querySelector('#multi-page');
-const langInput = document.querySelector('#lang-input');
+const multiModeBtn = document.querySelector("#multi-page");
+const langInput = document.querySelector("#lang-input");
 
 const calendarContainer = document.querySelector(".calendar-container");
 const controlsContainer = document.querySelector(".controls-container");
@@ -19,20 +21,23 @@ const cropControlsContainer = document.querySelector(
   ".crop-controls-container"
 );
 
-newProjectBtn.addEventListener('click', () => {
-  newProjectContainer.style.top = '-60px';
+// Show/Hide "New calendar container"
+newProjectBtn.addEventListener("click", () => {
+  newProjectContainer.style.top = "-60px";
 });
 
-newCalendarInputsContainer.addEventListener('mouseleave', () => {
-  setTimeout(() => {
-    newProjectContainer.style.top = '0px';
-  }, 5000)
-})
+document.addEventListener("click", (e) => {
+  if (
+    !newCalendarInputsContainer.contains(e.target) &&
+    e.target !== newProjectBtn
+  ) {
+    newProjectContainer.style.top = "0px";
+  }
+});
 
 let currentCalendar;
 
 getButton.addEventListener("click", () => {
-
   // Gather data from inputs
   const startYear = +yearInput.value;
   const firstMonthIndex = +monthInput.value;
@@ -56,7 +61,7 @@ getButton.addEventListener("click", () => {
   newProjectIDB(newCalendarData);
 
   // Hide new calendar inputs
-  newProjectContainer.style.top = '0px';
+  newProjectContainer.style.top = "0px";
 });
 
 function loadProject() {
@@ -102,9 +107,7 @@ function loadProject() {
     const db = request.result;
 
     // Init transaction on all stored objects
-    const transaction = db.transaction(
-      db.objectStoreNames,
-      "readwrite");
+    const transaction = db.transaction(db.objectStoreNames, "readwrite");
 
     const dataStore = transaction.objectStore("current_project_data");
     const imagesStore = transaction.objectStore("current_project_images");
@@ -123,13 +126,13 @@ function loadProject() {
             // Retrieve images array via current calendar method
             currentCalendar.retrieveImages(imagesQuery.result);
           }
-        }
+        };
       }
     };
     transaction.oncomplete = function () {
       db.close();
     };
-  }
+  };
 }
 
 // Set new project in IDB
@@ -147,9 +150,7 @@ function newProjectIDB({ startYear, firstMonthIndex, lang, mode }) {
   request.onsuccess = function () {
     const db = request.result;
 
-    const transaction = db.transaction(
-      db.objectStoreNames,
-      "readwrite");
+    const transaction = db.transaction(db.objectStoreNames, "readwrite");
 
     const dataStore = transaction.objectStore("current_project_data");
     const imagesStore = transaction.objectStore("current_project_images");
@@ -174,7 +175,7 @@ function newProjectIDB({ startYear, firstMonthIndex, lang, mode }) {
 
 // Init calendar
 function newCalendar({ startYear, firstMonthIndex, lang, mode }) {
-  if (mode === 'multi-page') {
+  if (mode === "multi-page") {
     currentCalendar = new MultiPageCalendar(
       firstMonthIndex,
       startYear,
@@ -194,8 +195,8 @@ function newCalendar({ startYear, firstMonthIndex, lang, mode }) {
       lang,
       mode
     );
-  };
-};
+  }
+}
 
 // Init - if some data in IDB - retrieve project. If not - set up IDB schema for future projects
 loadProject();

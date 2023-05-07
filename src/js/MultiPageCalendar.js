@@ -1,5 +1,6 @@
-import { Calendar } from "./Calendar.js";
-import { glyphsMP } from "../assets/Montserrat/MontserratGlyphs.js";
+import { Calendar } from "./Calendar";
+import { glyphsMP } from "../assets/Montserrat/MontserratGlyphs";
+import { icons } from "../assets/icons";
 
 export class MultiPageCalendar extends Calendar {
   constructor(
@@ -184,9 +185,9 @@ export class MultiPageCalendar extends Calendar {
       const monthEl = monthContainer.querySelector(`#month-title-${i}`);
       const yearEl = monthContainer.querySelector(`#year-title-${i}`);
 
-      if (this.lang === 'ru') {
+      if (this.lang === "ru") {
         monthEl.innerHTML = glyphsMP.monthsRu[this.monthCounter];
-      } else if (this.lang === 'en') {
+      } else if (this.lang === "en") {
         monthEl.innerHTML = glyphsMP.monthsEn[this.monthCounter];
       }
 
@@ -220,10 +221,8 @@ export class MultiPageCalendar extends Calendar {
         17,
         195.8,
         glyphsMP,
-        'fill: none; stroke:#999999; stroke-miterlimit: 10; stroke-width: .5px;'
+        "fill: none; stroke:#999999; stroke-miterlimit: 10; stroke-width: .5px;"
       );
-
-
     }
 
     this.calendarWrapper.append(this.calendarInner);
@@ -231,34 +230,35 @@ export class MultiPageCalendar extends Calendar {
   }
 
   initMultiPageControls() {
-    this.prevBtn = document.createElement('button');
-    this.prevBtn.id = 'prev-month';
-    this.prevBtn.innerHTML = `<img src='./assets/icons/prev.svg'/>`;
+    this.prevBtn = document.createElement("button");
+    this.prevBtn.id = "prev-month";
+    this.prevBtn.innerHTML = icons.prev;
 
-    this.nextBtn = document.createElement('button');
-    this.nextBtn.id = 'next-month';
-    this.nextBtn.innerHTML = `<img src='./assets/icons/next.svg'/>`;
+    this.nextBtn = document.createElement("button");
+    this.nextBtn.id = "next-month";
+    this.nextBtn.innerHTML = icons.next;
 
-    this.allPDFDownloadBtn = document.createElement('button');
-    this.allPDFDownloadBtn.id = 'pdf-download-all';
-    this.allPDFDownloadBtn.innerHTML = `<img src='./assets/icons/pdf-multi.svg'/>`;
+    this.allPDFDownloadBtn = document.createElement("button");
+    this.allPDFDownloadBtn.id = "pdf-download-all";
+    this.allPDFDownloadBtn.innerHTML = icons.pdfMulti;
 
-
-    this.multipleImagesInput = document.createElement('input');
-    this.multipleImagesInput.setAttribute('type', 'file');
-    this.multipleImagesInput.setAttribute('multiple', 'multiple');
-    this.multipleImagesInput.setAttribute('accept', 'image/jpeg, image/png, image/jpg');
-    this.multipleImagesInput.id = 'upload-multiple-input';
+    this.multipleImagesInput = document.createElement("input");
+    this.multipleImagesInput.setAttribute("type", "file");
+    this.multipleImagesInput.setAttribute("multiple", "multiple");
+    this.multipleImagesInput.setAttribute(
+      "accept",
+      "image/jpeg, image/png, image/jpg"
+    );
+    this.multipleImagesInput.id = "upload-multiple-input";
     this.multipleImagesInput.hidden = true;
     // this.multipleImagesInput.onclick = function(){
     //  this.value = null;
     // }
 
-
-    this.uploadMultipleImgsBtn = document.createElement('label');
-    this.uploadMultipleImgsBtn.setAttribute('for', 'upload-multiple-input')
-    this.uploadMultipleImgsBtn.id = 'upload-multiple';
-    this.uploadMultipleImgsBtn.innerHTML = `<img src='./assets/icons/upload-multi.svg'/>`;
+    this.uploadMultipleImgsBtn = document.createElement("label");
+    this.uploadMultipleImgsBtn.setAttribute("for", "upload-multiple-input");
+    this.uploadMultipleImgsBtn.id = "upload-multiple";
+    this.uploadMultipleImgsBtn.innerHTML = icons.uploadMulti;
 
     `    <input
       type="file"
@@ -269,15 +269,23 @@ export class MultiPageCalendar extends Calendar {
           
       <label for="upload-input" id="upload-btn" class="upload-btn">
         <img src='./assets/icons/upload.svg'/>
-      </label>`
+      </label>`;
 
+    this.controlsContainer.insertAdjacentElement(
+      "afterbegin",
+      this.allPDFDownloadBtn
+    );
+    this.controlsContainer.insertAdjacentElement("afterbegin", this.prevBtn);
 
-    this.controlsContainer.insertAdjacentElement('afterbegin', this.allPDFDownloadBtn);
-    this.controlsContainer.insertAdjacentElement('afterbegin', this.prevBtn);
-
-    this.controlsContainer.insertAdjacentElement('beforeend', this.multipleImagesInput);
-    this.controlsContainer.insertAdjacentElement('beforeend', this.uploadMultipleImgsBtn);
-    this.controlsContainer.insertAdjacentElement('beforeend', this.nextBtn);
+    this.controlsContainer.insertAdjacentElement(
+      "beforeend",
+      this.multipleImagesInput
+    );
+    this.controlsContainer.insertAdjacentElement(
+      "beforeend",
+      this.uploadMultipleImgsBtn
+    );
+    this.controlsContainer.insertAdjacentElement("beforeend", this.nextBtn);
   }
 
   initMultiPageControlsEvents() {
@@ -308,12 +316,12 @@ export class MultiPageCalendar extends Calendar {
       this.setVisibleMonth();
     });
 
-    this.multipleImagesInput.addEventListener('change', (e) => {
+    this.multipleImagesInput.addEventListener("change", (e) => {
       if (this.cropper) {
         this.removeCropper();
       }
       this.uploadMultipleImages(e);
-    })
+    });
     this.allPDFDownloadBtn.addEventListener("click", () => {
       if (this.cropper) {
         this.removeCropper();
@@ -325,6 +333,8 @@ export class MultiPageCalendar extends Calendar {
 
   setVisibleMonth() {
     this.calendarInner.style.left = `-${this.currentMonth * 100}%`;
+    console.log(this.currentMonth);
+    console.log(this.calendarInner);
   }
 
   uploadMultipleImages(e) {
@@ -338,8 +348,9 @@ export class MultiPageCalendar extends Calendar {
       const reader = new FileReader();
 
       reader.onload = (e) => {
-
-        const imageGroup = this.calendarInner.querySelector(`#month-${i}-container #image-group`);
+        const imageGroup = this.calendarInner.querySelector(
+          `#month-${i}-container #image-group`
+        );
         const imageEl = document.createElementNS(
           "http://www.w3.org/2000/svg",
           "image"
@@ -357,30 +368,33 @@ export class MultiPageCalendar extends Calendar {
           this.imagePlaceholderHeight * this.reduceRate
         );
 
+        reduced
+          .then((reducedImage) => {
+            const resultImage = reducedImage ? reducedImage : e.target.result;
 
-        reduced.then(reducedImage => {
-          const resultImage = reducedImage ? reducedImage : e.target.result;
+            this.saveToIDB(resultImage, i);
 
-          this.saveToIDB(resultImage, i);
-
-          imageEl.setAttributeNS(
-            "http://www.w3.org/1999/xlink",
-            "href",
-            resultImage
-          );
-          imageGroup.innerHTML = "";
-          imageGroup.appendChild(imageEl);
-          loadedFilesCounter++;
-        }).then(() => {
-          if (loadedFilesCounter === files.length ||
-            loadedFilesCounter === 11) {
-            this.loading('hide');
-          }
-        })
+            imageEl.setAttributeNS(
+              "http://www.w3.org/1999/xlink",
+              "href",
+              resultImage
+            );
+            imageGroup.innerHTML = "";
+            imageGroup.appendChild(imageEl);
+            loadedFilesCounter++;
+          })
+          .then(() => {
+            if (
+              loadedFilesCounter === files.length ||
+              loadedFilesCounter === 11
+            ) {
+              this.loading("hide");
+            }
+          });
       };
 
       reader.readAsDataURL(files[i]);
-      this.loading('show');
+      this.loading("show");
 
       if (i === 11) {
         break;
@@ -389,42 +403,38 @@ export class MultiPageCalendar extends Calendar {
   }
 
   retrieveImages(imagesArr) {
-    this.loading('show');
+    this.loading("show");
     let loadingCounter = 0;
 
-    imagesArr.forEach(imageItem => {
+    imagesArr.forEach((imageItem) => {
       const currentMonthContainer = imageItem.id;
 
-      fetch(imageItem.image)
-        .then(res => {
-          const imgURL = res.url;
+      fetch(imageItem.image).then((res) => {
+        const imgURL = res.url;
 
-          const imageGroup = document.querySelector(
-            `#month-${currentMonthContainer}-container #image-group`);
+        const imageGroup = document.querySelector(
+          `#month-${currentMonthContainer}-container #image-group`
+        );
 
-          const imageEl = document.createElementNS(
-            "http://www.w3.org/2000/svg",
-            "image"
-          );
+        const imageEl = document.createElementNS(
+          "http://www.w3.org/2000/svg",
+          "image"
+        );
 
-          imageEl.setAttribute("height", this.imagePlaceholderHeight);
-          imageEl.setAttribute("width", this.imagePlaceholderWidth);
-          imageEl.setAttribute("x", this.imagePlaceholderX);
-          imageEl.setAttribute("y", this.imagePlaceholderY);
-          imageEl.setAttributeNS(
-            "http://www.w3.org/1999/xlink",
-            "href",
-            imgURL
-          );
+        imageEl.setAttribute("height", this.imagePlaceholderHeight);
+        imageEl.setAttribute("width", this.imagePlaceholderWidth);
+        imageEl.setAttribute("x", this.imagePlaceholderX);
+        imageEl.setAttribute("y", this.imagePlaceholderY);
+        imageEl.setAttributeNS("http://www.w3.org/1999/xlink", "href", imgURL);
 
-          imageGroup.innerHTML = "";
-          imageGroup.appendChild(imageEl);
-          loadingCounter++;
+        imageGroup.innerHTML = "";
+        imageGroup.appendChild(imageEl);
+        loadingCounter++;
 
-          if (loadingCounter === imagesArr.length) {
-            this.loading('hide');
-          }
-        });
+        if (loadingCounter === imagesArr.length) {
+          this.loading("hide");
+        }
+      });
     });
   }
 }

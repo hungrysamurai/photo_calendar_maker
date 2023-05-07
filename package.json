@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Ptoto calendar templates generator",
   "browserslist": "> 0.5%, last 2 versions, not dead",
- "scripts": { 
+  "scripts": {
     "start": "parcel index.html --dist-dir ./build",
     "build": "parcel build index.html --dist-dir ./dist"
   },
@@ -24,10 +24,11 @@
   "homepage": "https://github.com/hungrysamurai/photo_calendar_maker#readme",
   "dependencies": {
     "cropperjs": "^1.5.13",
+    "gsap": "^3.11.5",
     "pdfkit": "^0.13.0",
     "svg-to-pdfkit": "^0.1.8"
   },
-   "targets": {
+  "targets": {
     "default": {
       "publicUrl": "./"
     }

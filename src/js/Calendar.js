@@ -1,5 +1,7 @@
-import Cropper from 'cropperjs';
-import SVGtoPDF from 'svg-to-pdfkit';
+import Cropper from "cropperjs";
+import SVGtoPDF from "svg-to-pdfkit";
+
+import { icons } from "../assets/icons.js";
 
 export class Calendar {
   constructor(
@@ -40,11 +42,11 @@ export class Calendar {
   initBasicControls() {
     this.controlsContainer.innerHTML = `
       <button id="pdf-download-current">
-        <img src='./assets/icons/pdf-single.svg'/>
+        ${icons.pdfSingle}
       </button>
      
       <button id="jpg-download">
-        <img src='./assets/icons/jpg.svg'/>
+       ${icons.jpg}
       </button>
   
         <select id="format-select">
@@ -52,7 +54,7 @@ export class Calendar {
        </select>
 
     <button id="crop-btn">
-      <img src='./assets/icons/crop.svg'/>
+      ${icons.crop}
     </button>
 
     <input
@@ -63,7 +65,7 @@ export class Calendar {
       onclick="this.value=null;"/>
           
       <label for="upload-input" id="upload-btn" class="upload-btn">
-        <img src='./assets/icons/upload.svg'/>
+        ${icons.upload}
       </label>
     `;
 
@@ -74,12 +76,12 @@ export class Calendar {
     const formats = Object.keys(this.outputDimensions);
 
     for (const format of formats) {
-      const optionEl = document.createElement('option');
-      optionEl.setAttribute('value', format);
+      const optionEl = document.createElement("option");
+      optionEl.setAttribute("value", format);
       optionEl.textContent = format;
 
       if (format === this.currentSize) optionEl.selected = true;
-      this.formatSelectInput.append(optionEl)
+      this.formatSelectInput.append(optionEl);
     }
 
     this.currentPDFDownloadBtn = this.controlsContainer.querySelector(
@@ -93,7 +95,6 @@ export class Calendar {
   }
 
   initBasicControlsEvents() {
-
     this.currentPDFDownloadBtn.addEventListener("click", () => {
       if (this.cropper) {
         this.removeCropper();
@@ -113,10 +114,10 @@ export class Calendar {
     this.cropBtn.addEventListener("click", () => {
       if (this.cropper) return;
 
-      const currentImageElement = this.getCurrentMockup('image');
+      const currentImageElement = this.getCurrentMockup("image");
 
       if (currentImageElement) {
-        this.loading('show');
+        this.loading("show");
         this.initCropper(currentImageElement);
         this.cropControlsContainer.classList.remove("hide");
       }
@@ -143,7 +144,7 @@ export class Calendar {
     const reader = new FileReader();
 
     reader.onload = (e) => {
-      const imageGroup = this.getCurrentMockup('#image-group');
+      const imageGroup = this.getCurrentMockup("#image-group");
 
       const imageEl = document.createElementNS(
         "http://www.w3.org/2000/svg",
@@ -162,7 +163,7 @@ export class Calendar {
         this.imagePlaceholderHeight * this.reduceRate
       );
 
-      reduced.then(reducedImage => {
+      reduced.then((reducedImage) => {
         const resultImage = reducedImage ? reducedImage : e.target.result;
         imageEl.setAttributeNS(
           "http://www.w3.org/1999/xlink",
@@ -171,31 +172,30 @@ export class Calendar {
         );
         imageGroup.innerHTML = "";
         imageGroup.appendChild(imageEl);
-        this.loading('hide');
+        this.loading("hide");
         // Save image to IDB
         this.saveToIDB(resultImage);
-      })
+      });
     };
-    this.loading('show');
+    this.loading("show");
     reader.readAsDataURL(imageFile);
   }
 
   // Reduce image file size & resolution
   async reduceImageSize(base64Str, maxWidth, maxHeight) {
     let resized_base64 = await new Promise((resolve) => {
-
-      let img = new Image()
-      img.src = base64Str
+      let img = new Image();
+      img.src = base64Str;
       img.onload = () => {
-        let width = img.width
-        let height = img.height
+        let width = img.width;
+        let height = img.height;
 
         if (width <= maxWidth || height <= maxHeight) {
           // If resolution of image is less than actual placeholder size
           resolve();
         }
 
-        let canvas = document.createElement('canvas')
+        let canvas = document.createElement("canvas");
         if (width > height) {
           if (width > maxWidth) {
             height *= maxWidth / width;
@@ -210,17 +210,17 @@ export class Calendar {
 
         canvas.width = width;
         canvas.height = height;
-        let ctx = canvas.getContext('2d');
+        let ctx = canvas.getContext("2d");
         ctx.drawImage(img, 0, 0, width, height);
         // Return reduced image
-        resolve(canvas.toDataURL("image/jpeg"))
-      }
+        resolve(canvas.toDataURL("image/jpeg"));
+      };
     });
     return resized_base64;
   }
 
   downloadCurrentJPG() {
-    const svg = this.getCurrentMockup('svg');
+    const svg = this.getCurrentMockup("svg");
     const svgData = new XMLSerializer().serializeToString(svg);
 
     const canvas = document.createElement("canvas");
@@ -230,19 +230,25 @@ export class Calendar {
 
     // SVG attributes fix for proper rasterization
     let properAttributes;
-    if (this.type === 'multi-page') {
-      properAttributes =
-        svgData.replace(`viewBox="0 0 210 297"`, `width="210" height="297" version="1.1"`);
-    } else if (this.type === 'single-page') {
-      properAttributes =
-        svgData.replace(`viewBox="0 0 2100 2970"`, `width="2100" height="2970" version="1.1"`);
+    if (this.type === "multi-page") {
+      properAttributes = svgData.replace(
+        `viewBox="0 0 210 297"`,
+        `width="210" height="297" version="1.1"`
+      );
+    } else if (this.type === "single-page") {
+      properAttributes = svgData.replace(
+        `viewBox="0 0 2100 2970"`,
+        `width="2100" height="2970" version="1.1"`
+      );
     }
 
     const img = new Image();
-    img.setAttribute("src", "data:image/svg+xml;base64," + btoa(properAttributes));
+    img.setAttribute(
+      "src",
+      "data:image/svg+xml;base64," + btoa(properAttributes)
+    );
 
     img.onload = () => {
-
       // Draw svg-to-img on canvas
       ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
       const dataURL = canvas.toDataURL("image/jpeg");
@@ -253,19 +259,18 @@ export class Calendar {
       a.href = dataURL;
       a.click();
       a.remove();
-
     };
   }
 
   downloadPDF(amount) {
-    this.loading('show');
+    this.loading("show");
     let pagesArray = [];
 
     const doc = new PDFDocument({ size: this.currentSize });
     const stream = doc.pipe(blobStream());
 
     if (amount === "current") {
-      pagesArray.push(this.getCurrentMockup('svg'));
+      pagesArray.push(this.getCurrentMockup("svg"));
       doc.info["Title"] = this.getFileName();
     }
 
@@ -283,7 +288,7 @@ export class Calendar {
     doc.end();
 
     stream.on("finish", () => {
-      this.loading('hide');
+      this.loading("hide");
       const url = stream.toBlobURL("application/pdf");
 
       const a = document.createElement("a");
@@ -291,13 +296,12 @@ export class Calendar {
       a.download = doc.info["Title"];
       a.href = url;
       a.dispatchEvent(my_evt);
-
     });
   }
 
   // Generate file name for file to save
   getFileName(span) {
-    if (span || this.type === 'single-page') {
+    if (span || this.type === "single-page") {
       const firstMonth = this.firstMonth;
       const firstMonthYear = this.startYear;
 
@@ -315,7 +319,7 @@ export class Calendar {
       return `${firstMonthName}_${firstMonthYear}-${lastMonthName}_${lastMonthYear}`;
     }
 
-    const currentMonthContainer = this.getCurrentMockup()
+    const currentMonthContainer = this.getCurrentMockup();
 
     const year = currentMonthContainer.dataset.year;
     const month = currentMonthContainer.dataset.month;
@@ -345,7 +349,7 @@ export class Calendar {
         this.cropperOuter.appendChild(imageElement);
 
         document.body.append(this.cropperOuter);
-        // currentImageElement.style.display = "none";
+        currentImageElement.style.display = "none";
 
         this.cropper = new Cropper(imageElement, {
           viewMode: 0,
@@ -360,19 +364,26 @@ export class Calendar {
               this.applyCrop(currentImageElement);
             });
 
-            this.cropper.initialZoomRatio = this.cropper.getCanvasData().width / this.cropper.getCanvasData().naturalWidth;
+            this.cropper.initialZoomRatio =
+              this.cropper.getCanvasData().width /
+              this.cropper.getCanvasData().naturalWidth;
 
             window.onresize = () => {
               this.updateCropperPosition(currentImageElement);
-            }
-            this.loading('hide');
+            };
+            this.loading("hide");
           },
 
           zoom: (e) => {
+            this.cropper.crop();
             this.cropper.setAspectRatio(0);
-            this.cropper.crop()
 
-            // Reset cropbox if zoomed out
+            console.log(this.cropper.getContainerData().width);
+            this.cropper.setCropBoxData({
+              width: this.cropper.getContainerData().width,
+              height: this.cropper.getContainerData().height,
+            });
+
             if (e.detail.ratio < e.detail.oldRatio) {
               if (
                 this.cropper.canvasData.width - 10 <
@@ -382,9 +393,14 @@ export class Calendar {
               }
             }
 
-            this.cropper.zoomRatio = this.cropper.getCanvasData().width / this.cropper.getCanvasData().naturalWidth;
+            this.cropper.zoomRatio =
+              this.cropper.getCanvasData().width /
+              this.cropper.getCanvasData().naturalWidth;
 
-            if ((this.cropper.zoomRatio.toFixed(5)) > (this.cropper.initialZoomRatio).toFixed(5)) {
+            if (
+              this.cropper.zoomRatio.toFixed(5) >
+              this.cropper.initialZoomRatio.toFixed(5)
+            ) {
               this.cropper.setDragMode("move");
               this.cropper.options.viewMode = 3;
             } else {
@@ -399,14 +415,18 @@ export class Calendar {
   updateCropperPosition(currentImageElement) {
     if (this.cropperOuter) {
       this.cropperOuter.style.position = "absolute";
-      this.cropperOuter.style.left = `${currentImageElement.getBoundingClientRect().left
-        }px`;
-      this.cropperOuter.style.top = `${currentImageElement.getBoundingClientRect().top
-        }px`;
-      this.cropperOuter.style.width = `${currentImageElement.getBoundingClientRect().width
-        }px`;
-      this.cropperOuter.style.height = `${currentImageElement.getBoundingClientRect().height
-        }px`;
+      this.cropperOuter.style.left = `${
+        currentImageElement.getBoundingClientRect().left
+      }px`;
+      this.cropperOuter.style.top = `${
+        currentImageElement.getBoundingClientRect().top
+      }px`;
+      this.cropperOuter.style.width = `${
+        currentImageElement.getBoundingClientRect().width
+      }px`;
+      this.cropperOuter.style.height = `${
+        currentImageElement.getBoundingClientRect().height
+      }px`;
     }
   }
 
@@ -416,7 +436,7 @@ export class Calendar {
       minHeight: 256,
       maxWidth: 4096,
       maxHeight: 4096,
-      fillColor: 'white'
+      fillColor: "white",
     });
 
     const ctx = canvas.getContext("2d", {
@@ -438,7 +458,7 @@ export class Calendar {
   }
 
   removeCropper() {
-    const currentImageElement = this.getCurrentMockup('image');
+    const currentImageElement = this.getCurrentMockup("image");
 
     currentImageElement.style.display = "block";
     this.cropper.destroy();
@@ -447,17 +467,16 @@ export class Calendar {
     this.cropperOuter = undefined;
 
     this.cropControlsContainer.innerHTML = "";
-
   }
 
   // Init crop buttons
   initCropperControls() {
     this.cropControlsContainer.innerHTML = `
       <button id="apply-crop">
-        <img src='./assets/icons/done.svg'/>
+        ${icons.done}
     </button>
       <button id="cancel-crop">
-        <img src='./assets/icons/cancel.svg'/>
+        ${icons.cancel}
       </button>
     `;
 
@@ -471,18 +490,27 @@ export class Calendar {
   }
 
   // Get mockup to manipulate
-  getCurrentMockup(element = '') {
-    if (this.type === 'multi-page') {
+  getCurrentMockup(element = "") {
+    if (this.type === "multi-page") {
       return this.calendarInner.querySelector(
         `#month-${this.currentMonth}-container ${element}`
       );
-    } else if (this.type === 'single-page') {
+    } else if (this.type === "single-page") {
       return this.calendarInner.querySelector(`#mockup-container ${element}`);
     }
   }
 
   // Calendar grid generate section
-  createMonthGrid(monthGrid, startIndex, totalDays, prevMonthDaysNumber, initialX, initialY, glyphsSet, cellStyles) {
+  createMonthGrid(
+    monthGrid,
+    startIndex,
+    totalDays,
+    prevMonthDaysNumber,
+    initialX,
+    initialY,
+    glyphsSet,
+    cellStyles
+  ) {
     let x = initialX;
     let y = initialY;
 
@@ -569,10 +597,12 @@ export class Calendar {
     this.loadingScreen.classList.add("loading-screen");
     this.loadingScreen.classList.add("hide");
 
-    this.loadingScreen.innerHTML = `
-    <img src="./assets/loader.gif"/>`
+    this.loadingScreen.innerHTML = icons.loader;
 
-    this.parentContainer.insertAdjacentElement("beforebegin", this.loadingScreen);
+    this.parentContainer.insertAdjacentElement(
+      "beforebegin",
+      this.loadingScreen
+    );
   }
 
   loading(action) {

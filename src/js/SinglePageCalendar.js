@@ -65,7 +65,7 @@ export class SinglePageCalendar extends Calendar {
 </svg>
     `;
 
-    let x = 95;
+    let x = 100;
     let y = 1700;
 
     // Global loop
@@ -138,7 +138,7 @@ export class SinglePageCalendar extends Calendar {
 
           <g id="days-grid"></g>
         `;
-      } else if (this.lang === 'en') {
+      } else if (this.lang === "en") {
         monthContainer.innerHTML = `
       <g id="month-title">
           <g transform="translate(24 12)">
@@ -202,7 +202,7 @@ export class SinglePageCalendar extends Calendar {
         0,
         86.42,
         glyphsSP,
-        'fill: none;stroke: none; stroke-width: 0; stroke-miterlimit: 0;'
+        "fill: none;stroke: none; stroke-width: 0; stroke-miterlimit: 0;"
       );
 
       // Append to main SVG
@@ -218,28 +218,23 @@ export class SinglePageCalendar extends Calendar {
   retrieveImages(imagesArr) {
     const imageFile = imagesArr[0].image;
 
-    fetch(imageFile)
-      .then(res => {
-        const imgURL = res.url;
-        const imageGroup = document.querySelector('#image-group');
+    fetch(imageFile).then((res) => {
+      const imgURL = res.url;
+      const imageGroup = document.querySelector("#image-group");
 
-        const imageEl = document.createElementNS(
-          "http://www.w3.org/2000/svg",
-          "image"
-        );
+      const imageEl = document.createElementNS(
+        "http://www.w3.org/2000/svg",
+        "image"
+      );
 
-        imageEl.setAttribute("height", this.imagePlaceholderHeight);
-        imageEl.setAttribute("width", this.imagePlaceholderWidth);
-        imageEl.setAttribute("x", this.imagePlaceholderX);
-        imageEl.setAttribute("y", this.imagePlaceholderY);
-        imageEl.setAttributeNS(
-          "http://www.w3.org/1999/xlink",
-          "href",
-          imgURL
-        );
+      imageEl.setAttribute("height", this.imagePlaceholderHeight);
+      imageEl.setAttribute("width", this.imagePlaceholderWidth);
+      imageEl.setAttribute("x", this.imagePlaceholderX);
+      imageEl.setAttribute("y", this.imagePlaceholderY);
+      imageEl.setAttributeNS("http://www.w3.org/1999/xlink", "href", imgURL);
 
-        imageGroup.innerHTML = "";
-        imageGroup.appendChild(imageEl);
-      });
+      imageGroup.innerHTML = "";
+      imageGroup.appendChild(imageEl);
+    });
   }
 }
