@@ -1,8 +1,28 @@
 import { Calendar } from "./Calendar";
+/**
+ * Object with SVG symbols (glyphs)
+ */
 import { glyphsMP } from "../assets/Montserrat/MontserratGlyphs";
+/**
+ * Object with SVG icons
+ */
 import { icons } from "../assets/icons";
 
+/**
+ * Class that generates Multi Page Calendar (each month on separate SVG)
+ */
 export class MultiPageCalendar extends Calendar {
+
+  /**
+   * 
+   * @param {number} firstMonthIndex 
+   * @param {number} year 
+   * @param {HTMLElement} parentContainer 
+   * @param {HTMLElement} controlsContainer 
+   * @param {HTMLElement} cropControlsContainer 
+   * @param {string} lang 
+   * @param {string} type 
+   */
   constructor(
     firstMonthIndex,
     year,
@@ -31,10 +51,6 @@ export class MultiPageCalendar extends Calendar {
     this.imagePlaceholderX = 10.9;
     this.imagePlaceholderY = 11.4;
 
-    this.reduceRate = 15;
-
-    // this.currentMonth = 0;
-
     this.createLoader();
 
     this.initDOMSVG();
@@ -46,6 +62,10 @@ export class MultiPageCalendar extends Calendar {
     this.pagesArray = [...this.calendarInner.querySelectorAll("svg")];
   }
 
+  /**
+   * @property {Function} initDOMSVG - creates SVG mockup in DOM
+   * @returns {void}
+   */
   initDOMSVG() {
     this.calendarWrapper = document.createElement("div");
     this.calendarWrapper.classList.add("calendar-wrapper");
@@ -229,6 +249,10 @@ export class MultiPageCalendar extends Calendar {
     this.parentContainer.append(this.calendarWrapper);
   }
 
+  /**
+   * @property {Function} initMultiPageControls - Creates controls of multi page calendar in DOM
+   * @returns {void}
+   */
   initMultiPageControls() {
     this.prevBtn = document.createElement("button");
     this.prevBtn.id = "prev-month";
@@ -288,6 +312,10 @@ export class MultiPageCalendar extends Calendar {
     this.controlsContainer.insertAdjacentElement("beforeend", this.nextBtn);
   }
 
+  /**
+   * @property {Function} initMultiPageControlsEvents - Adds events listener to controls buttons
+   * @returns {void}
+   */
   initMultiPageControlsEvents() {
     this.nextBtn.addEventListener("click", () => {
       if (this.cropper) {
@@ -331,12 +359,19 @@ export class MultiPageCalendar extends Calendar {
     });
   }
 
+  /**
+   * @property {Function} setVisibleMonth - show current month mockup in DOM by translate calendarInner container by X axis
+   * @returns {void}
+   */
   setVisibleMonth() {
     this.calendarInner.style.left = `-${this.currentMonth * 100}%`;
-    console.log(this.currentMonth);
-    console.log(this.calendarInner);
   }
 
+  /**
+   * @property {Function} uploadMultipleImages - upload multiple images in calendar
+   * @param {Event Object} e - object with files 
+   * @returns {void}
+   */
   uploadMultipleImages(e) {
     if (!e.target.files[0]) return;
 
@@ -402,6 +437,11 @@ export class MultiPageCalendar extends Calendar {
     }
   }
 
+  /**
+   * @property {Fucntion} retrieveImages - load images from given array to DOM
+   * @param {Array} imagesArr - Array of images to load
+   * @returns {void} 
+   */
   retrieveImages(imagesArr) {
     this.loading("show");
     let loadingCounter = 0;

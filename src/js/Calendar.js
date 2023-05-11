@@ -1,9 +1,25 @@
 import Cropper from "cropperjs";
 import SVGtoPDF from "svg-to-pdfkit";
-
+/**
+ * Object with SVG icons
+ */
 import { icons } from "../assets/icons.js";
 
+/**
+ * Class that includes basic logic of calendar grid creation, methods to init basic DOM elements, upload/download documents (single), Cropper functionality, image compression, saving to IndexedDB (single) and loader
+ */
 export class Calendar {
+
+  /**
+   * 
+   * @param {number} firstMonthIndex 
+   * @param {number} year 
+   * @param {HTMLElement} parentContainer 
+   * @param {HTMLElement} controlsContainer 
+   * @param {HTMLElement} cropControlsContainer 
+   * @param {string} lang 
+   * @param {string} type 
+   */
   constructor(
     firstMonthIndex,
     year,
@@ -21,7 +37,10 @@ export class Calendar {
     this.lang = lang;
     this.type = type;
 
-    // Dimensions of document (px)
+    /**
+     * Dimensions of document (px)
+     * @type {Object}
+     */
     this.outputDimensions = {
       A5: { width: 1748, height: 2480 },
       A4: { width: 2480, height: 3508 },
@@ -31,14 +50,31 @@ export class Calendar {
     this.currentMonth = 0;
 
     // Month counters
+    /**
+     * Counter of months
+     * @type {number}
+     */
     this.monthCounter = this.firstMonthIndex;
 
+    /**
+     * Capture initial first momnth
+     * @type {number}
+     */
     this.firstMonth = this.firstMonthIndex;
+
+    // Rate to reduce uploading images size
+    this.reduceRate = 15;
+
     this.startYear = this.year;
     this.lastMonth;
     this.endYear;
   }
   // DOM insertion section
+
+  /**
+   * @property {Function} initBasicControls - creates controls buttons in DOM
+   * @returns {void}
+   */
   initBasicControls() {
     this.controlsContainer.innerHTML = `
       <button id="pdf-download-current">
@@ -94,6 +130,10 @@ export class Calendar {
     this.uploadImgInput = this.controlsContainer.querySelector("#upload-input");
   }
 
+  /**
+   * @property {Function} initBasicControlsEvents - sets events on buttons
+   * @returns {void}
+   */
   initBasicControlsEvents() {
     this.currentPDFDownloadBtn.addEventListener("click", () => {
       if (this.cropper) {
@@ -137,6 +177,12 @@ export class Calendar {
   }
 
   // Upload/download section
+
+  /**
+   * @property {Function} uploadImg - Upload single image
+   * @param {Event Object} e - Event object that fires when upload single image button pressed
+   * @returns {void}
+   */
   uploadImg(e) {
     if (!e.target.files[0]) return;
     const imageFile = e.target.files[0];
@@ -145,7 +191,6 @@ export class Calendar {
 
     reader.onload = (e) => {
       const imageGroup = this.getCurrentMockup("#image-group");
-
       const imageEl = document.createElementNS(
         "http://www.w3.org/2000/svg",
         "image"
@@ -181,7 +226,13 @@ export class Calendar {
     reader.readAsDataURL(imageFile);
   }
 
-  // Reduce image file size & resolution
+  /**
+   * @property {Function} reduceImageSize - Reduce image file size & resolution
+   * @param {string} base64Str - Base64 string - image file
+   * @param {number} maxWidth - max width of image is equal to width of svg-placeholder times reduceRate
+   * @param {number} maxHeight - max height of image is equal to height of svg-placeholder times reduceRate
+   * @returns {Promise} - Promise object of resized image
+   */
   async reduceImageSize(base64Str, maxWidth, maxHeight) {
     let resized_base64 = await new Promise((resolve) => {
       let img = new Image();
@@ -189,8 +240,7 @@ export class Calendar {
       img.onload = () => {
         let width = img.width;
         let height = img.height;
-
-        if (width <= maxWidth || height <= maxHeight) {
+        if (width <= maxWidth && height <= maxHeight) {
           // If resolution of image is less than actual placeholder size
           resolve();
         }
@@ -219,6 +269,10 @@ export class Calendar {
     return resized_base64;
   }
 
+  /**
+   * @property {Function} downloadCurrentJPG - Download current (visible) svg mockup
+   * @returns {void}
+   */
   downloadCurrentJPG() {
     const svg = this.getCurrentMockup("svg");
     const svgData = new XMLSerializer().serializeToString(svg);
@@ -230,17 +284,11 @@ export class Calendar {
 
     // SVG attributes fix for proper rasterization
     let properAttributes;
-    if (this.type === "multi-page") {
-      properAttributes = svgData.replace(
-        `viewBox="0 0 210 297"`,
-        `width="210" height="297" version="1.1"`
-      );
-    } else if (this.type === "single-page") {
-      properAttributes = svgData.replace(
-        `viewBox="0 0 2100 2970"`,
-        `width="2100" height="2970" version="1.1"`
-      );
-    }
+
+    properAttributes = svgData.replace(
+      `viewBox="0 0 210 297"`,
+      `width="210" height="297" version="1.1"`
+    );
 
     const img = new Image();
     img.setAttribute(
@@ -262,6 +310,11 @@ export class Calendar {
     };
   }
 
+  /**
+   * @property {Function} downloadPDF - download as PDF
+   * @param {string} amount - single-page/all pages
+   * @returns {void}
+   */
   downloadPDF(amount) {
     this.loading("show");
     let pagesArray = [];
@@ -299,7 +352,11 @@ export class Calendar {
     });
   }
 
-  // Generate file name for file to save
+  /**
+   * @property {Function} getFileName - Generates name of file
+   * @param {string} span 
+   * @returns {string} - name of downloading file
+   */
   getFileName(span) {
     if (span || this.type === "single-page") {
       const firstMonth = this.firstMonth;
@@ -331,6 +388,12 @@ export class Calendar {
   }
 
   // Crop functionality section
+
+  /**
+   * @property {Function} initCropper - create Cropper object, initCropper on current svg mockup image element
+   * @param {HTMLElement} currentImageElement 
+   * @returns {void}
+   */
   initCropper(currentImageElement) {
     const imageFile = currentImageElement.getAttribute("href");
 
@@ -340,6 +403,7 @@ export class Calendar {
         this.cropperOuter = document.createElement("div");
         this.cropperOuter.classList.add("cropper-outer-container");
 
+        // Position cropper element on top of placeholder
         this.updateCropperPosition(currentImageElement);
 
         const imageElement = document.createElement("img");
@@ -347,8 +411,8 @@ export class Calendar {
         imageElement.src = URL.createObjectURL(imageFile);
 
         this.cropperOuter.appendChild(imageElement);
-
         document.body.append(this.cropperOuter);
+
         currentImageElement.style.display = "none";
 
         this.cropper = new Cropper(imageElement, {
@@ -378,7 +442,6 @@ export class Calendar {
             this.cropper.crop();
             this.cropper.setAspectRatio(0);
 
-            console.log(this.cropper.getContainerData().width);
             this.cropper.setCropBoxData({
               width: this.cropper.getContainerData().width,
               height: this.cropper.getContainerData().height,
@@ -412,24 +475,30 @@ export class Calendar {
       });
   }
 
+  /**
+   * @property {Function} updateCropperPosition - Properly position Cropper element on top of image
+   * @param {HTMLElement} currentImageElement
+   * @returns {void}
+   */
   updateCropperPosition(currentImageElement) {
     if (this.cropperOuter) {
       this.cropperOuter.style.position = "absolute";
-      this.cropperOuter.style.left = `${
-        currentImageElement.getBoundingClientRect().left
-      }px`;
-      this.cropperOuter.style.top = `${
-        currentImageElement.getBoundingClientRect().top
-      }px`;
-      this.cropperOuter.style.width = `${
-        currentImageElement.getBoundingClientRect().width
-      }px`;
-      this.cropperOuter.style.height = `${
-        currentImageElement.getBoundingClientRect().height
-      }px`;
+      this.cropperOuter.style.left = `${currentImageElement.getBoundingClientRect().left
+        }px`;
+      this.cropperOuter.style.top = `${currentImageElement.getBoundingClientRect().top
+        }px`;
+      this.cropperOuter.style.width = `${currentImageElement.getBoundingClientRect().width
+        }px`;
+      this.cropperOuter.style.height = `${currentImageElement.getBoundingClientRect().height
+        }px`;
     }
   }
 
+  /**
+   * @property {Fucntion} applyCrop - apply crop and save cropped image
+   * @param {HTMLElement} currentImageElement 
+   * @returns {void}
+   */
   applyCrop(currentImageElement) {
     const canvas = this.cropper.getCroppedCanvas({
       minWidth: 256,
@@ -453,10 +522,14 @@ export class Calendar {
     );
     // Save cropped image to IDB
     this.saveToIDB(resultURL);
-    // Get rit pf cropper
+    // Get rid of cropper
     this.removeCropper();
   }
 
+  /**
+  * @property {Fucntion} removeCropper - deactivate and destroy Cropper and its DOM elements
+  * @returns {void}
+  */
   removeCropper() {
     const currentImageElement = this.getCurrentMockup("image");
 
@@ -469,7 +542,10 @@ export class Calendar {
     this.cropControlsContainer.innerHTML = "";
   }
 
-  // Init crop buttons
+  /**
+   * @property {Function} initCropperControls - Create Cropper buttons in DOM
+   * @returns {void}
+   */
   initCropperControls() {
     this.cropControlsContainer.innerHTML = `
       <button id="apply-crop">
@@ -489,7 +565,11 @@ export class Calendar {
     });
   }
 
-  // Get mockup to manipulate
+  /**
+   * @property {Function} getCurrentMockup - Get current mockup to manipulate
+   * @param {string} [element=""] element - selector string to pick specific element
+   * @returns {HTMLElement} - DOM element to manipulate
+   */
   getCurrentMockup(element = "") {
     if (this.type === "multi-page") {
       return this.calendarInner.querySelector(
@@ -501,6 +581,19 @@ export class Calendar {
   }
 
   // Calendar grid generate section
+
+  /**
+   * @property {Function} createMonthGrid - Generates month grid in given DOM element with provided parameters
+   * @param {HTMLElement} monthGrid - element to append calendar grid 
+   * @param {number} startIndex - first day of month
+   * @param {number} totalDays - number of days in current month 
+   * @param {number} prevMonthDaysNumber - number of days in prev month 
+   * @param {number} initialX - initial X coords to place day cell
+   * @param {number} initialY - initial Y coords to place day cell
+   * @param {Object} glyphsSet - Object with SVG glyphs 
+   * @param {string} cellStyles - additional styles for each day cell
+   * @returns {void} 
+   */
   createMonthGrid(
     monthGrid,
     startIndex,
@@ -557,7 +650,14 @@ export class Calendar {
     }
   }
 
-  // Create individual cell
+  /**
+   * @property {Function} createDayCell - Create individual day cell
+   * @param {number} x - x coordinate of cell 
+   * @param {number} y - y coordinate of cell 
+   * @param {number} cellNumber - number of day 
+   * @param {string} cellStyles - addition CSS styles for cell 
+   * @returns {HTMLElement} - DOM element of cell
+   */
   createDayCell(x, y, cellNumber, cellStyles) {
     let dayGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
 
@@ -579,10 +679,23 @@ export class Calendar {
   }
 
   // Date functions section
+
+  /**
+   * @property {Function} daysInMonth - gives number of days in current month 
+   * @param {number} month - given month 
+   * @param {number} year - given year 
+   * @returns {number} - total number of days in given month
+   */
   daysInMonth(month, year) {
     return new Date(year, month, 0).getDate();
   }
 
+  /**
+   * @property {Function} getFirstDay - gives position of first day on month
+   * @param {number} month 
+   * @param {number} year 
+   * @returns {number}
+   */
   getFirstDay(month, year) {
     let index = new Date(year, month, 1);
     if (index.getDay() === 0) {
@@ -592,6 +705,11 @@ export class Calendar {
   }
 
   // Loader section
+
+  /**
+   * @property {Fucntion} createLoader - creates loader element
+   * @returns {void}
+   */
   createLoader() {
     this.loadingScreen = document.createElement("div");
     this.loadingScreen.classList.add("loading-screen");
@@ -605,6 +723,11 @@ export class Calendar {
     );
   }
 
+  /**
+   * @property {Fucntion} loading - toggle visibility of loader element
+   * @param {string} action 
+   * @returns {void}
+   */
   loading(action) {
     if (action === "hide") {
       this.loadingScreen.classList.add("hide");
@@ -615,7 +738,11 @@ export class Calendar {
     }
   }
 
-  // Save image to IDB
+  /**
+   * @property {Function} saveToIDB - save current image to IndexedDB
+   * @param {string} imageFile - image to save in IndexedDB
+   * @param {number} [id=this.currentMonth] - index of month
+   */
   saveToIDB(imageFile, id = this.currentMonth) {
     const indexedDB =
       window.indexedDB ||

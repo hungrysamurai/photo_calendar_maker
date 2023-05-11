@@ -35,15 +35,35 @@ document.addEventListener("click", (e) => {
   }
 });
 
+/**
+ * Current calendar object
+ * @type {Object}
+ */
 let currentCalendar;
 
 getButton.addEventListener("click", () => {
-  // Gather data from inputs
+  // Collect data from inputs
+  /**
+   * @type {number}
+   */
   const startYear = +yearInput.value;
+  /**
+   * @type {number}
+   */
   const firstMonthIndex = +monthInput.value;
+  /**
+   * @type {string}
+   */
   const lang = langInput.value;
+  /**
+   * @type {string}
+   */
   const mode = multiModeBtn.checked ? "multi-page" : "single-page";
 
+  /**
+   * All values from inputs
+   * @type {Object}
+   */
   const newCalendarData = { startYear, firstMonthIndex, lang, mode };
 
   // Purge all current content
@@ -64,6 +84,10 @@ getButton.addEventListener("click", () => {
   newProjectContainer.style.top = "0px";
 });
 
+/**
+ * @property {Function} loadProject - if some data in IndexedDB - retrieve project. If not - set up IDB schema for project
+ * @returns {void}
+ */
 function loadProject() {
   // Open IDB
   const indexedDB =
@@ -75,7 +99,40 @@ function loadProject() {
 
   const request = indexedDB.open("Photo Calendar Project", 1);
 
-  // Initially set DB
+  request.onsuccess = function () {
+    // Check if there any data in DB
+    const db = request.result;
+
+    // Init transaction on all stored objects
+    const transaction = db.transaction(db.objectStoreNames, "readwrite");
+
+    const dataStore = transaction.objectStore("current_project_data");
+    const imagesStore = transaction.objectStore("current_project_images");
+
+    // Get data object
+    const query = dataStore.get(0);
+
+    query.onsuccess = function () {
+      // If data...
+      if (query.result) {
+        // init project with stored data
+        newCalendar(query.result);
+        // If images...
+        const imagesQuery = imagesStore.getAll();
+        imagesQuery.onsuccess = function () {
+          if (imagesQuery.result.length !== 0) {
+            // Retrieve images array via current calendar method
+            currentCalendar.retrieveImages(imagesQuery.result);
+          }
+        };
+      }
+    };
+    transaction.oncomplete = function () {
+      db.close();
+    };
+  };
+
+  // Initially set DB (if there is no IDB yet)
   request.onupgradeneeded = function () {
     const db = request.result;
 
@@ -101,41 +158,16 @@ function loadProject() {
       unique: false,
     });
   };
-
-  request.onsuccess = function () {
-    // Check if there any data in DB
-    const db = request.result;
-
-    // Init transaction on all stored objects
-    const transaction = db.transaction(db.objectStoreNames, "readwrite");
-
-    const dataStore = transaction.objectStore("current_project_data");
-    const imagesStore = transaction.objectStore("current_project_images");
-
-    // Get data object
-    const query = dataStore.get(0);
-
-    query.onsuccess = function () {
-      // If data...
-      if (query.result) {
-        newCalendar(query.result);
-        // If images...
-        const imagesQuery = imagesStore.getAll();
-        imagesQuery.onsuccess = function () {
-          if (imagesQuery.result.length !== 0) {
-            // Retrieve images array via current calendar method
-            currentCalendar.retrieveImages(imagesQuery.result);
-          }
-        };
-      }
-    };
-    transaction.oncomplete = function () {
-      db.close();
-    };
-  };
 }
 
-// Set new project in IDB
+/**
+ * @property {Function} newProjectIDB - Set new project in IDB
+ * @param {Object} newCalendarData - object with data for calendar
+ * @param {number} [newCalendarData.startYear]
+ * @param {number} [newCalendarData.firstMonthIndex]
+ * @param {string} [newCalendarData.lang]
+ * @param {string} [newCalendarData.mode] - single-page/multi-page
+ */
 function newProjectIDB({ startYear, firstMonthIndex, lang, mode }) {
   // Open IDB
   const indexedDB =
@@ -173,7 +205,14 @@ function newProjectIDB({ startYear, firstMonthIndex, lang, mode }) {
   };
 }
 
-// Init calendar
+/**
+ * @property {Function} newCalendar - Init new calendar in DOM
+ * @param {Object} newCalendarData - object with data for calendar
+ * @param {number} [newCalendarData.startYear]
+ * @param {number} [newCalendarData.firstMonthIndex]
+ * @param {string} [newCalendarData.lang]
+ * @param {string} [newCalendarData.mode] - single-page/multi-page
+ */
 function newCalendar({ startYear, firstMonthIndex, lang, mode }) {
   if (mode === "multi-page") {
     currentCalendar = new MultiPageCalendar(
@@ -198,5 +237,5 @@ function newCalendar({ startYear, firstMonthIndex, lang, mode }) {
   }
 }
 
-// Init - if some data in IDB - retrieve project. If not - set up IDB schema for future projects
+// Init
 loadProject();
