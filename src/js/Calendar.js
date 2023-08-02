@@ -19,7 +19,8 @@ export class Calendar {
    * @param {HTMLElement} cropControlsContainer 
    * @param {string} lang 
    * @param {string} type 
-   */
+   * @param {Object} font   
+   * */
   constructor(
     firstMonthIndex,
     year,
@@ -27,7 +28,8 @@ export class Calendar {
     controlsContainer,
     cropControlsContainer,
     lang,
-    type
+    type,
+    font
   ) {
     this.firstMonthIndex = firstMonthIndex;
     this.year = year;
@@ -36,6 +38,9 @@ export class Calendar {
     this.cropControlsContainer = cropControlsContainer;
     this.lang = lang;
     this.type = type;
+    this.font = font;
+
+    this.monthsNamesList = this.getMonths();
 
     /**
      * Dimensions of document (px)
@@ -227,6 +232,7 @@ export class Calendar {
   }
 
   /**
+   * @async
    * @property {Function} reduceImageSize - Reduce image file size & resolution
    * @param {string} base64Str - Base64 string - image file
    * @param {number} maxWidth - max width of image is equal to width of svg-placeholder times reduceRate
@@ -581,6 +587,55 @@ export class Calendar {
   }
 
   // Calendar grid generate section
+
+  /**
+   * @property {Function} getOutline - create outline (<path> element) from given string, and set it x-coords, y-coords, size and fill
+   * @param {string} string - text to outline
+   * @param {number} x - x-coords to place element
+   * @param {number} y - y-coords to place element 
+   * @param {number} fontSize 
+   * @param {string} fill 
+   * @returns {HTMLElement} - <path>
+   */
+  getOutline(string, x, y, fontSize, fill = '#231f20') {
+    const outline = this.font.getPath(
+      string, x, y, fontSize
+    );
+    outline.fill = fill;
+    return outline.toSVG();
+  }
+
+  /**
+   * @property {Function} getMonths - generates array on months names
+   * @returns {Array}
+   */
+  getMonths() {
+    return Array.from({ length: 12 }, (_, i) => {
+      let monthName = new Intl.DateTimeFormat(this.lang, { month: "long" }).format(new Date(0, i));
+      // Capitalize first letters
+      if (this.lang === 'ru') {
+        monthName = monthName[0].toUpperCase() + monthName.slice(1);
+      }
+      return monthName;
+    }
+    );
+  }
+
+  /**
+   * @property {Function} getWeekDays - generates array of week days
+   * @param {string} - length of week day name
+   * @returns {Array}
+   */
+  getWeekDays(length) {
+    return Array.from({ length: 7 }, (_, i) => {
+      let weekDay = new Intl.DateTimeFormat(this.lang, { weekday: length }).format(new Date(0, 0, i + 1));
+      // Capitalize first letters
+      if (this.lang === 'ru') {
+        weekDay = weekDay[0].toUpperCase() + weekDay.slice(1);
+      }
+      return weekDay;
+    })
+  }
 
   /**
    * @property {Function} createMonthGrid - Generates month grid in given DOM element with provided parameters

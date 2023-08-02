@@ -22,6 +22,7 @@ export class MultiPageCalendar extends Calendar {
    * @param {HTMLElement} cropControlsContainer 
    * @param {string} lang 
    * @param {string} type 
+   * @param {Object} font
    */
   constructor(
     firstMonthIndex,
@@ -30,7 +31,8 @@ export class MultiPageCalendar extends Calendar {
     controlsContainer,
     cropControlsContainer,
     lang,
-    type
+    type,
+    font
   ) {
     super(
       firstMonthIndex,
@@ -39,8 +41,11 @@ export class MultiPageCalendar extends Calendar {
       controlsContainer,
       cropControlsContainer,
       lang,
-      type
+      type,
+      font
     );
+
+    this.weekDaysNamesList = this.getWeekDays('long');
 
     // Mockup pre-defined dimensions
     this.dayCellHeight = 15;
@@ -50,6 +55,11 @@ export class MultiPageCalendar extends Calendar {
     this.imagePlaceholderHeight = 155;
     this.imagePlaceholderX = 10.9;
     this.imagePlaceholderY = 11.4;
+
+    // Weekdays positions
+    this.weekDayXCoords = this.lang === 'ru' ?
+      [17, 46.7, 74, 97.2, 122, 147, 167.4] :
+      [22.72, 47.3, 69, 96.72, 123.2, 147, 173]
 
     this.createLoader();
 
@@ -96,15 +106,9 @@ export class MultiPageCalendar extends Calendar {
         
         <g id="text-group-${i}">
 
-          <g
-            id="month-title-${i}"
-            transform="translate(30 172.5) scale(0.5)">
-          </g>
+          <g id="month-title-${i}"></g>
 
-          <g
-            id="year-title-${i}"
-            transform="translate(150 174.4)">
-          </g>
+          <g id="year-title-${i}"></g>
 
           <g id="days-titles-${i}">
           </g>
@@ -126,92 +130,26 @@ export class MultiPageCalendar extends Calendar {
 
       const daysTitles = monthContainer.querySelector(`#days-titles-${i}`);
 
-      if (this.lang === "ru") {
-        daysTitles.innerHTML = `
-      <g
-    transform= "translate(18.5 190) scale(0.45)">
-      ${glyphsMP.weekDaysRu.monday}
-            </g >
+      // Generate week days paths
+      const weekDaysEls = this.weekDaysNamesList.map((weekDayName, i) => {
+        return `
+        <g>
+        ${this.getOutline(
+          weekDayName, this.weekDayXCoords[i], 192, 3.3)}
+        </g>
+         `}).join('');
 
-            <g
-              transform="translate(48 190) scale(0.45)">
-              ${glyphsMP.weekDaysRu.tuesday}
-            </g>
-
-            <g
-              transform="translate(74 190) scale(0.45)">
-              ${glyphsMP.weekDaysRu.wednesday}
-            </g>
-
-            <g
-              transform="translate(97.2 190) scale(0.45)">
-              ${glyphsMP.weekDaysRu.thursday}
-            </g>
-
-            <g
-              transform="translate(122 190) scale(0.45)">
-              ${glyphsMP.weekDaysRu.friday}
-            </g>
-
-            <g
-              transform="translate(148 190) scale(0.45)">
-              ${glyphsMP.weekDaysRu.saturday}
-            </g>
-
-            <g
-              transform="translate(169 190) scale(0.45)">
-              ${glyphsMP.weekDaysRu.sunday}
-            </g>
-    `;
-      } else if (this.lang === "en") {
-        daysTitles.innerHTML = `
-      <g
-    transform="translate(22.72 190) scale(0.5)" >
-      ${glyphsMP.weekDaysEn.monday}
-            </g >
-
-            <g
-              transform="translate(47.72 190) scale(0.5)">
-              ${glyphsMP.weekDaysEn.tuesday}
-            </g>
-
-            <g
-              transform="translate(69 190) scale(0.5)">
-              ${glyphsMP.weekDaysEn.wednesday}
-            </g>
-
-            <g
-              transform="translate(96.72 190) scale(0.5)">
-              ${glyphsMP.weekDaysEn.thursday}
-            </g>
-
-            <g
-              transform="translate(124.72 190) scale(0.5)">
-              ${glyphsMP.weekDaysEn.friday}
-            </g>
-
-            <g
-              transform="translate(147 190) scale(0.5)">
-              ${glyphsMP.weekDaysEn.saturday}
-            </g>
-
-            <g
-              transform="translate(173 190) scale(0.5)">
-              ${glyphsMP.weekDaysEn.sunday}
-            </g>
-    `;
-      }
+      daysTitles.innerHTML = weekDaysEls;
 
       const monthEl = monthContainer.querySelector(`#month-title-${i}`);
       const yearEl = monthContainer.querySelector(`#year-title-${i}`);
 
-      if (this.lang === "ru") {
-        monthEl.innerHTML = glyphsMP.monthsRu[this.monthCounter];
-      } else if (this.lang === "en") {
-        monthEl.innerHTML = glyphsMP.monthsEn[this.monthCounter];
-      }
+      monthEl.innerHTML = this.getOutline(
+        this.monthsNamesList[this.monthCounter],
+        30, 182.5, 14
+      );
 
-      yearEl.innerHTML = glyphsMP.years[this.year];
+      yearEl.innerHTML = this.getOutline(`${this.year}`, 140, 182.5, 14);
 
       // Insert year & month data on container
       monthContainer.dataset.year = this.year;

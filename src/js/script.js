@@ -1,3 +1,5 @@
+import opentype from 'opentype.js';
+
 import { SinglePageCalendar } from "./SinglePageCalendar.js";
 import { MultiPageCalendar } from "./MultiPageCalendar.js";
 
@@ -83,6 +85,32 @@ getButton.addEventListener("click", () => {
   // Hide new calendar inputs
   newProjectContainer.style.top = "0px";
 });
+
+/**
+ * @property {Function} createYearsOptions - Generate years for input (current year + 5)
+ * @returns {void}
+ */
+function createYearsOptions() {
+  const currentYear = new Date().getFullYear();
+  const years = [currentYear];
+
+  for (let i = 1; i < 5; i++) {
+    years.push(new Date().getFullYear() + i)
+  }
+
+  yearInput.innerHTML = years.map(year => {
+    return `<option value=${year}>${year}</option>`
+  }).join('')
+};
+
+/**
+ * @property {Function} setCurrentMonth - set active option in month input to current month
+ * @returns {void}
+ */
+function setCurrentMonth() {
+  const currentMonth = new Date().getMonth();
+  monthInput.querySelectorAll('option')[currentMonth].setAttribute('selected', true)
+}
 
 /**
  * @property {Function} loadProject - if some data in IndexedDB - retrieve project. If not - set up IDB schema for project
@@ -206,6 +234,7 @@ function newProjectIDB({ startYear, firstMonthIndex, lang, mode }) {
 }
 
 /**
+ * @async
  * @property {Function} newCalendar - Init new calendar in DOM
  * @param {Object} newCalendarData - object with data for calendar
  * @param {number} [newCalendarData.startYear]
@@ -213,7 +242,12 @@ function newProjectIDB({ startYear, firstMonthIndex, lang, mode }) {
  * @param {string} [newCalendarData.lang]
  * @param {string} [newCalendarData.mode] - single-page/multi-page
  */
-function newCalendar({ startYear, firstMonthIndex, lang, mode }) {
+async function newCalendar({ startYear, firstMonthIndex, lang, mode }) {
+  // Load and parse font
+  const buffer = fetch('/MontserratBold.ttf')
+    .then(res => res.arrayBuffer());
+  const font = opentype.parse(await buffer);
+
   if (mode === "multi-page") {
     currentCalendar = new MultiPageCalendar(
       firstMonthIndex,
@@ -222,7 +256,8 @@ function newCalendar({ startYear, firstMonthIndex, lang, mode }) {
       controlsContainer,
       cropControlsContainer,
       lang,
-      mode
+      mode,
+      font
     );
   } else {
     currentCalendar = new SinglePageCalendar(
@@ -232,10 +267,13 @@ function newCalendar({ startYear, firstMonthIndex, lang, mode }) {
       controlsContainer,
       cropControlsContainer,
       lang,
-      mode
+      mode,
+      font
     );
   }
 }
 
 // Init
 loadProject();
+createYearsOptions();
+setCurrentMonth()

@@ -19,6 +19,7 @@ export class SinglePageCalendar extends Calendar {
    * @param {HTMLElement} cropControlsContainer 
    * @param {string} lang 
    * @param {string} type 
+   * @param {Object} font
    */
   constructor(
     firstMonthIndex,
@@ -27,7 +28,8 @@ export class SinglePageCalendar extends Calendar {
     controlsContainer,
     cropControlsContainer,
     lang,
-    type
+    type,
+    font
   ) {
     super(
       firstMonthIndex,
@@ -36,8 +38,11 @@ export class SinglePageCalendar extends Calendar {
       controlsContainer,
       cropControlsContainer,
       lang,
-      type
+      type,
+      font
     );
+
+    this.weekDaysNamesList = this.getWeekDays('short');
 
     // Mockup pre-defined dimensions
     this.dayCellHeight = 4.435;
@@ -50,6 +55,11 @@ export class SinglePageCalendar extends Calendar {
     this.imagePlaceholderHeight = 155;
     this.imagePlaceholderX = 10.9;
     this.imagePlaceholderY = 11.4;
+
+    // Weekdays positions
+    this.weekDayXCoords = this.lang === 'ru' ?
+      [1.4, 8, 14.2, 21.1, 27.5, 34, 40.8] :
+      [0.8, 7.6, 13.5, 20.8, 27.8, 34.1, 40]
 
     this.createLoader();
     this.initDOMSVG();
@@ -118,87 +128,43 @@ export class SinglePageCalendar extends Calendar {
 
       // Populate current month
 
-      if (this.lang === "ru") {
-        monthContainer.innerHTML = `
+      // Generate week days paths
+      const weekDaysEls = this.weekDaysNamesList.map((weekDayName, i) => {
+        return `
+        <g>
+        ${this.getOutline(
+          weekDayName, this.weekDayXCoords[i],
+          8,
+          this.lang === 'ru' ? 2.9 : 2.6
+        )}
+        </g>
+         `}).join('');
+
+
+      monthContainer.innerHTML = `
       <g id="month-title">
-          <g transform="translate(2.4 1.2) scale(0.1)">
-          ${glyphsSP.monthsRu[this.monthCounter]}
+          <g>
+          ${this.getOutline(
+        this.monthsNamesList[this.monthCounter],
+        5, 3.5, 4
+      )}
           </g>
         </g>
 
         <g id="year-title">
-          <g transform="translate(36 1.8) scale(0.1)">
-          ${glyphsSP.years[this.year]}
+          <g>
+          ${this.getOutline(`${this.year}`, 30, 3.5, 4)}
           </g>
         </g>
 
         <g id="week-days-titles">
-          <g transform="translate(2.1 6.75) scale(.15)">
-          ${glyphsSP.weekDaysRu.monday}
-          </g>
-          <g transform="translate(8.6 6.75) scale(.15)">
-          ${glyphsSP.weekDaysRu.tuesday}
-          </g>
-          <g transform="translate(14.9 6.75) scale(.15)">
-          ${glyphsSP.weekDaysRu.wednesday}
-          </g>
-          <g transform="translate(21.7 6.75) scale(.15)">
-          ${glyphsSP.weekDaysRu.thursday}
-          </g>
-          <g transform="translate(28.3 6.75) scale(.15)">
-          ${glyphsSP.weekDaysRu.friday}
-          </g>
-          <g transform="translate(34.6 6.75) scale(.15)">
-          ${glyphsSP.weekDaysRu.saturday}
-          </g>
-          <g transform="translate(41.4 6.75) scale(.15)">
-           ${glyphsSP.weekDaysRu.sunday}
+        ${weekDaysEls}
           </g>
         </g>
 
           <g id="days-grid"></g>
         `;
-      } else if (this.lang === "en") {
-        monthContainer.innerHTML = `
-      <g id="month-title">
-          <g transform="translate(2.4 1.2) scale(0.1)">
-          ${glyphsSP.monthsEn[this.monthCounter]}
-          </g>
-        </g>
 
-        <g id="year-title">
-          <g transform="translate(36 1.8) scale(0.1)">
-          ${glyphsSP.years[this.year]}
-          </g>
-        </g>
-
-        <g id="week-days-titles">
-          <g transform="translate(1.8 6.75) scale(.15)">
-          ${glyphsSP.weekDaysEn.monday}
-          </g>
-          <g transform="translate(7.9 6.75) scale(.15)">
-          ${glyphsSP.weekDaysEn.tuesday}
-          </g>
-          <g transform="translate(14 6.75) scale(.15)">
-          ${glyphsSP.weekDaysEn.wednesday}
-          </g>
-          <g transform="translate(21 6.75) scale(.15)">
-          ${glyphsSP.weekDaysEn.thursday}
-          </g>
-          <g transform="translate(28 6.75) scale(.15)">
-          ${glyphsSP.weekDaysEn.friday}
-          </g>
-          <g transform="translate(34.1 6.75) scale(.15)">
-          ${glyphsSP.weekDaysEn.saturday}
-          </g>
-          <g transform="translate(40.8 6.75) scale(.15)">
-           ${glyphsSP.weekDaysEn.sunday}
-          </g>
-        </g>
-
-          <g id="days-grid"></g>
-        `;
-      }
 
       if (i === 11) {
         this.lastMonth = this.monthCounter;
