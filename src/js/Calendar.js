@@ -9,17 +9,16 @@ import { icons } from "../assets/icons.js";
  * Class that includes basic logic of calendar grid creation, methods to init basic DOM elements, upload/download documents (single), Cropper functionality, image compression, saving to IndexedDB (single) and loader
  */
 export class Calendar {
-
   /**
-   * 
-   * @param {number} firstMonthIndex 
-   * @param {number} year 
-   * @param {HTMLElement} parentContainer 
-   * @param {HTMLElement} controlsContainer 
-   * @param {HTMLElement} cropControlsContainer 
-   * @param {string} lang 
-   * @param {string} type 
-   * @param {Object} font   
+   *
+   * @param {number} firstMonthIndex
+   * @param {number} year
+   * @param {HTMLElement} parentContainer
+   * @param {HTMLElement} controlsContainer
+   * @param {HTMLElement} cropControlsContainer
+   * @param {string} lang
+   * @param {string} type
+   * @param {Object} font
    * */
   constructor(
     firstMonthIndex,
@@ -360,7 +359,7 @@ export class Calendar {
 
   /**
    * @property {Function} getFileName - Generates name of file
-   * @param {string} span 
+   * @param {string} span
    * @returns {string} - name of downloading file
    */
   getFileName(span) {
@@ -397,7 +396,7 @@ export class Calendar {
 
   /**
    * @property {Function} initCropper - create Cropper object, initCropper on current svg mockup image element
-   * @param {HTMLElement} currentImageElement 
+   * @param {HTMLElement} currentImageElement
    * @returns {void}
    */
   initCropper(currentImageElement) {
@@ -489,20 +488,24 @@ export class Calendar {
   updateCropperPosition(currentImageElement) {
     if (this.cropperOuter) {
       this.cropperOuter.style.position = "absolute";
-      this.cropperOuter.style.left = `${currentImageElement.getBoundingClientRect().left
-        }px`;
-      this.cropperOuter.style.top = `${currentImageElement.getBoundingClientRect().top
-        }px`;
-      this.cropperOuter.style.width = `${currentImageElement.getBoundingClientRect().width
-        }px`;
-      this.cropperOuter.style.height = `${currentImageElement.getBoundingClientRect().height
-        }px`;
+      this.cropperOuter.style.left = `${
+        currentImageElement.getBoundingClientRect().left
+      }px`;
+      this.cropperOuter.style.top = `${
+        currentImageElement.getBoundingClientRect().top
+      }px`;
+      this.cropperOuter.style.width = `${
+        currentImageElement.getBoundingClientRect().width
+      }px`;
+      this.cropperOuter.style.height = `${
+        currentImageElement.getBoundingClientRect().height
+      }px`;
     }
   }
 
   /**
    * @property {Fucntion} applyCrop - apply crop and save cropped image
-   * @param {HTMLElement} currentImageElement 
+   * @param {HTMLElement} currentImageElement
    * @returns {void}
    */
   applyCrop(currentImageElement) {
@@ -533,9 +536,9 @@ export class Calendar {
   }
 
   /**
-  * @property {Fucntion} removeCropper - deactivate and destroy Cropper and its DOM elements
-  * @returns {void}
-  */
+   * @property {Fucntion} removeCropper - deactivate and destroy Cropper and its DOM elements
+   * @returns {void}
+   */
   removeCropper() {
     const currentImageElement = this.getCurrentMockup("image");
 
@@ -592,15 +595,13 @@ export class Calendar {
    * @property {Function} getOutline - create outline (<path> element) from given string, and set it x-coords, y-coords, size and fill
    * @param {string} string - text to outline
    * @param {number} x - x-coords to place element
-   * @param {number} y - y-coords to place element 
-   * @param {number} fontSize 
-   * @param {string} fill 
+   * @param {number} y - y-coords to place element
+   * @param {number} fontSize
+   * @param {string} fill
    * @returns {HTMLElement} - <path>
    */
-  getOutline(string, x, y, fontSize, fill = '#231f20') {
-    const outline = this.font.getPath(
-      string, x, y, fontSize
-    );
+  getOutline(string, x, y, fontSize, fill = "#231f20") {
+    const outline = this.font.getPath(string, x, y, fontSize);
     outline.fill = fill;
     return outline.toSVG();
   }
@@ -611,14 +612,15 @@ export class Calendar {
    */
   getMonths() {
     return Array.from({ length: 12 }, (_, i) => {
-      let monthName = new Intl.DateTimeFormat(this.lang, { month: "long" }).format(new Date(0, i));
+      let monthName = new Intl.DateTimeFormat(this.lang, {
+        month: "long",
+      }).format(new Date(0, i));
       // Capitalize first letters
-      if (this.lang === 'ru') {
+      if (this.lang === "ru") {
         monthName = monthName[0].toUpperCase() + monthName.slice(1);
       }
       return monthName;
-    }
-    );
+    });
   }
 
   /**
@@ -628,26 +630,28 @@ export class Calendar {
    */
   getWeekDays(length) {
     return Array.from({ length: 7 }, (_, i) => {
-      let weekDay = new Intl.DateTimeFormat(this.lang, { weekday: length }).format(new Date(0, 0, i + 1));
+      let weekDay = new Intl.DateTimeFormat(this.lang, {
+        weekday: length,
+      }).format(new Date(0, 0, i + 1));
       // Capitalize first letters
-      if (this.lang === 'ru') {
+      if (this.lang === "ru") {
         weekDay = weekDay[0].toUpperCase() + weekDay.slice(1);
       }
       return weekDay;
-    })
+    });
   }
 
   /**
    * @property {Function} createMonthGrid - Generates month grid in given DOM element with provided parameters
-   * @param {HTMLElement} monthGrid - element to append calendar grid 
+   * @param {HTMLElement} monthGrid - element to append calendar grid
    * @param {number} startIndex - first day of month
-   * @param {number} totalDays - number of days in current month 
-   * @param {number} prevMonthDaysNumber - number of days in prev month 
+   * @param {number} totalDays - number of days in current month
+   * @param {number} prevMonthDaysNumber - number of days in prev month
    * @param {number} initialX - initial X coords to place day cell
    * @param {number} initialY - initial Y coords to place day cell
-   * @param {Object} glyphsSet - Object with SVG glyphs 
+   * @param {Object} glyphsSet - Object with SVG glyphs
    * @param {string} cellStyles - additional styles for each day cell
-   * @returns {void} 
+   * @returns {void}
    */
   createMonthGrid(
     monthGrid,
@@ -707,10 +711,10 @@ export class Calendar {
 
   /**
    * @property {Function} createDayCell - Create individual day cell
-   * @param {number} x - x coordinate of cell 
-   * @param {number} y - y coordinate of cell 
-   * @param {number} cellNumber - number of day 
-   * @param {string} cellStyles - addition CSS styles for cell 
+   * @param {number} x - x coordinate of cell
+   * @param {number} y - y coordinate of cell
+   * @param {number} cellNumber - number of day
+   * @param {string} cellStyles - addition CSS styles for cell
    * @returns {HTMLElement} - DOM element of cell
    */
   createDayCell(x, y, cellNumber, cellStyles) {
@@ -736,9 +740,9 @@ export class Calendar {
   // Date functions section
 
   /**
-   * @property {Function} daysInMonth - gives number of days in current month 
-   * @param {number} month - given month 
-   * @param {number} year - given year 
+   * @property {Function} daysInMonth - gives number of days in current month
+   * @param {number} month - given month
+   * @param {number} year - given year
    * @returns {number} - total number of days in given month
    */
   daysInMonth(month, year) {
@@ -747,8 +751,8 @@ export class Calendar {
 
   /**
    * @property {Function} getFirstDay - gives position of first day on month
-   * @param {number} month 
-   * @param {number} year 
+   * @param {number} month
+   * @param {number} year
    * @returns {number}
    */
   getFirstDay(month, year) {
@@ -780,7 +784,7 @@ export class Calendar {
 
   /**
    * @property {Fucntion} loading - toggle visibility of loader element
-   * @param {string} action 
+   * @param {string} action
    * @returns {void}
    */
   loading(action) {

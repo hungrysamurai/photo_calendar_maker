@@ -1,4 +1,4 @@
-import opentype from 'opentype.js';
+import opentype from "opentype.js";
 
 import { SinglePageCalendar } from "./SinglePageCalendar.js";
 import { MultiPageCalendar } from "./MultiPageCalendar.js";
@@ -95,13 +95,15 @@ function createYearsOptions() {
   const years = [currentYear];
 
   for (let i = 1; i < 5; i++) {
-    years.push(new Date().getFullYear() + i)
+    years.push(new Date().getFullYear() + i);
   }
 
-  yearInput.innerHTML = years.map(year => {
-    return `<option value=${year}>${year}</option>`
-  }).join('')
-};
+  yearInput.innerHTML = years
+    .map((year) => {
+      return `<option value=${year}>${year}</option>`;
+    })
+    .join("");
+}
 
 /**
  * @property {Function} setCurrentMonth - set active option in month input to current month
@@ -109,7 +111,9 @@ function createYearsOptions() {
  */
 function setCurrentMonth() {
   const currentMonth = new Date().getMonth();
-  monthInput.querySelectorAll('option')[currentMonth].setAttribute('selected', true)
+  monthInput
+    .querySelectorAll("option")
+    [currentMonth].setAttribute("selected", true);
 }
 
 /**
@@ -243,9 +247,15 @@ function newProjectIDB({ startYear, firstMonthIndex, lang, mode }) {
  * @param {string} [newCalendarData.mode] - single-page/multi-page
  */
 async function newCalendar({ startYear, firstMonthIndex, lang, mode }) {
+  const baseName =
+    process.env.NODE_ENV === "production"
+      ? "/projects/photo_calendar_maker/"
+      : "/";
+
   // Load and parse font
-  const buffer = fetch('/MontserratBold.ttf')
-    .then(res => res.arrayBuffer());
+  const buffer = fetch(`${baseName}MontserratBold.ttf`).then((res) =>
+    res.arrayBuffer()
+  );
   const font = opentype.parse(await buffer);
 
   if (mode === "multi-page") {
@@ -276,4 +286,4 @@ async function newCalendar({ startYear, firstMonthIndex, lang, mode }) {
 // Init
 loadProject();
 createYearsOptions();
-setCurrentMonth()
+setCurrentMonth();
