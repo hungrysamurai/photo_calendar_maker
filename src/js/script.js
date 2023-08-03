@@ -117,7 +117,6 @@ function createYearsOptions() {
  * @returns {void}
  */
 function createFontsOptions() {
-  console.log(fontsData);
   const optionsInDOM = Object.keys(fontsData).map(fontName => {
 
     return `<option value=${fontName}>${fontName}</option>`
@@ -162,26 +161,33 @@ function loadProject() {
     const dataStore = transaction.objectStore("current_project_data");
     const imagesStore = transaction.objectStore("current_project_images");
     // Get data object
-    const query = dataStore.get(0);
+    const dataQuery = dataStore.get(0);
+    const imagesQuery = imagesStore.getAll();
 
-    query.onsuccess = async function () {
+    let projectData;
+    let imagesData;
+
+    console.log(dataQuery);
+    dataQuery.onsuccess = function () {
       // If data...
-      if (query.result) {
-        const imagesQuery = imagesStore.getAll();
-
-        // Init projects with stored data
-        await newCalendar(query.result);
-
-        imagesQuery.onsuccess = function () {
-          // If images...
-          if (imagesQuery.result.length !== 0) {
-            // Retrieve images array via current calendar method
-            currentCalendar.retrieveImages(imagesQuery.result);
-          }
-        };
+      if (dataQuery.result) {
+        projectData = dataQuery.result;
       }
     };
-    transaction.oncomplete = function () {
+
+    // If images...
+    imagesQuery.onsuccess = function () {
+      imagesData = imagesQuery.result;
+    }
+
+    transaction.oncomplete = async function () {
+      if (projectData) {
+        await newCalendar(projectData);
+
+        if (imagesData) {
+          currentCalendar.retrieveImages(imagesData)
+        }
+      }
       db.close();
     };
   };
@@ -201,6 +207,7 @@ function loadProject() {
     dataStore.createIndex("startYear", ["startYear"], { unique: false });
     dataStore.createIndex("lang", ["lang"], { unique: false });
     dataStore.createIndex("mode", ["mode"], { unique: false });
+    dataStore.createIndex("font", ["font"], { unique: false });
 
     // Set images object
     const imagesStore = db.createObjectStore("current_project_images", {
@@ -324,9 +331,9 @@ async function newCalendar({ startYear, firstMonthIndex, lang, font, mode }) {
 }
 
 // Init
-loadProject();
-
 createYearsOptions();
 createFontsOptions();
 setCurrentMonth();
+
+loadProject();
 

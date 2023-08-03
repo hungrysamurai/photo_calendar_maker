@@ -376,8 +376,14 @@ export class MultiPageCalendar extends Calendar {
    * @param {Array} imagesArr - Array of images to load
    * @returns {void} 
    */
-  retrieveImages(imagesArr) {
+  async retrieveImages(imagesArr) {
     this.loading("show");
+    console.log(imagesArr);
+    if (imagesArr.length === 0) {
+      this.loading("hide");
+      return;
+    }
+
     let loadingCounter = 0;
 
     imagesArr.forEach((imageItem) => {

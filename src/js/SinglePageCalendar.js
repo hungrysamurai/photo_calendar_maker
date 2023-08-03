@@ -203,6 +203,11 @@ export class SinglePageCalendar extends Calendar {
    * @returns {void} 
    */
   retrieveImages(imagesArr) {
+
+    if (imagesArr.length === 0) {
+      return;
+    }
+
     const imageFile = imagesArr[0].image;
 
     fetch(imageFile).then((res) => {
