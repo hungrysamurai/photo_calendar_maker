@@ -418,7 +418,7 @@ export class Calendar {
         this.cropperOuter.appendChild(imageElement);
         document.body.append(this.cropperOuter);
 
-        currentImageElement.style.display = "none";
+        currentImageElement.style.visibility = "hidden";
 
         this.cropper = new Cropper(imageElement, {
           viewMode: 0,
@@ -488,18 +488,14 @@ export class Calendar {
   updateCropperPosition(currentImageElement) {
     if (this.cropperOuter) {
       this.cropperOuter.style.position = "absolute";
-      this.cropperOuter.style.left = `${
-        currentImageElement.getBoundingClientRect().left
-      }px`;
-      this.cropperOuter.style.top = `${
-        currentImageElement.getBoundingClientRect().top
-      }px`;
-      this.cropperOuter.style.width = `${
-        currentImageElement.getBoundingClientRect().width
-      }px`;
-      this.cropperOuter.style.height = `${
-        currentImageElement.getBoundingClientRect().height
-      }px`;
+      this.cropperOuter.style.left = `${currentImageElement.getBoundingClientRect().left
+        }px`;
+      this.cropperOuter.style.top = `${currentImageElement.getBoundingClientRect().top
+        }px`;
+      this.cropperOuter.style.width = `${currentImageElement.getBoundingClientRect().width
+        }px`;
+      this.cropperOuter.style.height = `${currentImageElement.getBoundingClientRect().height
+        }px`;
     }
   }
 
@@ -542,7 +538,7 @@ export class Calendar {
   removeCropper() {
     const currentImageElement = this.getCurrentMockup("image");
 
-    currentImageElement.style.display = "block";
+    currentImageElement.style.visibility = "visible";
     this.cropper.destroy();
     this.cropper = undefined;
     this.cropperOuter.remove();
