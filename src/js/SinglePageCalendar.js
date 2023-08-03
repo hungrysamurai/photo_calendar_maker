@@ -1,11 +1,6 @@
 import { Calendar } from "./Calendar.js";
 
 /**
- * Object with SVG symbols (glyphs)
- */
-import { glyphsSP } from "../assets/Montserrat/MontserratGlyphs.js";
-
-/**
  * Class that generates Single Page Calendar (all months on one page)
  */
 export class SinglePageCalendar extends Calendar {
@@ -19,7 +14,8 @@ export class SinglePageCalendar extends Calendar {
    * @param {HTMLElement} cropControlsContainer 
    * @param {string} lang 
    * @param {string} type 
-   * @param {Object} font
+   * @param {Array} fontsArray
+   * @param {Object} manualXCoordsArray
    */
   constructor(
     firstMonthIndex,
@@ -29,7 +25,8 @@ export class SinglePageCalendar extends Calendar {
     cropControlsContainer,
     lang,
     type,
-    font
+    fontsArray,
+    manualXCoordsArray
   ) {
     super(
       firstMonthIndex,
@@ -39,9 +36,10 @@ export class SinglePageCalendar extends Calendar {
       cropControlsContainer,
       lang,
       type,
-      font
+      fontsArray
     );
 
+    console.log(manualXCoordsArray);
     this.weekDaysNamesList = this.getWeekDays('short');
 
     // Mockup pre-defined dimensions
@@ -57,9 +55,7 @@ export class SinglePageCalendar extends Calendar {
     this.imagePlaceholderY = 11.4;
 
     // Weekdays positions
-    this.weekDayXCoords = this.lang === 'ru' ?
-      [1.4, 8, 14.2, 21.1, 27.5, 34, 40.8] :
-      [0.8, 7.6, 13.5, 20.8, 27.8, 34.1, 40]
+    this.weekDayXCoords = manualXCoordsArray[this.lang]
 
     this.createLoader();
     this.initDOMSVG();
@@ -187,7 +183,7 @@ export class SinglePageCalendar extends Calendar {
         this.daysInMonth(this.monthCounter - 1, this.year) - 1,
         0,
         8.642,
-        glyphsSP,
+        3.3,
         "fill: none;stroke: none; stroke-width: 0; stroke-miterlimit: 0;"
       );
 

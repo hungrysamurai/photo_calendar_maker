@@ -18,7 +18,7 @@ export class Calendar {
    * @param {HTMLElement} cropControlsContainer
    * @param {string} lang
    * @param {string} type
-   * @param {Object} font
+   * @param {Array} fontsArray
    * */
   constructor(
     firstMonthIndex,
@@ -28,7 +28,7 @@ export class Calendar {
     cropControlsContainer,
     lang,
     type,
-    font
+    fontsArray,
   ) {
     this.firstMonthIndex = firstMonthIndex;
     this.year = year;
@@ -37,7 +37,14 @@ export class Calendar {
     this.cropControlsContainer = cropControlsContainer;
     this.lang = lang;
     this.type = type;
-    this.font = font;
+
+    // Set fonts object
+    this.fonts = {};
+
+    // Add widths
+    for (let i = 0; i < fontsArray.length; i++) {
+      this.fonts[fontsArray[i].names.fontSubfamily.en.toLowerCase()] = fontsArray[i]
+    }
 
     this.monthsNamesList = this.getMonths();
 
@@ -593,13 +600,41 @@ export class Calendar {
    * @param {number} x - x-coords to place element
    * @param {number} y - y-coords to place element
    * @param {number} fontSize
+   * @param {string} fontWeight
    * @param {string} fill
    * @returns {HTMLElement} - <path>
    */
-  getOutline(string, x, y, fontSize, fill = "#231f20") {
-    const outline = this.font.getPath(string, x, y, fontSize);
+  getOutline(string, x, y, fontSize, fontWeight = 'bold', fill = "#231f20") {
+    const outline = this.fonts[fontWeight].getPath(string, x, y, fontSize);
     outline.fill = fill;
     return outline.toSVG();
+  }
+
+  /**
+ * @property {Function} getDigitPathAndPlacement - creates path for individual day digit in calendar grid
+ * @param {string} string - text to outline (number as string)
+ * @param {number} x - x-coords to place element
+ * @param {number} y - y-coords to place element
+ * @param {number} fontSize
+ * @param {string} fontWeight
+ * @param {string} fill
+ * @returns {HTMLElement} - <path>
+ */
+  getDigitPathAndPlacement(number, x, y, fontSize, fontWeight = 'bold', fill) {
+    const outline = this.fonts[fontWeight].getPath(number, x, y, fontSize);
+
+    const { x1, x2, y1, y2 } = outline.getBoundingBox();
+
+    const xShift = Number(((x2 - x1) / 2).toFixed(2));
+    const yShift = Number(((y2 - y1) / 2).toFixed(2));
+
+    const pathElement = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+
+    pathElement.setAttribute('d', outline.toPathData());
+    pathElement.setAttribute('transform', `translate(-${xShift} ${yShift})`);
+    pathElement.setAttribute('fill', fill);
+
+    return pathElement;
   }
 
   /**
@@ -656,7 +691,7 @@ export class Calendar {
     prevMonthDaysNumber,
     initialX,
     initialY,
-    glyphsSet,
+    fontSize,
     cellStyles
   ) {
     let x = initialX;
@@ -682,15 +717,22 @@ export class Calendar {
 
     // Set days digits in cells
     for (let i = 1; i < totalDays + 1; i++) {
-      cellsTextFields[currentDayIndex].innerHTML = glyphsSet.digits[i - 1];
+
+      cellsTextFields[currentDayIndex].appendChild(
+        this.getDigitPathAndPlacement(`${i}`, this.dayCellWidth / 2, this.dayCellHeight / 2, fontSize)
+      );
+
       currentDayIndex++;
     }
 
     // Prepend previous month
     if (startIndex !== 0) {
       for (let i = startIndex - 1; i >= 0; i--) {
-        cellsTextFields[i].innerHTML =
-          glyphsSet.secondaryDigits[prevMonthDaysCount - 1];
+
+        cellsTextFields[i].appendChild(
+          this.getDigitPathAndPlacement(`${prevMonthDaysCount}`, this.dayCellWidth / 2, this.dayCellHeight / 2, fontSize, 'regular', '#999')
+        );
+
         prevMonthDaysCount--;
       }
     }
@@ -698,8 +740,11 @@ export class Calendar {
     // Extend on next month
     if (currentDayIndex <= 42) {
       for (let i = 1; currentDayIndex < 42; currentDayIndex++) {
-        cellsTextFields[currentDayIndex].innerHTML =
-          glyphsSet.secondaryDigits[i - 1];
+
+        cellsTextFields[currentDayIndex].appendChild(
+          this.getDigitPathAndPlacement(`${i}`, this.dayCellWidth / 2, this.dayCellHeight / 2, fontSize, 'regular', '#999')
+        );
+
         i++;
       }
     }
@@ -728,7 +773,7 @@ export class Calendar {
               
         <g class="cell-digit"
         transform="translate(${x} ${y})">
-      </g>;
+      </g>
     `;
     return dayGroup;
   }

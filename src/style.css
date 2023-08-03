@@ -391,3 +391,28 @@ svg > svg {
     background-color: #231f20;
   }
 }
+
+@media (max-width: 500px) {
+  .new-calendar-controls .mode-radio,
+  .new-calendar-controls select {
+    margin-right: 0;
+    font-size: 0.5rem;
+  }
+
+  .new-calendar-controls .mode-radio div {
+    font-size: 0.5rem;
+    margin-right: 0.2rem;
+    padding: 0.1rem;
+  }
+
+  .new-calendar-controls button {
+    font-size: 0.6rem;
+    margin-left: 0.2rem;
+  }
+
+  .controls-container button svg,
+  .controls-container label svg {
+    width: 22px;
+    height: 22px;
+  }
+}

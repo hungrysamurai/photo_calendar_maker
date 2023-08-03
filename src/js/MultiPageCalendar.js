@@ -1,9 +1,5 @@
 import { Calendar } from "./Calendar";
 /**
- * Object with SVG symbols (glyphs)
- */
-import { glyphsMP } from "../assets/Montserrat/MontserratGlyphs";
-/**
  * Object with SVG icons
  */
 import { icons } from "../assets/icons";
@@ -22,7 +18,8 @@ export class MultiPageCalendar extends Calendar {
    * @param {HTMLElement} cropControlsContainer 
    * @param {string} lang 
    * @param {string} type 
-   * @param {Object} font
+   * @param {Array} fontsArray
+   * @param {Object} manualXCoordsArray
    */
   constructor(
     firstMonthIndex,
@@ -32,7 +29,8 @@ export class MultiPageCalendar extends Calendar {
     cropControlsContainer,
     lang,
     type,
-    font
+    fontsArray,
+    manualXCoordsArray
   ) {
     super(
       firstMonthIndex,
@@ -42,7 +40,7 @@ export class MultiPageCalendar extends Calendar {
       cropControlsContainer,
       lang,
       type,
-      font
+      fontsArray
     );
 
     this.weekDaysNamesList = this.getWeekDays('long');
@@ -57,9 +55,7 @@ export class MultiPageCalendar extends Calendar {
     this.imagePlaceholderY = 11.4;
 
     // Weekdays positions
-    this.weekDayXCoords = this.lang === 'ru' ?
-      [17, 46.7, 74, 97.2, 122, 147, 167.4] :
-      [22.72, 47.3, 69, 96.72, 123.2, 147, 173]
+    this.weekDayXCoords = manualXCoordsArray[this.lang]
 
     this.createLoader();
 
@@ -178,7 +174,7 @@ export class MultiPageCalendar extends Calendar {
         this.daysInMonth(this.monthCounter - 1, this.year),
         17,
         195.8,
-        glyphsMP,
+        7.5,
         "fill: none; stroke:#999999; stroke-miterlimit: 10; stroke-width: .5px;"
       );
     }

@@ -1,5 +1,7 @@
 import opentype from "opentype.js";
 
+import fontsData from "../assets/fontsData.js";
+
 import { SinglePageCalendar } from "./SinglePageCalendar.js";
 import { MultiPageCalendar } from "./MultiPageCalendar.js";
 
@@ -16,6 +18,7 @@ const monthInput = document.querySelector("#month-input");
 const yearInput = document.querySelector("#year-input");
 const multiModeBtn = document.querySelector("#multi-page");
 const langInput = document.querySelector("#lang-input");
+const fontInput = document.querySelector("#font-input");
 
 const calendarContainer = document.querySelector(".calendar-container");
 const controlsContainer = document.querySelector(".controls-container");
@@ -60,13 +63,17 @@ getButton.addEventListener("click", () => {
   /**
    * @type {string}
    */
+  const font = fontInput.value;
+  /**
+   * @type {string}
+   */
   const mode = multiModeBtn.checked ? "multi-page" : "single-page";
 
   /**
    * All values from inputs
    * @type {Object}
    */
-  const newCalendarData = { startYear, firstMonthIndex, lang, mode };
+  const newCalendarData = { startYear, firstMonthIndex, lang, font, mode };
 
   // Purge all current content
   calendarContainer.innerHTML = "";
@@ -106,6 +113,20 @@ function createYearsOptions() {
 }
 
 /**
+ * @property {Function} createFontsOptions - Generate fonts options for input
+ * @returns {void}
+ */
+function createFontsOptions() {
+  console.log(fontsData);
+  const optionsInDOM = Object.keys(fontsData).map(fontName => {
+
+    return `<option value=${fontName}>${fontName}</option>`
+  }).join('')
+
+  fontInput.innerHTML = optionsInDOM
+}
+
+/**
  * @property {Function} setCurrentMonth - set active option in month input to current month
  * @returns {void}
  */
@@ -113,7 +134,7 @@ function setCurrentMonth() {
   const currentMonth = new Date().getMonth();
   monthInput
     .querySelectorAll("option")
-    [currentMonth].setAttribute("selected", true);
+  [currentMonth].setAttribute("selected", true);
 }
 
 /**
@@ -140,18 +161,19 @@ function loadProject() {
 
     const dataStore = transaction.objectStore("current_project_data");
     const imagesStore = transaction.objectStore("current_project_images");
-
     // Get data object
     const query = dataStore.get(0);
 
-    query.onsuccess = function () {
+    query.onsuccess = async function () {
       // If data...
       if (query.result) {
-        // init project with stored data
-        newCalendar(query.result);
-        // If images...
         const imagesQuery = imagesStore.getAll();
+
+        // Init projects with stored data
+        await newCalendar(query.result);
+
         imagesQuery.onsuccess = function () {
+          // If images...
           if (imagesQuery.result.length !== 0) {
             // Retrieve images array via current calendar method
             currentCalendar.retrieveImages(imagesQuery.result);
@@ -200,7 +222,7 @@ function loadProject() {
  * @param {string} [newCalendarData.lang]
  * @param {string} [newCalendarData.mode] - single-page/multi-page
  */
-function newProjectIDB({ startYear, firstMonthIndex, lang, mode }) {
+function newProjectIDB({ startYear, firstMonthIndex, lang, font, mode }) {
   // Open IDB
   const indexedDB =
     window.indexedDB ||
@@ -224,8 +246,9 @@ function newProjectIDB({ startYear, firstMonthIndex, lang, mode }) {
       id: 0,
       startYear,
       firstMonthIndex,
-      lang: lang,
-      mode: mode,
+      lang,
+      mode,
+      font
     });
 
     // Remove old images
@@ -246,17 +269,32 @@ function newProjectIDB({ startYear, firstMonthIndex, lang, mode }) {
  * @param {string} [newCalendarData.lang]
  * @param {string} [newCalendarData.mode] - single-page/multi-page
  */
-async function newCalendar({ startYear, firstMonthIndex, lang, mode }) {
+async function newCalendar({ startYear, firstMonthIndex, lang, font, mode }) {
+
+  const {
+    fontNameBold,
+    fontNameRegular,
+    manualXCoordsMultiPage,
+    manualXCoordsSinglePage
+  } = fontsData[font]
+
   const baseName =
     process.env.NODE_ENV === "production"
       ? "/projects/photo_calendar_maker/"
       : "/";
 
-  // Load and parse font
-  const buffer = fetch(`${baseName}MontserratBold.ttf`).then((res) =>
-    res.arrayBuffer()
-  );
-  const font = opentype.parse(await buffer);
+  const fontBoldBuffer = fetch(`${baseName}${fontNameBold}.ttf`);
+  const fontMeiumBuffer = fetch(`${baseName}${fontNameRegular}.ttf`);
+
+  const requests = await Promise.all([fontBoldBuffer, fontMeiumBuffer]).then((requestsArray) => {
+    const results = requestsArray.map(async (req) => {
+      const buffer = req.arrayBuffer();
+      return opentype.parse(await buffer);
+    });
+    return results;
+  });
+
+  const fontsArray = await Promise.all(requests);
 
   if (mode === "multi-page") {
     currentCalendar = new MultiPageCalendar(
@@ -267,7 +305,8 @@ async function newCalendar({ startYear, firstMonthIndex, lang, mode }) {
       cropControlsContainer,
       lang,
       mode,
-      font
+      fontsArray,
+      manualXCoordsMultiPage
     );
   } else {
     currentCalendar = new SinglePageCalendar(
@@ -278,12 +317,16 @@ async function newCalendar({ startYear, firstMonthIndex, lang, mode }) {
       cropControlsContainer,
       lang,
       mode,
-      font
+      fontsArray,
+      manualXCoordsSinglePage
     );
   }
 }
 
 // Init
 loadProject();
+
 createYearsOptions();
+createFontsOptions();
 setCurrentMonth();
+
