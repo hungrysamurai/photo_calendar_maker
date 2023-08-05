@@ -24,8 +24,7 @@ export class SinglePageCalendar extends Calendar {
     cropControlsContainer,
     lang,
     type,
-    fontsArray,
-    manualXCoordsArray
+    fontsArray
   ) {
     super(
       firstMonthIndex,
@@ -55,9 +54,6 @@ export class SinglePageCalendar extends Calendar {
     this.imagePlaceholderHeight = 155;
     this.imagePlaceholderX = 10.9;
     this.imagePlaceholderY = 11.4;
-
-    // Weekdays positions
-    this.weekDayXCoords = manualXCoordsArray[this.lang];
 
     this.createLoader();
     this.initDOMSVG();

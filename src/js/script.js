@@ -277,12 +277,7 @@ function newProjectIDB({ startYear, firstMonthIndex, lang, font, mode }) {
  * @param {string} [newCalendarData.mode] - single-page/multi-page
  */
 async function newCalendar({ startYear, firstMonthIndex, lang, font, mode }) {
-  const {
-    fontNameBold,
-    fontNameRegular,
-    manualXCoordsMultiPage,
-    manualXCoordsSinglePage,
-  } = fontsData[font];
+  const { fontNameBold, fontNameRegular } = fontsData[font];
 
   const baseName =
     process.env.NODE_ENV === "production"
@@ -324,8 +319,7 @@ async function newCalendar({ startYear, firstMonthIndex, lang, font, mode }) {
       cropControlsContainer,
       lang,
       mode,
-      fontsArray,
-      manualXCoordsSinglePage
+      fontsArray
     );
   }
 }
