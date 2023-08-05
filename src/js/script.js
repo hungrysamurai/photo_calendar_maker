@@ -101,7 +101,7 @@ function createYearsOptions() {
   const currentYear = new Date().getFullYear();
   const years = [currentYear];
 
-  for (let i = 1; i < 5; i++) {
+  for (let i = 1; i < 10; i++) {
     years.push(new Date().getFullYear() + i);
   }
 
@@ -117,12 +117,13 @@ function createYearsOptions() {
  * @returns {void}
  */
 function createFontsOptions() {
-  const optionsInDOM = Object.keys(fontsData).map(fontName => {
+  const optionsInDOM = Object.keys(fontsData)
+    .map((fontName) => {
+      return `<option value=${fontName}>${fontName}</option>`;
+    })
+    .join("");
 
-    return `<option value=${fontName}>${fontName}</option>`
-  }).join('')
-
-  fontInput.innerHTML = optionsInDOM
+  fontInput.innerHTML = optionsInDOM;
 }
 
 /**
@@ -133,7 +134,7 @@ function setCurrentMonth() {
   const currentMonth = new Date().getMonth();
   monthInput
     .querySelectorAll("option")
-  [currentMonth].setAttribute("selected", true);
+    [currentMonth].setAttribute("selected", true);
 }
 
 /**
@@ -167,7 +168,6 @@ function loadProject() {
     let projectData;
     let imagesData;
 
-    console.log(dataQuery);
     dataQuery.onsuccess = function () {
       // If data...
       if (dataQuery.result) {
@@ -178,14 +178,14 @@ function loadProject() {
     // If images...
     imagesQuery.onsuccess = function () {
       imagesData = imagesQuery.result;
-    }
+    };
 
     transaction.oncomplete = async function () {
       if (projectData) {
         await newCalendar(projectData);
 
         if (imagesData) {
-          currentCalendar.retrieveImages(imagesData)
+          currentCalendar.retrieveImages(imagesData);
         }
       }
       db.close();
@@ -255,7 +255,7 @@ function newProjectIDB({ startYear, firstMonthIndex, lang, font, mode }) {
       firstMonthIndex,
       lang,
       mode,
-      font
+      font,
     });
 
     // Remove old images
@@ -277,13 +277,12 @@ function newProjectIDB({ startYear, firstMonthIndex, lang, font, mode }) {
  * @param {string} [newCalendarData.mode] - single-page/multi-page
  */
 async function newCalendar({ startYear, firstMonthIndex, lang, font, mode }) {
-
   const {
     fontNameBold,
     fontNameRegular,
     manualXCoordsMultiPage,
-    manualXCoordsSinglePage
-  } = fontsData[font]
+    manualXCoordsSinglePage,
+  } = fontsData[font];
 
   const baseName =
     process.env.NODE_ENV === "production"
@@ -293,13 +292,15 @@ async function newCalendar({ startYear, firstMonthIndex, lang, font, mode }) {
   const fontBoldBuffer = fetch(`${baseName}${fontNameBold}.ttf`);
   const fontMeiumBuffer = fetch(`${baseName}${fontNameRegular}.ttf`);
 
-  const requests = await Promise.all([fontBoldBuffer, fontMeiumBuffer]).then((requestsArray) => {
-    const results = requestsArray.map(async (req) => {
-      const buffer = req.arrayBuffer();
-      return opentype.parse(await buffer);
-    });
-    return results;
-  });
+  const requests = await Promise.all([fontBoldBuffer, fontMeiumBuffer]).then(
+    (requestsArray) => {
+      const results = requestsArray.map(async (req) => {
+        const buffer = req.arrayBuffer();
+        return opentype.parse(await buffer);
+      });
+      return results;
+    }
+  );
 
   const fontsArray = await Promise.all(requests);
 
@@ -312,8 +313,7 @@ async function newCalendar({ startYear, firstMonthIndex, lang, font, mode }) {
       cropControlsContainer,
       lang,
       mode,
-      fontsArray,
-      manualXCoordsMultiPage
+      fontsArray
     );
   } else {
     currentCalendar = new SinglePageCalendar(
@@ -336,4 +336,3 @@ createFontsOptions();
 setCurrentMonth();
 
 loadProject();
-

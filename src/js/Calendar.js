@@ -28,7 +28,7 @@ export class Calendar {
     cropControlsContainer,
     lang,
     type,
-    fontsArray,
+    fontsArray
   ) {
     this.firstMonthIndex = firstMonthIndex;
     this.year = year;
@@ -43,7 +43,8 @@ export class Calendar {
 
     // Add widths
     for (let i = 0; i < fontsArray.length; i++) {
-      this.fonts[fontsArray[i].names.fontSubfamily.en.toLowerCase()] = fontsArray[i]
+      this.fonts[fontsArray[i].names.fontSubfamily.en.toLowerCase()] =
+        fontsArray[i];
     }
 
     this.monthsNamesList = this.getMonths();
@@ -495,14 +496,18 @@ export class Calendar {
   updateCropperPosition(currentImageElement) {
     if (this.cropperOuter) {
       this.cropperOuter.style.position = "absolute";
-      this.cropperOuter.style.left = `${currentImageElement.getBoundingClientRect().left
-        }px`;
-      this.cropperOuter.style.top = `${currentImageElement.getBoundingClientRect().top
-        }px`;
-      this.cropperOuter.style.width = `${currentImageElement.getBoundingClientRect().width
-        }px`;
-      this.cropperOuter.style.height = `${currentImageElement.getBoundingClientRect().height
-        }px`;
+      this.cropperOuter.style.left = `${
+        currentImageElement.getBoundingClientRect().left
+      }px`;
+      this.cropperOuter.style.top = `${
+        currentImageElement.getBoundingClientRect().top
+      }px`;
+      this.cropperOuter.style.width = `${
+        currentImageElement.getBoundingClientRect().width
+      }px`;
+      this.cropperOuter.style.height = `${
+        currentImageElement.getBoundingClientRect().height
+      }px`;
     }
   }
 
@@ -604,35 +609,45 @@ export class Calendar {
    * @param {string} fill
    * @returns {HTMLElement} - <path>
    */
-  getOutline(string, x, y, fontSize, fontWeight = 'bold', fill = "#231f20") {
+  getOutline(string, x, y, fontSize, fontWeight = "bold", fill = "#231f20") {
     const outline = this.fonts[fontWeight].getPath(string, x, y, fontSize);
     outline.fill = fill;
     return outline.toSVG();
   }
 
   /**
- * @property {Function} getDigitPathAndPlacement - creates path for individual day digit in calendar grid
- * @param {string} string - text to outline (number as string)
- * @param {number} x - x-coords to place element
- * @param {number} y - y-coords to place element
- * @param {number} fontSize
- * @param {string} fontWeight
- * @param {string} fill
- * @returns {HTMLElement} - <path>
- */
-  getDigitPathAndPlacement(number, x, y, fontSize, fontWeight = 'bold', fill) {
-    const outline = this.fonts[fontWeight].getPath(number, x, y, fontSize);
+   * @property {Function} getAndPlaceOutline - creates path for individual day digit in calendar grid
+   * @param {string} string - text to outline (number as string)
+   * @param {number} x - x-coords to place element
+   * @param {number} y - y-coords to place element
+   * @param {number} fontSize
+   * @param {string} fontWeight
+   * @param {string} fill
+   * @returns {HTMLElement} - <path>
+   */
+  getAndPlaceOutline(
+    string,
+    x,
+    y,
+    fontSize,
+    fontWeight = "bold",
+    fill = "#231f20"
+  ) {
+    const outline = this.fonts[fontWeight].getPath(string, x, y, fontSize);
 
     const { x1, x2, y1, y2 } = outline.getBoundingBox();
 
     const xShift = Number(((x2 - x1) / 2).toFixed(2));
     const yShift = Number(((y2 - y1) / 2).toFixed(2));
 
-    const pathElement = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    const pathElement = document.createElementNS(
+      "http://www.w3.org/2000/svg",
+      "path"
+    );
 
-    pathElement.setAttribute('d', outline.toPathData());
-    pathElement.setAttribute('transform', `translate(-${xShift} ${yShift})`);
-    pathElement.setAttribute('fill', fill);
+    pathElement.setAttribute("d", outline.toPathData());
+    pathElement.setAttribute("transform", `translate(-${xShift} ${yShift})`);
+    pathElement.setAttribute("fill", fill);
 
     return pathElement;
   }
@@ -717,9 +732,13 @@ export class Calendar {
 
     // Set days digits in cells
     for (let i = 1; i < totalDays + 1; i++) {
-
       cellsTextFields[currentDayIndex].appendChild(
-        this.getDigitPathAndPlacement(`${i}`, this.dayCellWidth / 2, this.dayCellHeight / 2, fontSize)
+        this.getAndPlaceOutline(
+          `${i}`,
+          this.dayCellWidth / 2,
+          this.dayCellHeight / 2,
+          fontSize
+        )
       );
 
       currentDayIndex++;
@@ -728,9 +747,15 @@ export class Calendar {
     // Prepend previous month
     if (startIndex !== 0) {
       for (let i = startIndex - 1; i >= 0; i--) {
-
         cellsTextFields[i].appendChild(
-          this.getDigitPathAndPlacement(`${prevMonthDaysCount}`, this.dayCellWidth / 2, this.dayCellHeight / 2, fontSize, 'regular', '#999')
+          this.getAndPlaceOutline(
+            `${prevMonthDaysCount}`,
+            this.dayCellWidth / 2,
+            this.dayCellHeight / 2,
+            fontSize,
+            "regular",
+            "#999"
+          )
         );
 
         prevMonthDaysCount--;
@@ -740,9 +765,15 @@ export class Calendar {
     // Extend on next month
     if (currentDayIndex <= 42) {
       for (let i = 1; currentDayIndex < 42; currentDayIndex++) {
-
         cellsTextFields[currentDayIndex].appendChild(
-          this.getDigitPathAndPlacement(`${i}`, this.dayCellWidth / 2, this.dayCellHeight / 2, fontSize, 'regular', '#999')
+          this.getAndPlaceOutline(
+            `${i}`,
+            this.dayCellWidth / 2,
+            this.dayCellHeight / 2,
+            fontSize,
+            "regular",
+            "#999"
+          )
         );
 
         i++;

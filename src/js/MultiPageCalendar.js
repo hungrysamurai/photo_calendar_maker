@@ -8,18 +8,16 @@ import { icons } from "../assets/icons";
  * Class that generates Multi Page Calendar (each month on separate SVG)
  */
 export class MultiPageCalendar extends Calendar {
-
   /**
-   * 
-   * @param {number} firstMonthIndex 
-   * @param {number} year 
-   * @param {HTMLElement} parentContainer 
-   * @param {HTMLElement} controlsContainer 
-   * @param {HTMLElement} cropControlsContainer 
-   * @param {string} lang 
-   * @param {string} type 
+   *
+   * @param {number} firstMonthIndex
+   * @param {number} year
+   * @param {HTMLElement} parentContainer
+   * @param {HTMLElement} controlsContainer
+   * @param {HTMLElement} cropControlsContainer
+   * @param {string} lang
+   * @param {string} type
    * @param {Array} fontsArray
-   * @param {Object} manualXCoordsArray
    */
   constructor(
     firstMonthIndex,
@@ -29,8 +27,7 @@ export class MultiPageCalendar extends Calendar {
     cropControlsContainer,
     lang,
     type,
-    fontsArray,
-    manualXCoordsArray
+    fontsArray
   ) {
     super(
       firstMonthIndex,
@@ -43,19 +40,20 @@ export class MultiPageCalendar extends Calendar {
       fontsArray
     );
 
-    this.weekDaysNamesList = this.getWeekDays('long');
+    this.weekDaysNamesList = this.getWeekDays("long");
 
     // Mockup pre-defined dimensions
     this.dayCellHeight = 15;
     this.dayCellWidth = 25;
 
+    this.calendarGridX = 17;
+    this.calendarGridY = 195.8;
+    this.daysFontSize = 7.5;
+
     this.imagePlaceholderWidth = 188.3;
     this.imagePlaceholderHeight = 155;
     this.imagePlaceholderX = 10.9;
     this.imagePlaceholderY = 11.4;
-
-    // Weekdays positions
-    this.weekDayXCoords = manualXCoordsArray[this.lang]
 
     this.createLoader();
 
@@ -114,10 +112,10 @@ export class MultiPageCalendar extends Calendar {
         <g id="image-group">
 
         <rect id="image-placeholder-${i}"
-          x="10.9"
-          y="11.4"
-          width="188.3"
-          height="155"
+          x=${this.imagePlaceholderX}
+          y=${this.imagePlaceholderY}
+          width=${this.imagePlaceholderWidth}
+          height=${this.imagePlaceholderHeight}
           style="fill: #e8e8e8"/>
         </g>
 
@@ -127,22 +125,35 @@ export class MultiPageCalendar extends Calendar {
       const daysTitles = monthContainer.querySelector(`#days-titles-${i}`);
 
       // Generate week days paths
-      const weekDaysEls = this.weekDaysNamesList.map((weekDayName, i) => {
-        return `
-        <g>
-        ${this.getOutline(
-          weekDayName, this.weekDayXCoords[i], 192, 3.3)}
-        </g>
-         `}).join('');
+      this.weekDaysNamesList.map((weekDayName, i) => {
+        const weekDayCell = document.createElementNS(
+          "http://www.w3.org/2000/svg",
+          "g"
+        );
+        weekDayCell.setAttribute(
+          "transform",
+          `translate(${this.calendarGridX + this.dayCellWidth * i} 192)`
+        );
 
-      daysTitles.innerHTML = weekDaysEls;
+        const weekDayPath = this.getAndPlaceOutline(
+          weekDayName,
+          this.dayCellWidth / 2,
+          -1,
+          3.3
+        );
+
+        weekDayCell.appendChild(weekDayPath);
+        daysTitles.appendChild(weekDayCell);
+      });
 
       const monthEl = monthContainer.querySelector(`#month-title-${i}`);
       const yearEl = monthContainer.querySelector(`#year-title-${i}`);
 
       monthEl.innerHTML = this.getOutline(
         this.monthsNamesList[this.monthCounter],
-        30, 182.5, 14
+        30,
+        182.5,
+        14
       );
 
       yearEl.innerHTML = this.getOutline(`${this.year}`, 140, 182.5, 14);
@@ -172,9 +183,9 @@ export class MultiPageCalendar extends Calendar {
         this.getFirstDay(this.monthCounter - 1, this.year) - 1,
         this.daysInMonth(this.monthCounter, this.year),
         this.daysInMonth(this.monthCounter - 1, this.year),
-        17,
-        195.8,
-        7.5,
+        this.calendarGridX,
+        this.calendarGridY,
+        this.daysFontSize,
         "fill: none; stroke:#999999; stroke-miterlimit: 10; stroke-width: .5px;"
       );
     }
@@ -303,7 +314,7 @@ export class MultiPageCalendar extends Calendar {
 
   /**
    * @property {Function} uploadMultipleImages - upload multiple images in calendar
-   * @param {Event Object} e - object with files 
+   * @param {Event Object} e - object with files
    * @returns {void}
    */
   uploadMultipleImages(e) {
@@ -374,11 +385,11 @@ export class MultiPageCalendar extends Calendar {
   /**
    * @property {Fucntion} retrieveImages - load images from given array to DOM
    * @param {Array} imagesArr - Array of images to load
-   * @returns {void} 
+   * @returns {void}
    */
   async retrieveImages(imagesArr) {
     this.loading("show");
-    console.log(imagesArr);
+
     if (imagesArr.length === 0) {
       this.loading("hide");
       return;

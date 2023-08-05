@@ -4,16 +4,15 @@ import { Calendar } from "./Calendar.js";
  * Class that generates Single Page Calendar (all months on one page)
  */
 export class SinglePageCalendar extends Calendar {
-
   /**
-   * 
-   * @param {number} firstMonthIndex 
-   * @param {number} year 
-   * @param {HTMLElement} parentContainer 
-   * @param {HTMLElement} controlsContainer 
-   * @param {HTMLElement} cropControlsContainer 
-   * @param {string} lang 
-   * @param {string} type 
+   *
+   * @param {number} firstMonthIndex
+   * @param {number} year
+   * @param {HTMLElement} parentContainer
+   * @param {HTMLElement} controlsContainer
+   * @param {HTMLElement} cropControlsContainer
+   * @param {string} lang
+   * @param {string} type
    * @param {Array} fontsArray
    * @param {Object} manualXCoordsArray
    */
@@ -39,12 +38,15 @@ export class SinglePageCalendar extends Calendar {
       fontsArray
     );
 
-    console.log(manualXCoordsArray);
-    this.weekDaysNamesList = this.getWeekDays('short');
+    this.weekDaysNamesList = this.getWeekDays("short");
 
     // Mockup pre-defined dimensions
     this.dayCellHeight = 4.435;
     this.dayCellWidth = 6.549;
+
+    this.calendarGridX = 0;
+    this.calendarGridY = 8.642;
+    this.daysFontSize = 3.3;
 
     this.monthCellHeight = 37.5;
     this.monthCellWidth = 45.722;
@@ -55,7 +57,7 @@ export class SinglePageCalendar extends Calendar {
     this.imagePlaceholderY = 11.4;
 
     // Weekdays positions
-    this.weekDayXCoords = manualXCoordsArray[this.lang]
+    this.weekDayXCoords = manualXCoordsArray[this.lang];
 
     this.createLoader();
     this.initDOMSVG();
@@ -84,7 +86,12 @@ export class SinglePageCalendar extends Calendar {
 
   <g id="image-group">
 
-    <rect id="image-placeholder" x="10.9" y="11.4" width="188.3" height="155" style="fill: #e8e8e8"/>
+    <rect id="image-placeholder" 
+    x=${this.imagePlaceholderX} 
+    y=${this.imagePlaceholderX} 
+    width=${this.imagePlaceholderWidth} 
+    height=${this.imagePlaceholderHeight}
+    style="fill: #e8e8e8"/>
 
   </g>
 
@@ -123,27 +130,10 @@ export class SinglePageCalendar extends Calendar {
       x += this.monthCellWidth + 2.3;
 
       // Populate current month
-
-      // Generate week days paths
-      const weekDaysEls = this.weekDaysNamesList.map((weekDayName, i) => {
-        return `
-        <g>
-        ${this.getOutline(
-          weekDayName, this.weekDayXCoords[i],
-          8,
-          this.lang === 'ru' ? 2.9 : 2.6
-        )}
-        </g>
-         `}).join('');
-
-
       monthContainer.innerHTML = `
       <g id="month-title">
           <g>
-          ${this.getOutline(
-        this.monthsNamesList[this.monthCounter],
-        5, 3.5, 4
-      )}
+          ${this.getOutline(this.monthsNamesList[this.monthCounter], 5, 3.5, 4)}
           </g>
         </g>
 
@@ -154,13 +144,40 @@ export class SinglePageCalendar extends Calendar {
         </g>
 
         <g id="week-days-titles">
-        ${weekDaysEls}
           </g>
         </g>
 
           <g id="days-grid"></g>
         `;
 
+      const daysTitles = monthContainer.querySelector("#week-days-titles");
+
+      // Generate week days paths
+      this.weekDaysNamesList.map((weekDayName, i) => {
+        const weekDayCell = document.createElementNS(
+          "http://www.w3.org/2000/svg",
+          "g"
+        );
+        weekDayCell.setAttribute(
+          "transform",
+          `translate(${Number(
+            this.calendarGridX + this.dayCellWidth * i
+          ).toFixed(2)} 0)`
+        );
+
+        // исключение для 'Cр'
+        let descenderException = i === 2 && this.lang === "ru" ? true : false;
+
+        const weekDayPath = this.getAndPlaceOutline(
+          weekDayName,
+          this.dayCellWidth / 2,
+          descenderException ? 6.5 : 7,
+          this.lang === "ru" ? 2.9 : 2.6
+        );
+
+        weekDayCell.appendChild(weekDayPath);
+        daysTitles.appendChild(weekDayCell);
+      });
 
       if (i === 11) {
         this.lastMonth = this.monthCounter;
@@ -181,9 +198,9 @@ export class SinglePageCalendar extends Calendar {
         this.getFirstDay(this.monthCounter - 1, this.year) - 1,
         this.daysInMonth(this.monthCounter, this.year),
         this.daysInMonth(this.monthCounter - 1, this.year) - 1,
-        0,
-        8.642,
-        3.3,
+        this.calendarGridX,
+        this.calendarGridY,
+        this.daysFontSize,
         "fill: none;stroke: none; stroke-width: 0; stroke-miterlimit: 0;"
       );
 
@@ -200,10 +217,9 @@ export class SinglePageCalendar extends Calendar {
   /**
    * @property {Fucntion} retrieveImages - load images from given array to DOM
    * @param {Array} imagesArr - Array of images to load
-   * @returns {void} 
+   * @returns {void}
    */
   retrieveImages(imagesArr) {
-
     if (imagesArr.length === 0) {
       return;
     }
