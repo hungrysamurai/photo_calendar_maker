@@ -164,7 +164,7 @@ svg {
   filter: drop-shadow(3px 3px 12px rgba(0, 0, 0, 0.33));
 }
 
-svg > svg {
+svg>svg {
   filter: initial;
 }
 
@@ -366,11 +366,13 @@ svg > svg {
 
 .cropper-dashed {
   border: 0 dashed #231f20;
+  filter: invert(1);
 }
 
 .cropper-center::before,
 .cropper-center::after {
   background-color: #231f20;
+  filter: invert(1);
 }
 
 .cropper-face {
@@ -380,10 +382,12 @@ svg > svg {
 
 .cropper-line {
   background-color: #231f20;
+  filter: invert(1);
 }
 
 .cropper-point {
   background-color: #231f20;
+  filter: invert(1);
 }
 
 @media (min-width: 1200px) {
@@ -393,6 +397,7 @@ svg > svg {
 }
 
 @media (max-width: 500px) {
+
   .new-calendar-controls .mode-radio,
   .new-calendar-controls select {
     margin-right: 0;
