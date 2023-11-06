@@ -1,30 +1,47 @@
-import opentype from "opentype.js";
+import opentype, { load } from "opentype.js";
 
 import fontsData from "../assets/fontsData.js";
 
 import { SinglePageCalendar } from "./SinglePageCalendar.js";
 import { MultiPageCalendar } from "./MultiPageCalendar.js";
+import { Calendar } from "./Calendar.js";
+import { CalendarData, FontArray, ImageObject, LoadedFontsObject } from "./types/types.js";
 
-const newProjectBtn = document.querySelector("#new-project");
-const newProjectContainer = document.querySelector(".new-project-container");
+import { collectDataFromInputs } from "./utils/collectDataFromInputs.ts";
+
+import { createYearsOptions } from "./utils/createYearsOptions.ts";
+import { createFontsOptions } from "./utils/createFontsOptions.ts";
+import { createMonthsOptions } from "./utils/createMonthsOptions.ts";
+import { loadFonts } from "./utils/loadFonts.ts";
+
+const newProjectContainer = document.querySelector(
+  ".new-project-container"
+) as HTMLDivElement;
+const newProjectBtn = document.querySelector(
+  "#new-project"
+) as HTMLButtonElement;
 
 const newCalendarInputsContainer = document.querySelector(
   ".new-calendar-controls"
-);
+) as HTMLDivElement;
 
-const getButton = document.querySelector("#get-button");
+const getButton = document.querySelector("#get-button") as HTMLButtonElement;
 
-const monthInput = document.querySelector("#month-input");
-const yearInput = document.querySelector("#year-input");
-const multiModeBtn = document.querySelector("#multi-page");
-const langInput = document.querySelector("#lang-input");
-const fontInput = document.querySelector("#font-input");
+const monthInput = document.querySelector("#month-input") as HTMLSelectElement;
+const yearInput = document.querySelector("#year-input") as HTMLSelectElement;
+const multiModeBtn = document.querySelector("#multi-page") as HTMLInputElement;
+const langInput = document.querySelector("#lang-input") as HTMLSelectElement;
+const fontInput = document.querySelector("#font-input") as HTMLSelectElement;
 
-const calendarContainer = document.querySelector(".calendar-container");
-const controlsContainer = document.querySelector(".controls-container");
+const calendarContainer = document.querySelector(
+  ".calendar-container"
+) as HTMLDivElement;
+const controlsContainer = document.querySelector(
+  ".controls-container"
+) as HTMLDivElement;
 const cropControlsContainer = document.querySelector(
   ".crop-controls-container"
-);
+) as HTMLDivElement;
 
 // Show/Hide "New calendar container"
 newProjectBtn.addEventListener("click", () => {
@@ -33,55 +50,28 @@ newProjectBtn.addEventListener("click", () => {
 
 document.addEventListener("click", (e) => {
   if (
-    !newCalendarInputsContainer.contains(e.target) &&
+    !newCalendarInputsContainer.contains(e.target as Document) &&
     e.target !== newProjectBtn
   ) {
     newProjectContainer.style.top = "0px";
   }
 });
 
-/**
- * Current calendar object
- * @type {Object}
- */
-let currentCalendar;
+// Globals
+let currentCalendar: Calendar;
+let loadedFonts: LoadedFontsObject;
 
 getButton.addEventListener("click", () => {
-  // Collect data from inputs
-  /**
-   * @type {number}
-   */
-  const startYear = +yearInput.value;
-  /**
-   * @type {number}
-   */
-  const firstMonthIndex = +monthInput.value;
-  /**
-   * @type {string}
-   */
-  const lang = langInput.value;
-  /**
-   * @type {string}
-   */
-  const font = fontInput.value;
-  /**
-   * @type {string}
-   */
-  const mode = multiModeBtn.checked ? "multi-page" : "single-page";
-
-  /**
-   * All values from inputs
-   * @type {Object}
-   */
-  const newCalendarData = { startYear, firstMonthIndex, lang, font, mode };
+  const newCalendarData: CalendarData = collectDataFromInputs(yearInput, monthInput, langInput, fontInput, multiModeBtn);
 
   // Purge all current content
   calendarContainer.innerHTML = "";
 
   // If old project in cropper mode - remove cropper
-  if (document.querySelector(".cropper-outer-container")) {
-    document.querySelector(".cropper-outer-container").remove();
-  }
+  // if (document.querySelector(".cropper-outer-container")) {
+  //   (document.querySelector(".cropper-outer-container") as HTMLDivElement
+  //   ).remove();
+  // }
 
   // Generate new calendar
   newCalendar(newCalendarData);
@@ -93,55 +83,11 @@ getButton.addEventListener("click", () => {
   newProjectContainer.style.top = "0px";
 });
 
-/**
- * @property {Function} createYearsOptions - Generate years for input (current year + 5)
- * @returns {void}
- */
-function createYearsOptions() {
-  const currentYear = new Date().getFullYear();
-  const years = [currentYear];
-
-  for (let i = 1; i < 10; i++) {
-    years.push(new Date().getFullYear() + i);
-  }
-
-  yearInput.innerHTML = years
-    .map((year) => {
-      return `<option value=${year}>${year}</option>`;
-    })
-    .join("");
-}
 
 /**
- * @property {Function} createFontsOptions - Generate fonts options for input
- * @returns {void}
+ * @property {Function} loadSavedProject - if some data in IndexedDB - retrieve project. If not - set up IDB schema for project
  */
-function createFontsOptions() {
-  const optionsInDOM = Object.keys(fontsData)
-    .map((fontName) => {
-      return `<option value=${fontName}>${fontName}</option>`;
-    })
-    .join("");
-
-  fontInput.innerHTML = optionsInDOM;
-}
-
-/**
- * @property {Function} setCurrentMonth - set active option in month input to current month
- * @returns {void}
- */
-function setCurrentMonth() {
-  const currentMonth = new Date().getMonth();
-  monthInput
-    .querySelectorAll("option")
-    [currentMonth].setAttribute("selected", true);
-}
-
-/**
- * @property {Function} loadProject - if some data in IndexedDB - retrieve project. If not - set up IDB schema for project
- * @returns {void}
- */
-function loadProject() {
+function loadSavedProject(): void {
   // Open IDB
   const indexedDB =
     window.indexedDB ||
@@ -165,8 +111,8 @@ function loadProject() {
     const dataQuery = dataStore.get(0);
     const imagesQuery = imagesStore.getAll();
 
-    let projectData;
-    let imagesData;
+    let projectData: CalendarData;
+    let imagesData: ImageObject[];
 
     dataQuery.onsuccess = function () {
       // If data...
@@ -229,7 +175,13 @@ function loadProject() {
  * @param {string} [newCalendarData.lang]
  * @param {string} [newCalendarData.mode] - single-page/multi-page
  */
-function newProjectIDB({ startYear, firstMonthIndex, lang, font, mode }) {
+function newProjectIDB({
+  startYear,
+  firstMonthIndex,
+  lang,
+  font,
+  mode,
+}: CalendarData): void {
   // Open IDB
   const indexedDB =
     window.indexedDB ||
@@ -276,28 +228,15 @@ function newProjectIDB({ startYear, firstMonthIndex, lang, font, mode }) {
  * @param {string} [newCalendarData.lang]
  * @param {string} [newCalendarData.mode] - single-page/multi-page
  */
-async function newCalendar({ startYear, firstMonthIndex, lang, font, mode }) {
-  const { fontNameBold, fontNameRegular } = fontsData[font];
+async function newCalendar({
+  startYear,
+  firstMonthIndex,
+  lang,
+  font,
+  mode,
+}: CalendarData): Promise<void> {
 
-  const baseName =
-    process.env.NODE_ENV === "production"
-      ? "/projects/photo_calendar_maker/"
-      : "/";
-
-  const fontBoldBuffer = fetch(`${baseName}${fontNameBold}.ttf`);
-  const fontMeiumBuffer = fetch(`${baseName}${fontNameRegular}.ttf`);
-
-  const requests = await Promise.all([fontBoldBuffer, fontMeiumBuffer]).then(
-    (requestsArray) => {
-      const results = requestsArray.map(async (req) => {
-        const buffer = req.arrayBuffer();
-        return opentype.parse(await buffer);
-      });
-      return results;
-    }
-  );
-
-  const fontsArray = await Promise.all(requests);
+  const currentFont: FontArray = loadedFonts[font];
 
   if (mode === "multi-page") {
     currentCalendar = new MultiPageCalendar(
@@ -308,7 +247,7 @@ async function newCalendar({ startYear, firstMonthIndex, lang, font, mode }) {
       cropControlsContainer,
       lang,
       mode,
-      fontsArray
+      currentFont
     );
   } else {
     currentCalendar = new SinglePageCalendar(
@@ -319,14 +258,18 @@ async function newCalendar({ startYear, firstMonthIndex, lang, font, mode }) {
       cropControlsContainer,
       lang,
       mode,
-      fontsArray
+      currentFont
     );
   }
 }
 
 // Init
-createYearsOptions();
-createFontsOptions();
-setCurrentMonth();
+window.addEventListener('DOMContentLoaded', async () => {
+  loadedFonts = await loadFonts();
 
-loadProject();
+  yearInput.innerHTML = createYearsOptions(10);
+  fontInput.innerHTML = createFontsOptions();
+  monthInput.innerHTML = createMonthsOptions();
+
+  loadSavedProject();
+})

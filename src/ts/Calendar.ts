@@ -4,11 +4,12 @@ import SVGtoPDF from "svg-to-pdfkit";
  * Object with SVG icons
  */
 import { icons } from "../assets/icons.js";
+import { ImageObject } from "./types/types.js";
 
 /**
  * Class that includes basic logic of calendar grid creation, methods to init basic DOM elements, upload/download documents (single), Cropper functionality, image compression, saving to IndexedDB (single) and loader
  */
-export class Calendar {
+export abstract class Calendar {
   /**
    *
    * @param {number} firstMonthIndex
@@ -20,6 +21,7 @@ export class Calendar {
    * @param {string} type
    * @param {Array} fontsArray
    * */
+
   constructor(
     firstMonthIndex,
     year,
@@ -46,6 +48,8 @@ export class Calendar {
       this.fonts[fontsArray[i].names.fontSubfamily.en.toLowerCase()] =
         fontsArray[i];
     }
+    console.log(this.fonts);
+
 
     this.monthsNamesList = this.getMonths();
 
@@ -496,18 +500,14 @@ export class Calendar {
   updateCropperPosition(currentImageElement) {
     if (this.cropperOuter) {
       this.cropperOuter.style.position = "absolute";
-      this.cropperOuter.style.left = `${
-        currentImageElement.getBoundingClientRect().left
-      }px`;
-      this.cropperOuter.style.top = `${
-        currentImageElement.getBoundingClientRect().top
-      }px`;
-      this.cropperOuter.style.width = `${
-        currentImageElement.getBoundingClientRect().width
-      }px`;
-      this.cropperOuter.style.height = `${
-        currentImageElement.getBoundingClientRect().height
-      }px`;
+      this.cropperOuter.style.left = `${currentImageElement.getBoundingClientRect().left
+        }px`;
+      this.cropperOuter.style.top = `${currentImageElement.getBoundingClientRect().top
+        }px`;
+      this.cropperOuter.style.width = `${currentImageElement.getBoundingClientRect().width
+        }px`;
+      this.cropperOuter.style.height = `${currentImageElement.getBoundingClientRect().height
+        }px`;
     }
   }
 
@@ -899,4 +899,8 @@ export class Calendar {
       };
     };
   }
+
+  abstract retrieveImages(imagesArr: ImageObject[]): void;
+
+  abstract initDOMSVG(): void;
 }

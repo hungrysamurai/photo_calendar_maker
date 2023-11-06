@@ -1,4 +1,4 @@
-import { Calendar } from "./Calendar.js";
+import { Calendar } from "./Calendar";
 
 /**
  * Class that generates Single Page Calendar (all months on one page)

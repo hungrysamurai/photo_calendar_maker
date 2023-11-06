@@ -394,7 +394,6 @@ export class MultiPageCalendar extends Calendar {
       this.loading("hide");
       return;
     }
-
     let loadingCounter = 0;
 
     imagesArr.forEach((imageItem) => {

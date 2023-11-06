@@ -1,6 +1,5 @@
 export const icons = {
-  cancel: `<?xml version="1.0" encoding="utf-8"?>
-<!-- Generator: Adobe Illustrator 26.4.1, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+	cancel: `<?xml version="1.0" encoding="utf-8"?>
 <svg version="1.1" id="Layer_2_1_" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
 	 viewBox="0 0 100 100" style="enable-background:new 0 0 100 100;" xml:space="preserve">
 <style type="text/css">
@@ -11,9 +10,8 @@ export const icons = {
 		C8.8,6,50,47.2,50,47.2z"/>
 </g>
 </svg>`,
-  crop: `
+	crop: `
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Generator: Adobe Illustrator 26.4.1, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
 <svg version="1.1" id="Layer_2_1_" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
 	 viewBox="0 0 100 100" style="enable-background:new 0 0 100 100;" xml:space="preserve">
 <polygon points="98,79.8 20,79.8 20,2 24,2 24,75.8 98,75.8 "/>
@@ -23,9 +21,8 @@ export const icons = {
 </svg>
 `,
 
-  done: `
+	done: `
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Generator: Adobe Illustrator 26.4.1, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
 <svg version="1.1" id="Layer_2_1_" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
 	 viewBox="0 0 100 100" style="enable-background:new 0 0 100 100;" xml:space="preserve">
 <style type="text/css">
@@ -34,8 +31,7 @@ export const icons = {
 <path class="st0" d="M98,16.7L32.7,86L2,49.8l3-2.6L32.8,80l62.2-66L98,16.7z"/>
 </svg>
 `,
-  jpg: `<?xml version="1.0" encoding="utf-8"?>
-<!-- Generator: Adobe Illustrator 24.1.2, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+	jpg: `<?xml version="1.0" encoding="utf-8"?>
 <svg version="1.1" id="Layer_2_1_" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
 	 viewBox="0 0 100 100" style="enable-background:new 0 0 100 100;" xml:space="preserve">
 <path d="M81.5,90.3000031h-63v-82.5h26.7000008c4.4000015,0,7.7999992,1.5,10,4.5C59.5,18,58.2000008,27.5,57.2000008,32
@@ -67,9 +63,8 @@ export const icons = {
 	c0.9160156,0.5078125,1.9619141,0.7607422,3.1357422,0.7607422c1.2460938,0,2.3671875-0.2666016,3.3632813-0.8007813V53.6650391z"/>
 </svg>
 `,
-  next: `
+	next: `
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Generator: Adobe Illustrator 24.1.2, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
 <svg version="1.1" id="Layer_2_1_" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
 	 viewBox="0 0 100 100" style="enable-background:new 0 0 100 100;" xml:space="preserve">
 <style type="text/css">
@@ -78,9 +73,8 @@ export const icons = {
 <path class="st0" d="M14,98l72-48L14,2V98z M78.8,50L18,90.4V9.6L78.8,50"/>
 </svg>
 `,
-  pdfMulti: `
+	pdfMulti: `
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Generator: Adobe Illustrator 24.1.2, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
 <svg version="1.1" id="Layer_2_1_" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
 	 viewBox="0 0 100 100" style="enable-background:new 0 0 100 100;" xml:space="preserve">
 <g>
@@ -99,8 +93,7 @@ export const icons = {
 </g>
 </svg>
 `,
-  pdfSingle: `<?xml version="1.0" encoding="utf-8"?>
-<!-- Generator: Adobe Illustrator 24.1.2, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+	pdfSingle: `<?xml version="1.0" encoding="utf-8"?>
 <svg version="1.1" id="Layer_2_1_" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
 	 viewBox="0 0 100 100" style="enable-background:new 0 0 100 100;" xml:space="preserve">
 <path d="M81.5,90.3h-63V7.8h26.7c4.4,0,7.8,1.5,10,4.5c4.3,5.7,3,15.2,2,19.7c4.5-1.1,13.8-2.6,19.6,1.6c3.1,2.3,4.7,5.8,4.7,10.5
@@ -115,8 +108,7 @@ export const icons = {
 <path d="M68.1,48.3v4.9h8.6v3.4h-8.6v6.8h-4.3V44.8h14v3.4H68.1z"/>
 </svg>
 `,
-  png: `<?xml version="1.0" encoding="utf-8"?>
-<!-- Generator: Adobe Illustrator 24.1.2, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+	png: `<?xml version="1.0" encoding="utf-8"?>
 <svg version="1.1" id="Layer_2_1_" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
 	 viewBox="0 0 100 100" style="enable-background:new 0 0 100 100;" xml:space="preserve">
 <path d="M81.5,90.3h-63V7.8h26.7c4.4,0,7.8,1.5,10,4.5c4.3,5.7,3,15.2,2,19.7c4.5-1.1,13.8-2.6,19.6,1.6c3.1,2.3,4.7,5.8,4.7,10.5
@@ -132,8 +124,7 @@ export const icons = {
 	s1.1,1.5,2,2c0.9,0.5,1.8,0.7,2.9,0.7c1.2,0,2.2-0.2,3.1-0.7V54.3z"/>
 </svg>
 `,
-  prev: `<?xml version="1.0" encoding="utf-8"?>
-<!-- Generator: Adobe Illustrator 24.1.2, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+	prev: `<?xml version="1.0" encoding="utf-8"?>
 <svg version="1.1" id="Layer_2_1_" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
 	 viewBox="0 0 100 100" style="enable-background:new 0 0 100 100;" xml:space="preserve">
 <style type="text/css">
@@ -142,9 +133,8 @@ export const icons = {
 <path class="st0" d="M86,2L14,50l72,48V2z M21.2,50L82,9.6v81.2L21.2,50"/>
 </svg>
 `,
-  uploadMulti: `
+	uploadMulti: `
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Generator: Adobe Illustrator 24.1.2, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
 <svg version="1.1" id="Layer_2_1_" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
 	 viewBox="0 0 100 100" style="enable-background:new 0 0 100 100;" xml:space="preserve">
 <style type="text/css">
@@ -169,9 +159,8 @@ export const icons = {
 </g>
 </svg>
 `,
-  upload: `
+	upload: `
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Generator: Adobe Illustrator 24.1.2, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
 <svg version="1.1" id="Layer_2_1_" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
 	 viewBox="0 0 100 100" style="enable-background:new 0 0 100 100;" xml:space="preserve">
 <style type="text/css">
@@ -181,7 +170,7 @@ export const icons = {
 	 M52,74h-4V14.4L29.2,37.2L26,34.8L50,6l24,28.8l-3.2,2.4L52,14.4C52,14.4,52,74,52,74z"/>
 </svg>
 `,
-  loader: `<?xml version="1.0" encoding="utf-8"?>
+	loader: `<?xml version="1.0" encoding="utf-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" style="margin: auto; display: block; shape-rendering: auto;" width="150px" height="150px" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid">
 <rect x="19" y="19" width="20" height="20" fill="#231f20">
   <animate attributeName="fill" values="#ff0073;#231f20;#231f20" keyTimes="0;0.125;1" dur="1s" repeatCount="indefinite" begin="0s" calcMode="discrete"></animate>
