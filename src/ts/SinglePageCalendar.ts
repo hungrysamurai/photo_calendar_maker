@@ -55,7 +55,6 @@ export class SinglePageCalendar extends Calendar {
     this.imagePlaceholderX = 10.9;
     this.imagePlaceholderY = 11.4;
 
-    this.createLoader();
     this.initDOMSVG();
     this.initBasicControls();
     this.initBasicControlsEvents();

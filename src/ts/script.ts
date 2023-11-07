@@ -2,8 +2,6 @@ import { SinglePageCalendar } from "./SinglePageCalendar";
 import { MultiPageCalendar } from "./MultiPageCalendar";
 import { Calendar } from "./Calendar";
 
-import { CalendarData, FontArray, ImageObject, LoadedFontsObject } from "./types/types";
-
 import { collectDataFromInputs } from "./utils/collectDataFromInputs.ts";
 
 import { createYearsOptions } from "./utils/createYearsOptions.ts";
@@ -267,6 +265,10 @@ window.addEventListener('DOMContentLoaded', async () => {
   yearInput.innerHTML = createYearsOptions(10);
   fontInput.innerHTML = createFontsOptions();
   monthInput.innerHTML = createMonthsOptions();
+
+  if (!Calendar.getCurrent()) {
+    Calendar.createLoader(calendarContainer);
+  };
 
   loadSavedProject();
 })

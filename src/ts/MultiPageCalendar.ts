@@ -4,6 +4,8 @@ import { Calendar } from "./Calendar";
  */
 import { icons } from "../assets/icons";
 
+import { LoadingState } from "../../types.d";
+
 /**
  * Class that generates Multi Page Calendar (each month on separate SVG)
  */
@@ -54,8 +56,6 @@ export class MultiPageCalendar extends Calendar {
     this.imagePlaceholderHeight = 155;
     this.imagePlaceholderX = 10.9;
     this.imagePlaceholderY = 11.4;
-
-    this.createLoader();
 
     this.initDOMSVG();
     this.initBasicControls();
@@ -368,13 +368,13 @@ export class MultiPageCalendar extends Calendar {
               loadedFilesCounter === files.length ||
               loadedFilesCounter === 11
             ) {
-              this.loading("hide");
+              Calendar.loading(LoadingState.Hide);
             }
           });
       };
 
       reader.readAsDataURL(files[i]);
-      this.loading("show");
+      Calendar.loading(LoadingState.Show);
 
       if (i === 11) {
         break;
@@ -388,10 +388,10 @@ export class MultiPageCalendar extends Calendar {
    * @returns {void}
    */
   async retrieveImages(imagesArr) {
-    this.loading("show");
+    Calendar.loading(LoadingState.Show);
 
     if (imagesArr.length === 0) {
-      this.loading("hide");
+      Calendar.loading(LoadingState.Hide);
       return;
     }
     let loadingCounter = 0;
@@ -422,7 +422,7 @@ export class MultiPageCalendar extends Calendar {
         loadingCounter++;
 
         if (loadingCounter === imagesArr.length) {
-          this.loading("hide");
+          Calendar.loading(LoadingState.Hide);
         }
       });
     });

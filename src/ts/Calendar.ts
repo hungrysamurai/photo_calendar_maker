@@ -2,26 +2,57 @@ import Cropper from "cropperjs";
 import SVGtoPDF from "svg-to-pdfkit";
 
 import { getMonthsList } from "./utils/getMonthsList";
-
+import { createHTMLElement } from './utils/createElement/createHTMLElement';
 /**
  * Object with SVG icons
  */
 import { icons } from "../assets/icons";
-import {
-  CalendarType,
-  FontArray,
-  FontData,
-  FormatNames,
-  ImageObject,
-  Languages,
-  OutputDimensions
-} from "./types/types";
 import { outputFormats } from "../assets/outputFormats";
+
+import { FormatNames, CalendarType, Languages, LoadingState } from "../../types.d";
 
 /**
  * Class that includes basic logic of calendar grid creation, methods to init basic DOM elements, upload/download documents (single), Cropper functionality, image compression, saving to IndexedDB (single) and loader
  */
 export abstract class Calendar {
+
+  static currentCalendar: Calendar;
+
+  static getCurrent(): undefined | Calendar {
+    return Calendar.currentCalendar;
+  }
+
+  static setCurrent(calendar: Calendar) {
+    Calendar.currentCalendar = calendar;
+  }
+
+  static loadingScreen: HTMLDivElement
+  /**
+   * @property {Fucntion} createLoader - creates loader element
+   */
+  static createLoader(element: HTMLElement): void {
+    Calendar.loadingScreen = createHTMLElement({
+      elementName: 'div',
+      className: 'loading-screen hide',
+      content: icons.loader,
+      insertTo: {
+        element,
+        position: "beforebegin"
+      }
+    })
+  }
+
+  static loading(state: LoadingState): void {
+    if (state === LoadingState.Hide) {
+      this.loadingScreen.classList.add("hide");
+      Calendar.currentCalendar.controlsContainer.style.pointerEvents = "auto";
+    } else if (state === LoadingState.Show) {
+      this.loadingScreen.classList.remove("hide");
+      Calendar.currentCalendar.controlsContainer.style.pointerEvents = "none";
+    }
+  }
+
+
   monthsNamesList: ReturnType<typeof getMonthsList>;
   fonts: FontData;
   outputDimensions: OutputDimensions;
@@ -83,6 +114,8 @@ export abstract class Calendar {
     this.startYear = this.year;
     this.lastMonth;
     this.endYear;
+
+    Calendar.setCurrent(this);
   }
   // DOM insertion section
 
@@ -172,7 +205,7 @@ export abstract class Calendar {
       const currentImageElement = this.getCurrentMockup("image");
 
       if (currentImageElement) {
-        this.loading("show");
+        Calendar.loading(LoadingState.Show);
         this.initCropper(currentImageElement);
         this.cropControlsContainer.classList.remove("hide");
       }
@@ -232,12 +265,14 @@ export abstract class Calendar {
         );
         imageGroup.innerHTML = "";
         imageGroup.appendChild(imageEl);
-        this.loading("hide");
+
+        Calendar.loading(LoadingState.Hide);
         // Save image to IDB
         this.saveToIDB(resultImage);
       });
     };
-    this.loading("show");
+
+    Calendar.loading(LoadingState.Show);
     reader.readAsDataURL(imageFile);
   }
 
@@ -332,7 +367,7 @@ export abstract class Calendar {
    * @returns {void}
    */
   downloadPDF(amount) {
-    this.loading("show");
+    Calendar.loading(LoadingState.Show);
     let pagesArray = [];
 
     const doc = new PDFDocument({ size: this.currentSize });
@@ -357,7 +392,7 @@ export abstract class Calendar {
     doc.end();
 
     stream.on("finish", () => {
-      this.loading("hide");
+      Calendar.loading(LoadingState.Hide);
       const url = stream.toBlobURL("application/pdf");
 
       const a = document.createElement("a");
@@ -451,7 +486,7 @@ export abstract class Calendar {
             window.onresize = () => {
               this.updateCropperPosition(currentImageElement);
             };
-            this.loading("hide");
+            Calendar.loading(LoadingState.Hide);
           },
 
           zoom: (e) => {
@@ -840,33 +875,33 @@ export abstract class Calendar {
    * @property {Fucntion} createLoader - creates loader element
    * @returns {void}
    */
-  createLoader() {
-    this.loadingScreen = document.createElement("div");
-    this.loadingScreen.classList.add("loading-screen");
-    this.loadingScreen.classList.add("hide");
+  // createLoader() {
+  //   this.loadingScreen = document.createElement("div");
+  //   this.loadingScreen.classList.add("loading-screen");
+  //   this.loadingScreen.classList.add("hide");
 
-    this.loadingScreen.innerHTML = icons.loader;
+  //   this.loadingScreen.innerHTML = icons.loader;
 
-    this.parentContainer.insertAdjacentElement(
-      "beforebegin",
-      this.loadingScreen
-    );
-  }
+  //   this.parentContainer.insertAdjacentElement(
+  //     "beforebegin",
+  //     this.loadingScreen
+  //   );
+  // }
 
   /**
    * @property {Fucntion} loading - toggle visibility of loader element
    * @param {string} action
    * @returns {void}
    */
-  loading(action) {
-    if (action === "hide") {
-      this.loadingScreen.classList.add("hide");
-      this.controlsContainer.style.pointerEvents = "auto";
-    } else if (action === "show") {
-      this.loadingScreen.classList.remove("hide");
-      this.controlsContainer.style.pointerEvents = "none";
-    }
-  }
+  // loading(action) {
+  //   if (action === "hide") {
+  //     this.loadingScreen.classList.add("hide");
+  //     this.controlsContainer.style.pointerEvents = "auto";
+  //   } else if (action === "show") {
+  //     this.loadingScreen.classList.remove("hide");
+  //     this.controlsContainer.style.pointerEvents = "none";
+  //   }
+  // }
 
   /**
    * @property {Function} saveToIDB - save current image to IndexedDB
@@ -900,6 +935,5 @@ export abstract class Calendar {
   }
 
   abstract retrieveImages(imagesArr: ImageObject[]): void;
-
   abstract initDOMSVG(): void;
 }
