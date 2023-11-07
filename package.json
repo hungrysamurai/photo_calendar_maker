@@ -34,6 +34,7 @@
     }
   },
   "devDependencies": {
+    "@types/node": "^20.8.10",
     "buffer": "^5.7.1",
     "parcel": "^2.8.3",
     "parcel-reporter-static-files-copy": "^1.5.2",

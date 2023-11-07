@@ -1,11 +1,8 @@
-import opentype, { load } from "opentype.js";
+import { SinglePageCalendar } from "./SinglePageCalendar";
+import { MultiPageCalendar } from "./MultiPageCalendar";
+import { Calendar } from "./Calendar";
 
-import fontsData from "../assets/fontsData.js";
-
-import { SinglePageCalendar } from "./SinglePageCalendar.js";
-import { MultiPageCalendar } from "./MultiPageCalendar.js";
-import { Calendar } from "./Calendar.js";
-import { CalendarData, FontArray, ImageObject, LoadedFontsObject } from "./types/types.js";
+import { CalendarData, FontArray, ImageObject, LoadedFontsObject } from "./types/types";
 
 import { collectDataFromInputs } from "./utils/collectDataFromInputs.ts";
 

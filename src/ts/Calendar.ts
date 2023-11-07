@@ -1,68 +1,67 @@
 import Cropper from "cropperjs";
 import SVGtoPDF from "svg-to-pdfkit";
+
+import { getMonthsList } from "./utils/getMonthsList";
+
 /**
  * Object with SVG icons
  */
-import { icons } from "../assets/icons.js";
-import { ImageObject } from "./types/types.js";
+import { icons } from "../assets/icons";
+import {
+  CalendarType,
+  FontArray,
+  FontData,
+  FormatNames,
+  ImageObject,
+  Languages,
+  OutputDimensions
+} from "./types/types";
+import { outputFormats } from "../assets/outputFormats";
 
 /**
  * Class that includes basic logic of calendar grid creation, methods to init basic DOM elements, upload/download documents (single), Cropper functionality, image compression, saving to IndexedDB (single) and loader
  */
 export abstract class Calendar {
-  /**
-   *
-   * @param {number} firstMonthIndex
-   * @param {number} year
-   * @param {HTMLElement} parentContainer
-   * @param {HTMLElement} controlsContainer
-   * @param {HTMLElement} cropControlsContainer
-   * @param {string} lang
-   * @param {string} type
-   * @param {Array} fontsArray
-   * */
+  monthsNamesList: ReturnType<typeof getMonthsList>;
+  fonts: FontData;
+  outputDimensions: OutputDimensions;
+  currentSize: FormatNames;
+  currentMonth: number;
+  monthCounter: number;
+  firstMonth: number;
+  imageReduceSizeRate: number;
+  startYear: number;
+  lastMonth: number;
+  endYear: number;
 
   constructor(
-    firstMonthIndex,
-    year,
-    parentContainer,
-    controlsContainer,
-    cropControlsContainer,
-    lang,
-    type,
-    fontsArray
+    public firstMonthIndex: number,
+    public year: number,
+    public parentContainer: HTMLDivElement,
+    public controlsContainer: HTMLDivElement,
+    public cropControlsContainer: HTMLDivElement,
+    public lang: Languages,
+    public type: CalendarType,
+    public currentFont: FontArray
   ) {
-    this.firstMonthIndex = firstMonthIndex;
-    this.year = year;
-    this.parentContainer = parentContainer;
-    this.controlsContainer = controlsContainer;
-    this.cropControlsContainer = cropControlsContainer;
-    this.lang = lang;
-    this.type = type;
-
     // Set fonts object
-    this.fonts = {};
+    this.fonts = {
+      bold: null,
+      regular: null
+    };
 
-    // Add widths
-    for (let i = 0; i < fontsArray.length; i++) {
-      this.fonts[fontsArray[i].names.fontSubfamily.en.toLowerCase()] =
-        fontsArray[i];
+    // Add weights
+    for (let i = 0; i < currentFont.length; i++) {
+      this.fonts[currentFont[i].names.fontSubfamily.en.toLowerCase()] = currentFont[i];
     }
-    console.log(this.fonts);
 
-
-    this.monthsNamesList = this.getMonths();
+    this.monthsNamesList = getMonthsList(this.lang)
 
     /**
      * Dimensions of document (px)
-     * @type {Object}
      */
-    this.outputDimensions = {
-      A5: { width: 1748, height: 2480 },
-      A4: { width: 2480, height: 3508 },
-      A3: { width: 3508, height: 4961 },
-    };
-    this.currentSize = "A4";
+    this.outputDimensions = outputFormats;
+    this.currentSize = FormatNames.A4;
     this.currentMonth = 0;
 
     // Month counters
@@ -79,7 +78,7 @@ export abstract class Calendar {
     this.firstMonth = this.firstMonthIndex;
 
     // Rate to reduce uploading images size
-    this.reduceRate = 15;
+    this.imageReduceSizeRate = 15;
 
     this.startYear = this.year;
     this.lastMonth;
@@ -101,7 +100,7 @@ export abstract class Calendar {
        ${icons.jpg}
       </button>
   
-        <select id="format-select">
+      <select id="format-select">
 
        </select>
 
@@ -220,8 +219,8 @@ export abstract class Calendar {
       // Image optimization
       const reduced = this.reduceImageSize(
         e.target.result,
-        this.imagePlaceholderWidth * this.reduceRate,
-        this.imagePlaceholderHeight * this.reduceRate
+        this.imagePlaceholderWidth * this.imageReduceSizeRate,
+        this.imagePlaceholderHeight * this.imageReduceSizeRate
       );
 
       reduced.then((reducedImage) => {
@@ -246,8 +245,8 @@ export abstract class Calendar {
    * @async
    * @property {Function} reduceImageSize - Reduce image file size & resolution
    * @param {string} base64Str - Base64 string - image file
-   * @param {number} maxWidth - max width of image is equal to width of svg-placeholder times reduceRate
-   * @param {number} maxHeight - max height of image is equal to height of svg-placeholder times reduceRate
+   * @param {number} maxWidth - max width of image is equal to width of svg-placeholder times imageReduceSizeRate
+   * @param {number} maxHeight - max height of image is equal to height of svg-placeholder times imageReduceSizeRate
    * @returns {Promise} - Promise object of resized image
    */
   async reduceImageSize(base64Str, maxWidth, maxHeight) {

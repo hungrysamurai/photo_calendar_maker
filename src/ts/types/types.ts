@@ -27,3 +27,37 @@ export type FontArray = Font[];
 export type LoadedFontsObject = {
   [key: string]: FontArray
 };
+
+export type FontData = {
+  [key in FontSubfamily]: Font
+}
+
+export enum Languages {
+  RU = 'ru',
+  EN = 'en'
+}
+
+export enum CalendarType {
+  SinglePage = 'single-page',
+  MultiPage = 'multi-page'
+}
+
+export enum FontSubfamily {
+  Bold = 'bold',
+  Regular = 'regular'
+}
+
+export type FormatWidthHeigth = {
+  width: number,
+  height: number
+}
+
+export enum FormatNames {
+  A5 = 'A5',
+  A4 = 'A4',
+  A3 = 'A3'
+}
+
+export type OutputDimensions = {
+  [key in FormatNames]: FormatWidthHeigth
+}
