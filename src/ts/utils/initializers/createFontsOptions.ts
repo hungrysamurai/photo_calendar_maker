@@ -1,4 +1,4 @@
-import fontsData from "../../assets/fontsData";
+import fontsData from "../../../assets/fontsData";
 
 /**
  * @property {Function} createFontsOptions - Generate fonts options for input
@@ -9,4 +9,4 @@ export const createFontsOptions = (): string => {
       return `<option value=${fontName}>${fontName}</option>`;
     })
     .join("");
-}
+};

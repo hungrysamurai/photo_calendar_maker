@@ -1,4 +1,4 @@
-import { CalendarData } from "../types/types"
+import { CalendarLanguage, CalendarType } from '../../../types.d'
 
 export const collectDataFromInputs = (
  yearInput: HTMLSelectElement,
@@ -19,7 +19,7 @@ export const collectDataFromInputs = (
  /**
   * @type {string}
   */
- const lang: string = langInput.value;
+ const lang: CalendarLanguage = langInput.value as CalendarLanguage;
  /**
   * @type {string}
   */
@@ -27,13 +27,13 @@ export const collectDataFromInputs = (
  /**
   * @type {string}
   */
- const mode: string = multiModeBtn.checked ? "multi-page" : "single-page";
+ const type: CalendarType = multiModeBtn.checked ? CalendarType.MultiPage : CalendarType.SinglePage;
 
  return {
   startYear,
   firstMonthIndex,
   lang,
   font,
-  mode,
+  type,
  };
 }

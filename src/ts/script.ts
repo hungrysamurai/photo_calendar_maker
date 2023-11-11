@@ -4,10 +4,11 @@ import { Calendar } from "./Calendar";
 
 import { collectDataFromInputs } from "./utils/collectDataFromInputs.ts";
 
-import { createYearsOptions } from "./utils/createYearsOptions.ts";
-import { createFontsOptions } from "./utils/createFontsOptions.ts";
-import { createMonthsOptions } from "./utils/createMonthsOptions.ts";
-import { loadFonts } from "./utils/loadFonts.ts";
+import { createYearsOptions } from "./utils/initializers/createYearsOptions.ts";
+import { createFontsOptions } from "./utils/initializers/createFontsOptions.ts";
+import { createMonthsOptions } from "./utils/initializers/createMonthsOptions.ts";
+import { loadFonts } from "./utils/initializers/loadFonts.ts";
+import { CalendarType, CalendarLanguage } from "../../types.d";
 
 const newProjectContainer = document.querySelector(
   ".new-project-container"
@@ -38,26 +39,21 @@ const cropControlsContainer = document.querySelector(
   ".crop-controls-container"
 ) as HTMLDivElement;
 
-// Show/Hide "New calendar container"
-newProjectBtn.addEventListener("click", () => {
-  newProjectContainer.style.top = "-60px";
-});
-
-document.addEventListener("click", (e) => {
-  if (
-    !newCalendarInputsContainer.contains(e.target as Document) &&
-    e.target !== newProjectBtn
-  ) {
-    newProjectContainer.style.top = "0px";
-  }
-});
-
 // Globals
 let currentCalendar: Calendar;
 let loadedFonts: LoadedFontsObject;
 
-getButton.addEventListener("click", () => {
-  const newCalendarData: CalendarData = collectDataFromInputs(yearInput, monthInput, langInput, fontInput, multiModeBtn);
+/**
+ * @property {Function} newProject - generate new calendar from inputs
+ */
+function newProject() {
+  const newCalendarData: CalendarData = collectDataFromInputs(
+    yearInput,
+    monthInput,
+    langInput,
+    fontInput,
+    multiModeBtn
+  );
 
   // Purge all current content
   calendarContainer.innerHTML = "";
@@ -76,8 +72,102 @@ getButton.addEventListener("click", () => {
 
   // Hide new calendar inputs
   newProjectContainer.style.top = "0px";
-});
+}
 
+/**
+ * @async
+ * @property {Function} newCalendar - Init new calendar in DOM
+ * @param {Object} newCalendarData - object with data for calendar
+ * @param {number} [newCalendarData.startYear]
+ * @param {number} [newCalendarData.firstMonthIndex]
+ * @param {string} [newCalendarData.lang]
+ * @param {string} [newCalendarData.type] - single-page/multi-page
+ */
+async function newCalendar({
+  startYear,
+  firstMonthIndex,
+  lang,
+  font,
+  type,
+}: CalendarData): Promise<void> {
+  const currentFont: FontArray = loadedFonts[font];
+
+  if (type === CalendarType.MultiPage) {
+    currentCalendar = new MultiPageCalendar(
+      firstMonthIndex,
+      startYear,
+      calendarContainer,
+      controlsContainer,
+      cropControlsContainer,
+      lang,
+      type,
+      currentFont
+    );
+  } else {
+    currentCalendar = new SinglePageCalendar(
+      firstMonthIndex,
+      startYear,
+      calendarContainer,
+      controlsContainer,
+      cropControlsContainer,
+      lang,
+      type,
+      currentFont
+    );
+  }
+}
+
+/**
+ * @property {Function} newProjectIDB - Set new project in IDB
+ * @param {Object} newCalendarData - object with data for calendar
+ * @param {number} [newCalendarData.startYear]
+ * @param {number} [newCalendarData.firstMonthIndex]
+ * @param {string} [newCalendarData.lang]
+ * @param {string} [newCalendarData.mode] - single-page/multi-page
+ */
+function newProjectIDB({
+  startYear,
+  firstMonthIndex,
+  lang,
+  font,
+  type,
+}: CalendarData): void {
+  // Open IDB
+  const indexedDB =
+    window.indexedDB ||
+    window.mozIndexedDB ||
+    window.webkitIndexedDB ||
+    window.msIndexedDB ||
+    window.shimIndexedDB;
+
+  const request = indexedDB.open("Photo Calendar Project", 1);
+
+  request.onsuccess = function () {
+    const db = request.result;
+
+    const transaction = db.transaction(db.objectStoreNames, "readwrite");
+
+    const dataStore = transaction.objectStore("current_project_data");
+    const imagesStore = transaction.objectStore("current_project_images");
+
+    // Add new data to db
+    dataStore.put({
+      id: 0,
+      startYear,
+      firstMonthIndex,
+      lang,
+      type,
+      font,
+    });
+
+    // Remove old images
+    imagesStore.clear();
+
+    transaction.oncomplete = function () {
+      db.close();
+    };
+  };
+}
 
 /**
  * @property {Function} loadSavedProject - if some data in IndexedDB - retrieve project. If not - set up IDB schema for project
@@ -147,7 +237,7 @@ function loadSavedProject(): void {
     });
     dataStore.createIndex("startYear", ["startYear"], { unique: false });
     dataStore.createIndex("lang", ["lang"], { unique: false });
-    dataStore.createIndex("mode", ["mode"], { unique: false });
+    dataStore.createIndex("type", ["type"], { unique: false });
     dataStore.createIndex("font", ["font"], { unique: false });
 
     // Set images object
@@ -162,113 +252,37 @@ function loadSavedProject(): void {
   };
 }
 
-/**
- * @property {Function} newProjectIDB - Set new project in IDB
- * @param {Object} newCalendarData - object with data for calendar
- * @param {number} [newCalendarData.startYear]
- * @param {number} [newCalendarData.firstMonthIndex]
- * @param {string} [newCalendarData.lang]
- * @param {string} [newCalendarData.mode] - single-page/multi-page
- */
-function newProjectIDB({
-  startYear,
-  firstMonthIndex,
-  lang,
-  font,
-  mode,
-}: CalendarData): void {
-  // Open IDB
-  const indexedDB =
-    window.indexedDB ||
-    window.mozIndexedDB ||
-    window.webkitIndexedDB ||
-    window.msIndexedDB ||
-    window.shimIndexedDB;
+// Init
+window.addEventListener(
+  "DOMContentLoaded",
+  async () => {
+    // Load fonts data
+    loadedFonts = await loadFonts();
 
-  const request = indexedDB.open("Photo Calendar Project", 1);
+    // Fill inputs with dynamic options
+    yearInput.innerHTML = createYearsOptions(10);
+    fontInput.innerHTML = createFontsOptions();
+    monthInput.innerHTML = createMonthsOptions();
 
-  request.onsuccess = function () {
-    const db = request.result;
-
-    const transaction = db.transaction(db.objectStoreNames, "readwrite");
-
-    const dataStore = transaction.objectStore("current_project_data");
-    const imagesStore = transaction.objectStore("current_project_images");
-
-    // Add new data to db
-    dataStore.put({
-      id: 0,
-      startYear,
-      firstMonthIndex,
-      lang,
-      mode,
-      font,
+    // Show/Hide "New calendar container"
+    newProjectBtn.addEventListener("click", () => {
+      newProjectContainer.style.top = "-60px";
     });
 
-    // Remove old images
-    imagesStore.clear();
+    document.addEventListener("click", (e) => {
+      if (
+        !newCalendarInputsContainer.contains(e.target as Document) &&
+        e.target !== newProjectBtn
+      ) {
+        newProjectContainer.style.top = "0px";
+      }
+    });
 
-    transaction.oncomplete = function () {
-      db.close();
-    };
-  };
-}
+    // Generate new calendar from inputs
+    getButton.addEventListener("click", newProject);
 
-/**
- * @async
- * @property {Function} newCalendar - Init new calendar in DOM
- * @param {Object} newCalendarData - object with data for calendar
- * @param {number} [newCalendarData.startYear]
- * @param {number} [newCalendarData.firstMonthIndex]
- * @param {string} [newCalendarData.lang]
- * @param {string} [newCalendarData.mode] - single-page/multi-page
- */
-async function newCalendar({
-  startYear,
-  firstMonthIndex,
-  lang,
-  font,
-  mode,
-}: CalendarData): Promise<void> {
-
-  const currentFont: FontArray = loadedFonts[font];
-
-  if (mode === "multi-page") {
-    currentCalendar = new MultiPageCalendar(
-      firstMonthIndex,
-      startYear,
-      calendarContainer,
-      controlsContainer,
-      cropControlsContainer,
-      lang,
-      mode,
-      currentFont
-    );
-  } else {
-    currentCalendar = new SinglePageCalendar(
-      firstMonthIndex,
-      startYear,
-      calendarContainer,
-      controlsContainer,
-      cropControlsContainer,
-      lang,
-      mode,
-      currentFont
-    );
-  }
-}
-
-// Init
-window.addEventListener('DOMContentLoaded', async () => {
-  loadedFonts = await loadFonts();
-
-  yearInput.innerHTML = createYearsOptions(10);
-  fontInput.innerHTML = createFontsOptions();
-  monthInput.innerHTML = createMonthsOptions();
-
-  if (!Calendar.getCurrent()) {
-    Calendar.createLoader(calendarContainer);
-  };
-
-  loadSavedProject();
-})
+    // Init IndexedDB
+    loadSavedProject();
+  },
+  { once: true }
+);

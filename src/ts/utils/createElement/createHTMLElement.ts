@@ -18,6 +18,10 @@ export const createHTMLElement = <TagName extends keyof HTMLElementTagNameMap>(
   element.innerHTML = params.content;
  }
 
+ if (params.text) {
+  element.textContent = params.text;
+ }
+
  if (params.parentToAppend) {
   params.parentToAppend.appendChild(element);
  }

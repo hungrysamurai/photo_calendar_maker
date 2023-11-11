@@ -58,10 +58,11 @@ export class MultiPageCalendar extends Calendar {
     this.imagePlaceholderY = 11.4;
 
     this.initDOMSVG();
-    this.initBasicControls();
-    this.initMultiPageControls();
-    this.initBasicControlsEvents();
-    this.initMultiPageControlsEvents();
+
+    if (Calendar.isNewType) {
+      this.initMultiPageControls();
+      this.initMultiPageControlsEvents();
+    }
 
     this.pagesArray = [...this.calendarInner.querySelectorAll("svg")];
   }
@@ -309,7 +310,7 @@ export class MultiPageCalendar extends Calendar {
    * @returns {void}
    */
   setVisibleMonth() {
-    this.calendarInner.style.left = `-${this.currentMonth * 100}%`;
+    Calendar.current.calendarInner.style.left = `-${this.currentMonth * 100}%`;
   }
 
   /**

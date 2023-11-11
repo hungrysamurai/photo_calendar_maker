@@ -1,30 +1,19 @@
 import { Calendar } from "./Calendar";
 
+import { CalendarLanguage, CalendarType } from "../../types";
 /**
  * Class that generates Single Page Calendar (all months on one page)
  */
 export class SinglePageCalendar extends Calendar {
-  /**
-   *
-   * @param {number} firstMonthIndex
-   * @param {number} year
-   * @param {HTMLElement} parentContainer
-   * @param {HTMLElement} controlsContainer
-   * @param {HTMLElement} cropControlsContainer
-   * @param {string} lang
-   * @param {string} type
-   * @param {Array} fontsArray
-   * @param {Object} manualXCoordsArray
-   */
   constructor(
-    firstMonthIndex,
-    year,
-    parentContainer,
-    controlsContainer,
-    cropControlsContainer,
-    lang,
-    type,
-    fontsArray
+    public firstMonthIndex: number,
+    public year: number,
+    public parentContainer: HTMLDivElement,
+    public controlsContainer: HTMLDivElement,
+    public cropControlsContainer: HTMLDivElement,
+    public lang: CalendarLanguage,
+    public type: CalendarType,
+    public currentFont: FontArray
   ) {
     super(
       firstMonthIndex,
@@ -34,9 +23,9 @@ export class SinglePageCalendar extends Calendar {
       cropControlsContainer,
       lang,
       type,
-      fontsArray
+      currentFont
     );
-
+    console.log(Calendar.isNewType);
     this.weekDaysNamesList = this.getWeekDays("short");
 
     // Mockup pre-defined dimensions
@@ -56,8 +45,6 @@ export class SinglePageCalendar extends Calendar {
     this.imagePlaceholderY = 11.4;
 
     this.initDOMSVG();
-    this.initBasicControls();
-    this.initBasicControlsEvents();
   }
 
   /**

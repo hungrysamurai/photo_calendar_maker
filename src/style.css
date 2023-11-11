@@ -308,9 +308,9 @@ svg>svg {
   height: 1.25rem;
 }
 
-/* .crop-controls-container.hide {
+.crop-controls-container.hide {
   visibility: hidden;
-} */
+}
 
 @media (max-width: 768px) {
   .new-project-container button {

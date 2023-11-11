@@ -1,13 +1,10 @@
 import opentype from "opentype.js";
-
-import fontsData from "../../assets/fontsData";
-import { LoadedFontsObject } from "../types/types";
+import fontsData from "../../../assets/fontsData";
 
 export const loadFonts = async (): Promise<LoadedFontsObject> => {
   const loadedFonts = {};
 
   for (const [fontTitle, fontVariants] of Object.entries(fontsData)) {
-
     const { fontNameBold, fontNameRegular } = fontVariants;
 
     const baseName =
@@ -33,4 +30,4 @@ export const loadFonts = async (): Promise<LoadedFontsObject> => {
   }
 
   return loadedFonts;
-}
+};
