@@ -85,11 +85,32 @@ declare global {
     content?: string;
     text?: string;
     parentToAppend?: HTMLElement;
+    children?: SVGElement[] | HTMLElement[];
     insertTo?: {
       element: HTMLElement;
       position: InsertPosition;
     };
     attributes?: {
+      [key: string]: string;
+    };
+  }
+
+  interface CreateSVGElementParams<TagName> {
+    elementName: TagName;
+    id?: string;
+    className?: string;
+    content?: string;
+    text?: string;
+    parentToAppend?: HTMLElement | SVGElement;
+    children?: SVGElement[];
+    insertTo?: {
+      element: HTMLElement;
+      position: InsertPosition;
+    };
+    attributes?: {
+      [key: string]: string;
+    };
+    attributesNS?: {
       [key: string]: string;
     };
   }

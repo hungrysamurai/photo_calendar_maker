@@ -106,14 +106,30 @@ export abstract class Calendar {
   lastMonth: number;
   endYear: number;
 
-  calendarInner: HTMLDivElement;
+  mockupHeight: number;
+  mockupWidth: number;
 
   imagePlaceholderWidth: number;
   imagePlaceholderHeight: number;
   imagePlaceholderX: number;
   imagePlaceholderY: number;
 
+  dayCellHeight: number;
+  dayCellWidth: number;
+  calendarGridX: number;
+  calendarGridY: number;
+  daysFontSize: number;
+
+  calendarGridLeftIndent: number;
+  calendarGridTopIndent: number;
+
+  calendarInner: HTMLDivElement;
+  calendarWrapper: HTMLDivElement;
+  imageElementGroup: SVGGElement;
+
   pagesArray: SVGElement[];
+
+  weekDaysNamesList: string[];
 
   constructor(
     public firstMonthIndex: number,
@@ -342,7 +358,7 @@ export abstract class Calendar {
 
           Calendar.loading(LoadingState.Hide);
           // Save image to IDB
-          this.current.saveToIDB(resultImage);
+          this.current.saveToIDB(resultImage as string);
         });
       };
 
@@ -768,14 +784,14 @@ export abstract class Calendar {
 
   /**
    * @property {Function} getWeekDays - generates array of week days
-   * @param {string} - length of week day name
-   * @returns {Array}
+   * @param {string} length - length of week day name
    */
-  getWeekDays(length) {
+  getWeekDays(length: "long" | "short" | "narrow" | undefined): string[] {
     return Array.from({ length: 7 }, (_, i) => {
       let weekDay = new Intl.DateTimeFormat(this.lang, {
         weekday: length,
       }).format(new Date(0, 0, i + 1));
+
       // Capitalize first letters
       if (this.lang === "ru") {
         weekDay = weekDay[0].toUpperCase() + weekDay.slice(1);
@@ -914,7 +930,7 @@ export abstract class Calendar {
    * @param {number} year - given year
    * @returns {number} - total number of days in given month
    */
-  daysInMonth(month, year) {
+  daysInMonth(month: number, year: number): number {
     return new Date(year, month, 0).getDate();
   }
 
@@ -922,9 +938,8 @@ export abstract class Calendar {
    * @property {Function} getFirstDay - gives position of first day on month
    * @param {number} month
    * @param {number} year
-   * @returns {number}
    */
-  getFirstDay(month, year) {
+  getFirstDay(month: number, year: number): number {
     let index = new Date(year, month, 1);
     if (index.getDay() === 0) {
       return 7;
@@ -937,7 +952,7 @@ export abstract class Calendar {
    * @param {string} imageFile - image to save in IndexedDB
    * @param {number} [id=this.currentMonth] - index of month
    */
-  saveToIDB(imageFile, id = this.currentMonth) {
+  saveToIDB(imageFile: string, id: number = this.currentMonth): void {
     const indexedDB =
       window.indexedDB ||
       window.mozIndexedDB ||
@@ -963,7 +978,6 @@ export abstract class Calendar {
     };
   }
 
+  abstract createSVGMockup(): void;
   abstract retrieveImages(imagesArr: ImageObject[]): void;
-  abstract initDOMSVG(): void;
-  // abstract rebuildControls(): void;
 }

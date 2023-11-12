@@ -1,10 +1,17 @@
 import { Calendar } from "./Calendar";
 
+import { createHTMLElement } from "./utils/createElement/createHTMLElement";
+import { createSVGElement } from "./utils/createElement/createSVGElement";
+
 import { CalendarLanguage, CalendarType } from "../../types";
 /**
  * Class that generates Single Page Calendar (all months on one page)
  */
 export class SinglePageCalendar extends Calendar {
+  monthCellPadding: number;
+  monthCellHeight: number;
+  monthCellWidth: number;
+
   constructor(
     public firstMonthIndex: number,
     public year: number,
@@ -25,8 +32,16 @@ export class SinglePageCalendar extends Calendar {
       type,
       currentFont
     );
-    console.log(Calendar.isNewType);
+
     this.weekDaysNamesList = this.getWeekDays("short");
+
+    this.mockupHeight = Number(
+      (Calendar.outputDimensions[Calendar.currentSize].height / 11.8).toFixed()
+    );
+
+    this.mockupWidth = Number(
+      (Calendar.outputDimensions[Calendar.currentSize].width / 11.8).toFixed()
+    );
 
     // Mockup pre-defined dimensions
     this.dayCellHeight = 4.435;
@@ -38,115 +53,150 @@ export class SinglePageCalendar extends Calendar {
 
     this.monthCellHeight = 37.5;
     this.monthCellWidth = 45.722;
+    this.monthCellPadding = 2.3;
 
     this.imagePlaceholderWidth = 188.3;
     this.imagePlaceholderHeight = 155;
     this.imagePlaceholderX = 10.9;
     this.imagePlaceholderY = 11.4;
 
-    this.initDOMSVG();
+    this.calendarGridLeftIndent = 10;
+    this.calendarGridTopIndent = 170;
+
+    this.monthTitleX = 5;
+    this.monthTitleY = 3.5;
+    this.monthTitleWeight = 4;
+
+    this.yearTitleX = 30;
+    this.yearTitleY = 3.5;
+    this.yearTitleWeigth = 4;
+
+    this.createSVGMockup();
   }
 
   /**
-   * @property {Function} initDOMSVG - creates SVG mockup in DOM
-   * @returns {void}
+   * @property {Function} createSVGMockup - creates SVG mockup in DOM
    */
-  initDOMSVG() {
-    this.calendarWrapper = document.createElement("div");
-    this.calendarWrapper.classList.add("calendar-wrapper");
+  createSVGMockup(): void {
+    this.calendarWrapper = createHTMLElement({
+      elementName: "div",
+      className: "calendar-wrapper",
+      parentToAppend: this.parentContainer,
+    });
 
-    this.calendarInner = document.createElement("div");
-    this.calendarInner.classList.add("calendar-inner");
+    this.calendarInner = createHTMLElement({
+      elementName: "div",
+      className: "calendar-inner",
+      parentToAppend: this.calendarWrapper,
+    });
 
-    const mockupContainer = document.createElement("div");
-    mockupContainer.id = "mockup-container";
+    const mockup = createSVGElement({
+      elementName: "svg",
+      id: "mockup",
+      attributes: {
+        viewBox: `0 0 ${this.mockupWidth} ${this.mockupHeight}`,
+      },
+    });
 
-    mockupContainer.innerHTML = `
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 210 297" id="mockup">
-  
-  <rect id="background-rect" width="210" height="297" style="fill: #fff"/>
+    const backgroundRect = createSVGElement({
+      elementName: "rect",
+      id: "background-rect",
+      parentToAppend: mockup,
+      attributes: {
+        width: this.mockupWidth.toString(),
+        height: this.mockupHeight.toString(),
+        style: "fill: #fff",
+      },
+    });
 
-  <g id="image-group">
+    this.imageElementGroup = createSVGElement({
+      elementName: "g",
+      id: "image-group",
+      parentToAppend: mockup,
+    });
 
-    <rect id="image-placeholder" 
-    x=${this.imagePlaceholderX} 
-    y=${this.imagePlaceholderX} 
-    width=${this.imagePlaceholderWidth} 
-    height=${this.imagePlaceholderHeight}
-    style="fill: #e8e8e8"/>
+    const imagePlaceholderRect = createSVGElement({
+      elementName: "rect",
+      id: "image-placeholder",
+      parentToAppend: this.imageElementGroup,
+      attributes: {
+        x: this.imagePlaceholderX.toString(),
+        y: this.imagePlaceholderX.toString(),
+        width: this.imagePlaceholderWidth.toString(),
+        height: this.imagePlaceholderHeight.toString(),
+        style: "fill: #e8e8e8",
+      },
+    });
 
-  </g>
+    const mockupContainer = createHTMLElement({
+      elementName: "div",
+      id: "mockup-container",
+      parentToAppend: this.calendarInner,
+      children: [mockup],
+    });
 
-</svg>
-    `;
-
-    let x = 10;
-    let y = 170;
+    let x = this.calendarGridLeftIndent;
+    let y = this.calendarGridTopIndent;
 
     // Global loop
     for (let i = 0; i < 12; i++) {
-      // Create month container
-      const monthContainer = document.createElementNS(
-        "http://www.w3.org/2000/svg",
-        "svg"
-      );
-      monthContainer.id = `month-container-${i}`;
-
       // if new row...
       if (i === 4 || i === 8) {
         // Increment y-movement
-        y += this.monthCellHeight + 2.3;
-        x = 10;
+        y += this.monthCellHeight + this.monthCellPadding;
+        x = this.calendarGridLeftIndent;
       }
 
-      monthContainer.setAttribute("x", x);
-      monthContainer.setAttribute("y", y);
-
-      monthContainer.setAttribute("width", this.monthCellWidth);
-      monthContainer.setAttribute("height", this.monthCellHeight);
-
-      monthContainer.dataset.month = this.monthCounter;
-      monthContainer.dataset.year = this.year;
+      // Create month container
+      const monthContainer = createSVGElement({
+        elementName: "svg",
+        id: `month-container-${i}`,
+        attributes: {
+          x: x.toString(),
+          y: y.toString(),
+          width: this.monthCellWidth.toString(),
+          height: this.monthCellHeight.toString(),
+          ["data-month"]: this.monthCounter.toString(),
+          ["data-year"]: this.year.toString(),
+        },
+      });
 
       // Increment x-movement
-      x += this.monthCellWidth + 2.3;
+      x += this.monthCellWidth + this.monthCellPadding;
 
-      // Populate current month
-      monthContainer.innerHTML = `
-      <g id="month-title">
-          <g>
-          ${this.getOutline(this.monthsNamesList[this.monthCounter], 5, 3.5, 4)}
-          </g>
-        </g>
+      const monthTitle = createSVGElement({
+        elementName: "g",
+        id: "month-title",
+        parentToAppend: monthContainer,
+        content: this.getOutline(
+          this.monthsNamesList[this.monthCounter],
+          5,
+          3.5,
+          4
+        ),
+      });
 
-        <g id="year-title">
-          <g>
-          ${this.getOutline(`${this.year}`, 30, 3.5, 4)}
-          </g>
-        </g>
+      const yearTitle = createSVGElement({
+        elementName: "g",
+        id: "year-title",
+        parentToAppend: monthContainer,
+        content: this.getOutline(`${this.year}`, 30, 3.5, 4),
+      });
 
-        <g id="week-days-titles">
-          </g>
-        </g>
+      const daysTitles = createSVGElement({
+        elementName: "g",
+        id: "week-days-titles",
+        parentToAppend: monthContainer,
+      });
 
-          <g id="days-grid"></g>
-        `;
-
-      const daysTitles = monthContainer.querySelector("#week-days-titles");
+      const currentMonthGrid = createSVGElement({
+        elementName: "g",
+        id: "days-grid",
+        parentToAppend: monthContainer,
+      });
 
       // Generate week days paths
       this.weekDaysNamesList.map((weekDayName, i) => {
-        const weekDayCell = document.createElementNS(
-          "http://www.w3.org/2000/svg",
-          "g"
-        );
-        weekDayCell.setAttribute(
-          "transform",
-          `translate(${Number(
-            this.calendarGridX + this.dayCellWidth * i
-          ).toFixed(2)} 0)`
-        );
-
         // исключение для 'Cр'
         let descenderException = i === 2 && this.lang === "ru" ? true : false;
 
@@ -157,8 +207,16 @@ export class SinglePageCalendar extends Calendar {
           this.lang === "ru" ? 2.9 : 2.6
         );
 
-        weekDayCell.appendChild(weekDayPath);
-        daysTitles.appendChild(weekDayCell);
+        const weekDayCell = createSVGElement({
+          elementName: "g",
+          parentToAppend: daysTitles,
+          attributes: {
+            transform: `translate(${Number(
+              this.calendarGridX + this.dayCellWidth * i
+            ).toFixed(2)} 0)`,
+          },
+          children: [weekDayPath],
+        });
       });
 
       if (i === 11) {
@@ -173,8 +231,6 @@ export class SinglePageCalendar extends Calendar {
         this.year++;
       }
 
-      const currentMonthGrid = monthContainer.querySelector("#days-grid");
-
       this.createMonthGrid(
         currentMonthGrid,
         this.getFirstDay(this.monthCounter - 1, this.year) - 1,
@@ -187,44 +243,38 @@ export class SinglePageCalendar extends Calendar {
       );
 
       // Append to main SVG
-      mockupContainer.querySelector("svg").appendChild(monthContainer);
+      mockup.appendChild(monthContainer);
     }
-
-    // Insert to DOM
-    this.calendarInner.append(mockupContainer);
-    this.calendarWrapper.append(this.calendarInner);
-    this.parentContainer.append(this.calendarWrapper);
   }
 
   /**
    * @property {Fucntion} retrieveImages - load images from given array to DOM
    * @param {Array} imagesArr - Array of images to load
-   * @returns {void}
    */
-  retrieveImages(imagesArr) {
+  retrieveImages(imagesArr: ImageObject[]): void {
     if (imagesArr.length === 0) {
       return;
     }
-
     const imageFile = imagesArr[0].image;
 
     fetch(imageFile).then((res) => {
+      this.imageElementGroup.innerHTML = "";
+
       const imgURL = res.url;
-      const imageGroup = document.querySelector("#image-group");
 
-      const imageEl = document.createElementNS(
-        "http://www.w3.org/2000/svg",
-        "image"
-      );
-
-      imageEl.setAttribute("height", this.imagePlaceholderHeight);
-      imageEl.setAttribute("width", this.imagePlaceholderWidth);
-      imageEl.setAttribute("x", this.imagePlaceholderX);
-      imageEl.setAttribute("y", this.imagePlaceholderY);
-      imageEl.setAttributeNS("http://www.w3.org/1999/xlink", "href", imgURL);
-
-      imageGroup.innerHTML = "";
-      imageGroup.appendChild(imageEl);
+      const imageEl = createSVGElement({
+        elementName: "image",
+        parentToAppend: this.imageElementGroup,
+        attributes: {
+          height: this.imagePlaceholderHeight.toString(),
+          width: this.imagePlaceholderWidth.toString(),
+          x: this.imagePlaceholderX.toString(),
+          y: this.imagePlaceholderY.toString(),
+        },
+        attributesNS: {
+          href: imgURL,
+        },
+      });
     });
   }
 }

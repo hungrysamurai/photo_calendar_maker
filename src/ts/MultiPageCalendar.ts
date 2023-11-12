@@ -57,7 +57,7 @@ export class MultiPageCalendar extends Calendar {
     this.imagePlaceholderX = 10.9;
     this.imagePlaceholderY = 11.4;
 
-    this.initDOMSVG();
+    this.createSVGMockup();
 
     if (Calendar.isNewType) {
       this.initMultiPageControls();
@@ -68,10 +68,10 @@ export class MultiPageCalendar extends Calendar {
   }
 
   /**
-   * @property {Function} initDOMSVG - creates SVG mockup in DOM
+   * @property {Function} createSVGMockup - creates SVG mockup in DOM
    * @returns {void}
    */
-  initDOMSVG() {
+  createSVGMockup() {
     this.calendarWrapper = document.createElement("div");
     this.calendarWrapper.classList.add("calendar-wrapper");
 
