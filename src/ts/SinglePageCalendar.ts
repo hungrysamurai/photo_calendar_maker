@@ -32,7 +32,6 @@ export class SinglePageCalendar extends Calendar {
       type,
       currentFont
     );
-
     this.weekDaysNamesList = this.getWeekDays("short");
 
     this.mockupHeight = Number(

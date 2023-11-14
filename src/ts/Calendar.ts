@@ -1,6 +1,6 @@
 import Cropper from "cropperjs";
-import SVGtoPDF from "svg-to-pdfkit";
 
+import SVGtoPDF from "svg-to-pdfkit";
 import BlobStream from "blob-stream";
 import PDFDocument from "pdfkit/js/pdfkit.standalone";
 
@@ -20,6 +20,7 @@ import {
   LoadingState,
   PDFPagesRangeToDownload,
 } from "../../types.d";
+import { createSVGElement } from "./utils/createElement/createSVGElement";
 
 /**
  * Class that includes basic logic of calendar grid creation, methods to init basic DOM elements, upload/download documents (single), Cropper functionality, image compression, saving to IndexedDB (single) and loader
@@ -65,6 +66,19 @@ export abstract class Calendar {
         this.loadingScreen.classList.remove("hide");
         Calendar.current.controlsContainer.style.pointerEvents = "none";
       }
+    }
+  }
+
+  static cleanUp(controlsContainer: HTMLDivElement): void {
+    Calendar.current.parentContainer.innerHTML = '';
+
+    // Clean controls to default if new type
+    if (Calendar.isNewType) {
+      [...controlsContainer.children].forEach(el => {
+        if (!this.basicControls.includes(el as HTMLElement)) {
+          el.remove();
+        }
+      })
     }
   }
 
@@ -161,6 +175,7 @@ export abstract class Calendar {
     this.startYear = this.year;
 
     if (!Calendar.current) {
+      // First initialization
       Calendar.createLoader(parentContainer);
       Calendar.initBasicControls(controlsContainer);
       Calendar.initBasicControlsEvents();
@@ -169,6 +184,9 @@ export abstract class Calendar {
     } else {
       // Check new type vs old type
       Calendar.isNewType = type !== Calendar.current.type;
+
+      // Clean  mockup container
+      Calendar.cleanUp(controlsContainer);
     }
 
     Calendar.current = this;
@@ -320,24 +338,20 @@ export abstract class Calendar {
 
       const reader = new FileReader();
 
-      reader.onload = (e) => {
+      reader.onload = () => {
         const imageGroup = this.getCurrentMockup("#image-group");
+        imageGroup.innerHTML = '';
 
-        const imageEl = document.createElementNS(
-          "http://www.w3.org/2000/svg",
-          "image"
-        );
-
-        imageEl.setAttribute(
-          "height",
-          this.current.imagePlaceholderHeight.toString()
-        );
-        imageEl.setAttribute(
-          "width",
-          this.current.imagePlaceholderWidth.toString()
-        );
-        imageEl.setAttribute("x", this.current.imagePlaceholderX.toString());
-        imageEl.setAttribute("y", this.current.imagePlaceholderY.toString());
+        const imageEl = createSVGElement({
+          elementName: 'image',
+          attributes: {
+            height: this.current.imagePlaceholderHeight.toString(),
+            width: this.current.imagePlaceholderWidth.toString(),
+            x: this.current.imagePlaceholderX.toString(),
+            y: this.current.imagePlaceholderY.toString()
+          },
+          parentToAppend: imageGroup
+        })
 
         // Image optimization
         const reduced = this.reduceImageSize(
@@ -353,10 +367,9 @@ export abstract class Calendar {
             "href",
             resultImage as string
           );
-          imageGroup.innerHTML = "";
-          imageGroup.appendChild(imageEl);
 
           Calendar.loading(LoadingState.Hide);
+
           // Save image to IDB
           this.current.saveToIDB(resultImage as string);
         });
@@ -737,9 +750,16 @@ export abstract class Calendar {
    * @param {number} fontSize
    * @param {string} fontWeight
    * @param {string} fill
-   * @returns {HTMLElement} - <path>
+   * @returns {string} - string representation of <path> element
    */
-  getOutline(string, x, y, fontSize, fontWeight = "bold", fill = "#231f20") {
+  getOutline(
+    string: string,
+    x: number,
+    y: number,
+    fontSize: number,
+    fontWeight: string = "bold",
+    fill: string = "#231f20"
+  ): string {
     const outline = this.fonts[fontWeight].getPath(string, x, y, fontSize);
     outline.fill = fill;
     return outline.toSVG();
@@ -753,16 +773,16 @@ export abstract class Calendar {
    * @param {number} fontSize
    * @param {string} fontWeight
    * @param {string} fill
-   * @returns {HTMLElement} - <path>
+   * @returns {SVGPathElement} - <path>
    */
   getAndPlaceOutline(
-    string,
-    x,
-    y,
-    fontSize,
-    fontWeight = "bold",
-    fill = "#231f20"
-  ) {
+    string: string,
+    x: number,
+    y: number,
+    fontSize: number,
+    fontWeight: string = "bold",
+    fill: string = "#231f20"
+  ): SVGPathElement {
     const outline = this.fonts[fontWeight].getPath(string, x, y, fontSize);
 
     const { x1, x2, y1, y2 } = outline.getBoundingBox();
@@ -770,14 +790,14 @@ export abstract class Calendar {
     const xShift = Number(((x2 - x1) / 2).toFixed(2));
     const yShift = Number(((y2 - y1) / 2).toFixed(2));
 
-    const pathElement = document.createElementNS(
-      "http://www.w3.org/2000/svg",
-      "path"
-    );
-
-    pathElement.setAttribute("d", outline.toPathData());
-    pathElement.setAttribute("transform", `translate(-${xShift} ${yShift})`);
-    pathElement.setAttribute("fill", fill);
+    const pathElement = createSVGElement({
+      elementName: 'path',
+      attributes: {
+        d: outline.toPathData(),
+        transform: `translate(-${xShift} ${yShift})`,
+        fill
+      }
+    })
 
     return pathElement;
   }
@@ -802,26 +822,25 @@ export abstract class Calendar {
 
   /**
    * @property {Function} createMonthGrid - Generates month grid in given DOM element with provided parameters
-   * @param {HTMLElement} monthGrid - element to append calendar grid
+   * @param {SVGGElement} monthGrid - element to append calendar grid
    * @param {number} startIndex - first day of month
    * @param {number} totalDays - number of days in current month
    * @param {number} prevMonthDaysNumber - number of days in prev month
    * @param {number} initialX - initial X coords to place day cell
    * @param {number} initialY - initial Y coords to place day cell
-   * @param {Object} glyphsSet - Object with SVG glyphs
+   * @param {number} fontSize - Object with SVG glyphs
    * @param {string} cellStyles - additional styles for each day cell
-   * @returns {void}
    */
   createMonthGrid(
-    monthGrid,
-    startIndex,
-    totalDays,
-    prevMonthDaysNumber,
-    initialX,
-    initialY,
-    fontSize,
-    cellStyles
-  ) {
+    monthGrid: SVGGElement,
+    startIndex: number,
+    totalDays: number,
+    prevMonthDaysNumber: number,
+    initialX: number,
+    initialY: number,
+    fontSize: number,
+    cellStyles: string
+  ): void {
     let x = initialX;
     let y = initialY;
 
@@ -900,25 +919,39 @@ export abstract class Calendar {
    * @param {number} y - y coordinate of cell
    * @param {number} cellNumber - number of day
    * @param {string} cellStyles - addition CSS styles for cell
-   * @returns {HTMLElement} - DOM element of cell
+   * @returns {SVGGElement} - DOM element of cell
    */
-  createDayCell(x, y, cellNumber, cellStyles) {
-    let dayGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+  createDayCell(x: number, y: number, cellNumber: number, cellStyles: string): SVGGElement {
+    const dayGroup = createSVGElement({
+      elementName: 'g',
+      id: `day-${cellNumber}-cell`,
+      attributes: {
+        width: this.dayCellWidth.toString(),
+        height: this.dayCellHeight.toString()
+      }
+    });
 
-    dayGroup.setAttribute("width", this.dayCellWidth);
-    dayGroup.setAttribute("height", this.dayCellHeight);
-    dayGroup.setAttribute("id", `day-${cellNumber}-cell`);
+    const dayRect = createSVGElement({
+      elementName: 'rect',
+      parentToAppend: dayGroup,
+      attributes: {
+        x: x.toString(),
+        y: y.toString(),
+        width: this.dayCellWidth.toString(),
+        height: this.dayCellHeight.toString(),
+        style: cellStyles ? cellStyles : ''
+      }
+    });
 
-    dayGroup.innerHTML = `
-      <rect y="${y}" x="${x}" 
-      width="${this.dayCellWidth}" 
-      height="${this.dayCellHeight}"
-      style="${cellStyles}"/></rect>
-              
-        <g class="cell-digit"
-        transform="translate(${x} ${y})">
-      </g>
-    `;
+    const cellDigit = createSVGElement({
+      elementName: 'g',
+      parentToAppend: dayGroup,
+      attributes: {
+        class: 'cell-digit',
+        transform: `translate(${x} ${y})`
+      }
+    })
+
     return dayGroup;
   }
 
