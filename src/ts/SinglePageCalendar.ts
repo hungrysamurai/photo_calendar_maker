@@ -38,11 +38,6 @@ export class SinglePageCalendar extends Calendar {
 
     this.mockupOptions = new A_FormatSinglePageMockupOptions(format)[format];
 
-    console.log(
-      (this.mockupOptions.imagePlaceholderWidth * 11.8).toFixed(),
-      (this.mockupOptions.imagePlaceholderHeight * 11.8).toFixed()
-    );
-
     this.weekDaysNamesList = this.getWeekDays("short");
 
     this.createSVGMockup();
