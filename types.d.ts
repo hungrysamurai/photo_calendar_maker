@@ -5,10 +5,17 @@ export enum CalendarLanguage {
   EN = "en",
 }
 
-export enum FormatNames {
-  A5 = "A5",
-  A4 = "A4",
-  A3 = "A3",
+export enum FormatName {
+  A6_Y = "A6_Y",
+  A6_X = "A6_X",
+  A5_Y = "A5_Y",
+  A5_X = "A5_X",
+  A4_Y = "A4_Y",
+  A4_X = "A4_X",
+  A3_Y = "A3_Y",
+  A3_X = "A3_X",
+  A2_Y = "A2_Y",
+  A2_X = "A2_X",
 }
 
 export enum CalendarType {
@@ -51,6 +58,7 @@ declare global {
     firstMonthIndex: number;
     lang: CalendarLanguage;
     font: string;
+    format: FormatName;
     type: CalendarType;
   };
 
@@ -67,15 +75,6 @@ declare global {
 
   type FontData = {
     [key in FontSubfamily]?: Font;
-  };
-
-  type FormatWidthHeigth = {
-    width: number;
-    height: number;
-  };
-
-  type OutputDimensions = {
-    [key in FormatNames]: FormatWidthHeigth;
   };
 
   interface CreateHTMLElementParams<TagName> {
@@ -113,5 +112,64 @@ declare global {
     attributesNS?: {
       [key: string]: string;
     };
+  }
+
+  type FormatWidthHeigth = {
+    width: number;
+    height: number;
+  };
+
+  type OutputDimensions = {
+    [key in FormatName]: FormatWidthHeigth;
+  };
+
+  interface MockupInputOptions {
+    mockupBackgroundFill: string;
+    dayCellHeight: number;
+    dayCellWidth: number;
+    calendarGridX: number;
+    calendarGridY: number;
+    daysFontSize: number;
+    dayCellStyles: string;
+    imagePlaceholderWidth: number;
+    imagePlaceholderHeight: number;
+    imagePlaceholderX: number;
+    imagePlaceholderY: number;
+    monthTitleX: number;
+    monthTitleY: number;
+    monthTitleFontSize: number;
+    yearTitleX: number;
+    yearTitleY: number;
+    yearTitleFontSize: number;
+    weekDayY: number;
+    weekDayFontSize: number;
+  }
+
+  interface SinglePageMockupInputOptions extends MockupInputOptions {
+    monthCellHeight: number;
+    monthCellWidth: number;
+    monthCellPadding: number;
+    calendarGridLeftIndent: number;
+    calendarGridTopIndent: number;
+    descenderException: number;
+    numberOfColumns: number;
+  }
+
+  interface SinglePageMockupOutputOptions extends SinglePageMockupInputOptions {
+    pixelsDimensions: FormatWidthHeigth;
+    mockupHeight: number;
+    mockupWidth: number;
+    weekDayX: number;
+  }
+
+  interface MultiPageMockupInputOptions extends MockupInputOptions {
+    weekDaysY: number;
+  }
+
+  interface MultiPageMockupOutputOptions extends MultiPageMockupInputOptions {
+    pixelsDimensions: FormatWidthHeigth;
+    mockupHeight: number;
+    mockupWidth: number;
+    weekDayX: number;
   }
 }

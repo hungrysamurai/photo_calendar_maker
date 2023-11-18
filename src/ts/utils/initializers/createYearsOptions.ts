@@ -1,5 +1,5 @@
 /**
- * @property {Function} createYearsOptions - Generate years elements for select input (current year + 5)
+ * @property {Function} createYearsOptions - Generate years elements for select input (current year + param)
  */
 export const createYearsOptions = (numberOfYearsToAdd: number): string => {
   const currentYear = new Date().getFullYear();
@@ -9,8 +9,9 @@ export const createYearsOptions = (numberOfYearsToAdd: number): string => {
     years.push(new Date().getFullYear() + i);
   }
 
-  return years.map((year) => {
-    return `<option value=${year}>${year}</option>`;
-  })
+  return years
+    .map((year) => {
+      return `<option value=${year}>${year}</option>`;
+    })
     .join("");
-}
+};

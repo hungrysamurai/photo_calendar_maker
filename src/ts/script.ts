@@ -7,8 +7,11 @@ import { collectDataFromInputs } from "./utils/collectDataFromInputs.ts";
 import { createYearsOptions } from "./utils/initializers/createYearsOptions.ts";
 import { createFontsOptions } from "./utils/initializers/createFontsOptions.ts";
 import { createMonthsOptions } from "./utils/initializers/createMonthsOptions.ts";
+import { createFormatsOptions } from "./utils/initializers/createFormatsOptions.ts";
+
 import { loadFonts } from "./utils/initializers/loadFonts.ts";
-import { CalendarType, CalendarLanguage } from "../../types.d";
+
+import { CalendarType } from "../../types.d";
 
 const newProjectContainer = document.querySelector(
   ".new-project-container"
@@ -28,6 +31,7 @@ const yearInput = document.querySelector("#year-input") as HTMLSelectElement;
 const multiModeBtn = document.querySelector("#multi-page") as HTMLInputElement;
 const langInput = document.querySelector("#lang-input") as HTMLSelectElement;
 const fontInput = document.querySelector("#font-input") as HTMLSelectElement;
+const formatInput = document.querySelector('#format-input') as HTMLSelectElement;
 
 const calendarContainer = document.querySelector(
   ".calendar-container"
@@ -52,17 +56,13 @@ function newProject() {
     monthInput,
     langInput,
     fontInput,
+    formatInput,
     multiModeBtn
   );
 
+
   // Purge all current content
   calendarContainer.innerHTML = "";
-
-  // If old project in cropper mode - remove cropper
-  // if (document.querySelector(".cropper-outer-container")) {
-  //   (document.querySelector(".cropper-outer-container") as HTMLDivElement
-  //   ).remove();
-  // }
 
   // Generate new calendar
   newCalendar(newCalendarData);
@@ -88,6 +88,7 @@ async function newCalendar({
   firstMonthIndex,
   lang,
   font,
+  format,
   type,
 }: CalendarData): Promise<void> {
   const currentFont: FontArray = loadedFonts[font];
@@ -101,7 +102,8 @@ async function newCalendar({
       cropControlsContainer,
       lang,
       type,
-      currentFont
+      currentFont,
+      format
     );
   } else {
     currentCalendar = new SinglePageCalendar(
@@ -112,7 +114,8 @@ async function newCalendar({
       cropControlsContainer,
       lang,
       type,
-      currentFont
+      currentFont,
+      format
     );
   }
 }
@@ -130,6 +133,7 @@ function newProjectIDB({
   firstMonthIndex,
   lang,
   font,
+  format,
   type,
 }: CalendarData): void {
   // Open IDB
@@ -158,6 +162,7 @@ function newProjectIDB({
       lang,
       type,
       font,
+      format
     });
 
     // Remove old images
@@ -239,6 +244,7 @@ function loadSavedProject(): void {
     dataStore.createIndex("lang", ["lang"], { unique: false });
     dataStore.createIndex("type", ["type"], { unique: false });
     dataStore.createIndex("font", ["font"], { unique: false });
+    dataStore.createIndex("format", ["format"], { unique: false });
 
     // Set images object
     const imagesStore = db.createObjectStore("current_project_images", {
@@ -263,10 +269,11 @@ window.addEventListener(
     yearInput.innerHTML = createYearsOptions(10);
     fontInput.innerHTML = createFontsOptions();
     monthInput.innerHTML = createMonthsOptions();
+    formatInput.innerHTML = createFormatsOptions();
 
     // Show/Hide "New calendar container"
     newProjectBtn.addEventListener("click", () => {
-      newProjectContainer.style.top = "-60px";
+      newProjectContainer.style.top = "-100px";
     });
 
     document.addEventListener("click", (e) => {

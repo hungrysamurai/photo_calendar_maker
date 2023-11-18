@@ -11,10 +11,10 @@ import { createHTMLElement } from "./utils/createElement/createHTMLElement";
  * Object with SVG icons
  */
 import { icons } from "../assets/icons";
-import { outputFormats } from "../assets/outputFormats";
+import { A_outputFormats } from "../assets/A_FormatOptions/A_OutputDimensions";
 
 import {
-  FormatNames,
+  FormatName,
   CalendarType,
   CalendarLanguage,
   LoadingState,
@@ -70,15 +70,15 @@ export abstract class Calendar {
   }
 
   static cleanUp(controlsContainer: HTMLDivElement): void {
-    Calendar.current.parentContainer.innerHTML = '';
+    Calendar.current.parentContainer.innerHTML = "";
 
     // Clean controls to default if new type
     if (Calendar.isNewType) {
-      [...controlsContainer.children].forEach(el => {
+      [...controlsContainer.children].forEach((el) => {
         if (!this.basicControls.includes(el as HTMLElement)) {
           el.remove();
         }
-      })
+      });
     }
   }
 
@@ -87,12 +87,10 @@ export abstract class Calendar {
   /**
    * Dimensions of document (px)
    */
-  static outputDimensions: OutputDimensions = outputFormats;
-  static currentSize: FormatNames = FormatNames.A4;
+  static outputDimensions: OutputDimensions = A_outputFormats;
 
   static currentPDFDownloadBtn: HTMLButtonElement;
   static jpgDownloadBtn: HTMLButtonElement;
-  static formatSelectInput: HTMLSelectElement;
   static cropBtn: HTMLButtonElement;
   static uploadImgInput: HTMLInputElement;
   static uploadImgBtn: HTMLLabelElement;
@@ -106,6 +104,8 @@ export abstract class Calendar {
   static applyCropBtn: HTMLButtonElement;
   static cancelCropBtn: HTMLButtonElement;
 
+  mockupOptions: SinglePageMockupOutputOptions | MultiPageMockupOutputOptions;
+
   // Set fonts object
   fonts: FontData = {};
 
@@ -115,7 +115,7 @@ export abstract class Calendar {
   firstMonth: number;
 
   // Rate to reduce uploading images size
-  imageReduceSizeRate: number = 15;
+  imageReduceSizeRate: number = 11.8;
   startYear: number;
   lastMonth: number;
   endYear: number;
@@ -141,7 +141,7 @@ export abstract class Calendar {
   calendarWrapper: HTMLDivElement;
   imageElementGroup: SVGGElement;
 
-  pagesArray: SVGElement[];
+  pagesArray: SVGElement[] = [];
 
   weekDaysNamesList: string[];
 
@@ -153,7 +153,8 @@ export abstract class Calendar {
     public cropControlsContainer: HTMLDivElement,
     public lang: CalendarLanguage,
     public type: CalendarType,
-    public currentFont: FontArray
+    public currentFont: FontArray,
+    public format: FormatName
   ) {
     // Add subfamilies to fonts object
     for (let i = 0; i < currentFont.length; i++) {
@@ -215,32 +216,6 @@ export abstract class Calendar {
     });
 
     this.basicControls.push(this.jpgDownloadBtn);
-
-    this.formatSelectInput = createHTMLElement({
-      elementName: "select",
-      id: "format-select",
-      parentToAppend: controlsContainer,
-    });
-
-    const formats = Object.keys(this.outputDimensions);
-
-    for (const format of formats) {
-      const optionEl = createHTMLElement({
-        elementName: "option",
-        text: format,
-        attributes: {
-          value: format,
-        },
-      });
-
-      if (format === this.currentSize) {
-        optionEl.selected = true;
-      }
-
-      this.formatSelectInput.append(optionEl);
-    }
-
-    this.basicControls.push(this.formatSelectInput);
 
     this.cropBtn = createHTMLElement({
       elementName: "button",
@@ -321,9 +296,9 @@ export abstract class Calendar {
       this.uploadImg(e);
     });
 
-    this.formatSelectInput.addEventListener("input", (e) => {
-      this.currentSize = (e.target as HTMLInputElement).value as FormatNames;
-    });
+    // this.formatSelectInput.addEventListener("input", (e) => {
+    //   this.currentSize = (e.target as HTMLInputElement).value as FormatName;
+    // });
   }
 
   // Upload/download section
@@ -340,24 +315,27 @@ export abstract class Calendar {
 
       reader.onload = () => {
         const imageGroup = this.getCurrentMockup("#image-group");
-        imageGroup.innerHTML = '';
+        imageGroup.innerHTML = "";
 
         const imageEl = createSVGElement({
-          elementName: 'image',
+          elementName: "image",
           attributes: {
-            height: this.current.imagePlaceholderHeight.toString(),
-            width: this.current.imagePlaceholderWidth.toString(),
-            x: this.current.imagePlaceholderX.toString(),
-            y: this.current.imagePlaceholderY.toString()
+            height:
+              this.current.mockupOptions.imagePlaceholderHeight.toString(),
+            width: this.current.mockupOptions.imagePlaceholderWidth.toString(),
+            x: this.current.mockupOptions.imagePlaceholderX.toString(),
+            y: this.current.mockupOptions.imagePlaceholderY.toString(),
           },
-          parentToAppend: imageGroup
-        })
+          parentToAppend: imageGroup,
+        });
 
         // Image optimization
         const reduced = this.reduceImageSize(
           reader.result as string,
-          this.current.imagePlaceholderWidth * this.current.imageReduceSizeRate,
-          this.current.imagePlaceholderHeight * this.current.imageReduceSizeRate
+          this.current.mockupOptions.imagePlaceholderWidth *
+            this.current.imageReduceSizeRate,
+          this.current.mockupOptions.imagePlaceholderHeight *
+            this.current.imageReduceSizeRate
         );
 
         reduced.then((reducedImage) => {
@@ -414,13 +392,12 @@ export abstract class Calendar {
             height = maxHeight;
           }
         }
-
         canvas.width = width;
         canvas.height = height;
         let ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
         ctx.drawImage(img, 0, 0, width, height);
         // Return reduced image
-        resolve(canvas.toDataURL("image/jpeg"));
+        resolve(canvas.toDataURL("image/png"));
       };
     });
   }
@@ -433,16 +410,17 @@ export abstract class Calendar {
     const svgData = new XMLSerializer().serializeToString(svg);
 
     const canvas = document.createElement("canvas");
-    canvas.width = this.outputDimensions[this.currentSize].width;
-    canvas.height = this.outputDimensions[this.currentSize].height;
+    canvas.width = this.outputDimensions[this.current.format].width;
+    canvas.height = this.outputDimensions[this.current.format].height;
     const ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
 
     // SVG attributes fix for proper rasterization
     let properAttributes: string;
+    console.log(this.current.mockupOptions.mockupWidth);
 
     properAttributes = svgData.replace(
-      `viewBox="0 0 210 297"`,
-      `width="210" height="297" version="1.1"`
+      `viewBox="0 0 ${this.current.mockupOptions.mockupWidth} ${this.current.mockupOptions.mockupHeight}"`,
+      `width="${this.current.mockupOptions.mockupWidth}" height="${this.current.mockupOptions.mockupHeight}" version="1.1"`
     );
 
     const img = new Image();
@@ -473,7 +451,12 @@ export abstract class Calendar {
     Calendar.loading(LoadingState.Show);
     let pagesArray: SVGElement[] = [];
 
-    const doc = new PDFDocument({ size: this.currentSize });
+    const doc = new PDFDocument({
+      size: [
+        this.outputDimensions[this.current.format].width,
+        this.outputDimensions[this.current.format].height,
+      ],
+    });
     const stream = doc.pipe(BlobStream());
 
     if (range === PDFPagesRangeToDownload.Current) {
@@ -791,13 +774,13 @@ export abstract class Calendar {
     const yShift = Number(((y2 - y1) / 2).toFixed(2));
 
     const pathElement = createSVGElement({
-      elementName: 'path',
+      elementName: "path",
       attributes: {
         d: outline.toPathData(),
         transform: `translate(-${xShift} ${yShift})`,
-        fill
-      }
-    })
+        fill,
+      },
+    });
 
     return pathElement;
   }
@@ -851,11 +834,11 @@ export abstract class Calendar {
     for (let i = 1; i < 43; i++) {
       if (i % 7 !== 0) {
         monthGrid.appendChild(this.createDayCell(x, y, i, cellStyles));
-        x += this.dayCellWidth;
+        x += this.mockupOptions.dayCellWidth;
       } else {
         monthGrid.appendChild(this.createDayCell(x, y, i, cellStyles));
         x = initialX;
-        y += this.dayCellHeight;
+        y += this.mockupOptions.dayCellHeight;
       }
     }
 
@@ -867,8 +850,8 @@ export abstract class Calendar {
       cellsTextFields[currentDayIndex].appendChild(
         this.getAndPlaceOutline(
           `${i}`,
-          this.dayCellWidth / 2,
-          this.dayCellHeight / 2,
+          this.mockupOptions.dayCellWidth / 2,
+          this.mockupOptions.dayCellHeight / 2,
           fontSize
         )
       );
@@ -882,8 +865,8 @@ export abstract class Calendar {
         cellsTextFields[i].appendChild(
           this.getAndPlaceOutline(
             `${prevMonthDaysCount}`,
-            this.dayCellWidth / 2,
-            this.dayCellHeight / 2,
+            this.mockupOptions.dayCellWidth / 2,
+            this.mockupOptions.dayCellHeight / 2,
             fontSize,
             "regular",
             "#999"
@@ -900,8 +883,8 @@ export abstract class Calendar {
         cellsTextFields[currentDayIndex].appendChild(
           this.getAndPlaceOutline(
             `${i}`,
-            this.dayCellWidth / 2,
-            this.dayCellHeight / 2,
+            this.mockupOptions.dayCellWidth / 2,
+            this.mockupOptions.dayCellHeight / 2,
             fontSize,
             "regular",
             "#999"
@@ -921,36 +904,41 @@ export abstract class Calendar {
    * @param {string} cellStyles - addition CSS styles for cell
    * @returns {SVGGElement} - DOM element of cell
    */
-  createDayCell(x: number, y: number, cellNumber: number, cellStyles: string): SVGGElement {
+  createDayCell(
+    x: number,
+    y: number,
+    cellNumber: number,
+    cellStyles: string
+  ): SVGGElement {
     const dayGroup = createSVGElement({
-      elementName: 'g',
+      elementName: "g",
       id: `day-${cellNumber}-cell`,
       attributes: {
-        width: this.dayCellWidth.toString(),
-        height: this.dayCellHeight.toString()
-      }
+        width: this.mockupOptions.dayCellWidth.toString(),
+        height: this.mockupOptions.dayCellHeight.toString(),
+      },
     });
 
     const dayRect = createSVGElement({
-      elementName: 'rect',
+      elementName: "rect",
       parentToAppend: dayGroup,
       attributes: {
         x: x.toString(),
         y: y.toString(),
-        width: this.dayCellWidth.toString(),
-        height: this.dayCellHeight.toString(),
-        style: cellStyles ? cellStyles : ''
-      }
+        width: this.mockupOptions.dayCellWidth.toString(),
+        height: this.mockupOptions.dayCellHeight.toString(),
+        style: cellStyles ? cellStyles : "",
+      },
     });
 
     const cellDigit = createSVGElement({
-      elementName: 'g',
+      elementName: "g",
       parentToAppend: dayGroup,
       attributes: {
-        class: 'cell-digit',
-        transform: `translate(${x} ${y})`
-      }
-    })
+        class: "cell-digit",
+        transform: `translate(${x} ${y})`,
+      },
+    });
 
     return dayGroup;
   }

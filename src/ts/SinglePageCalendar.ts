@@ -3,14 +3,15 @@ import { Calendar } from "./Calendar";
 import { createHTMLElement } from "./utils/createElement/createHTMLElement";
 import { createSVGElement } from "./utils/createElement/createSVGElement";
 
-import { CalendarLanguage, CalendarType } from "../../types";
+import { CalendarLanguage, CalendarType, FormatName } from "../../types";
+
+import { A_FormatSinglePageMockupOptions } from "../assets/A_FormatOptions/A_FormatOptions";
+// import A_FormatYSinglePageInputOptions from "../assets/A_FormatOptions/A_FormatYSinglePageInputOptions";
 /**
  * Class that generates Single Page Calendar (all months on one page)
  */
 export class SinglePageCalendar extends Calendar {
-  monthCellPadding: number;
-  monthCellHeight: number;
-  monthCellWidth: number;
+  mockupOptions: SinglePageMockupOutputOptions;
 
   constructor(
     public firstMonthIndex: number,
@@ -20,7 +21,8 @@ export class SinglePageCalendar extends Calendar {
     public cropControlsContainer: HTMLDivElement,
     public lang: CalendarLanguage,
     public type: CalendarType,
-    public currentFont: FontArray
+    public currentFont: FontArray,
+    public format: FormatName
   ) {
     super(
       firstMonthIndex,
@@ -30,45 +32,18 @@ export class SinglePageCalendar extends Calendar {
       cropControlsContainer,
       lang,
       type,
-      currentFont
+      currentFont,
+      format
     );
+
+    this.mockupOptions = new A_FormatSinglePageMockupOptions(format)[format];
+
+    console.log(
+      (this.mockupOptions.imagePlaceholderWidth * 11.8).toFixed(),
+      (this.mockupOptions.imagePlaceholderHeight * 11.8).toFixed()
+    );
+
     this.weekDaysNamesList = this.getWeekDays("short");
-
-    this.mockupHeight = Number(
-      (Calendar.outputDimensions[Calendar.currentSize].height / 11.8).toFixed()
-    );
-
-    this.mockupWidth = Number(
-      (Calendar.outputDimensions[Calendar.currentSize].width / 11.8).toFixed()
-    );
-
-    // Mockup pre-defined dimensions
-    this.dayCellHeight = 4.435;
-    this.dayCellWidth = 6.549;
-
-    this.calendarGridX = 0;
-    this.calendarGridY = 8.642;
-    this.daysFontSize = 3.3;
-
-    this.monthCellHeight = 37.5;
-    this.monthCellWidth = 45.722;
-    this.monthCellPadding = 2.3;
-
-    this.imagePlaceholderWidth = 188.3;
-    this.imagePlaceholderHeight = 155;
-    this.imagePlaceholderX = 10.9;
-    this.imagePlaceholderY = 11.4;
-
-    this.calendarGridLeftIndent = 10;
-    this.calendarGridTopIndent = 170;
-
-    this.monthTitleX = 5;
-    this.monthTitleY = 3.5;
-    this.monthTitleWeight = 4;
-
-    this.yearTitleX = 30;
-    this.yearTitleY = 3.5;
-    this.yearTitleWeigth = 4;
 
     this.createSVGMockup();
   }
@@ -93,7 +68,7 @@ export class SinglePageCalendar extends Calendar {
       elementName: "svg",
       id: "mockup",
       attributes: {
-        viewBox: `0 0 ${this.mockupWidth} ${this.mockupHeight}`,
+        viewBox: `0 0 ${this.mockupOptions.mockupWidth} ${this.mockupOptions.mockupHeight}`,
       },
     });
 
@@ -102,9 +77,9 @@ export class SinglePageCalendar extends Calendar {
       id: "background-rect",
       parentToAppend: mockup,
       attributes: {
-        width: this.mockupWidth.toString(),
-        height: this.mockupHeight.toString(),
-        style: "fill: #fff",
+        width: this.mockupOptions.mockupWidth.toString(),
+        height: this.mockupOptions.mockupHeight.toString(),
+        style: `fill: ${this.mockupOptions.mockupBackgroundFill}`,
       },
     });
 
@@ -119,10 +94,10 @@ export class SinglePageCalendar extends Calendar {
       id: "image-placeholder",
       parentToAppend: this.imageElementGroup,
       attributes: {
-        x: this.imagePlaceholderX.toString(),
-        y: this.imagePlaceholderX.toString(),
-        width: this.imagePlaceholderWidth.toString(),
-        height: this.imagePlaceholderHeight.toString(),
+        x: this.mockupOptions.imagePlaceholderX.toString(),
+        y: this.mockupOptions.imagePlaceholderY.toString(),
+        width: this.mockupOptions.imagePlaceholderWidth.toString(),
+        height: this.mockupOptions.imagePlaceholderHeight.toString(),
         style: "fill: #e8e8e8",
       },
     });
@@ -134,16 +109,18 @@ export class SinglePageCalendar extends Calendar {
       children: [mockup],
     });
 
-    let x = this.calendarGridLeftIndent;
-    let y = this.calendarGridTopIndent;
+    let x = this.mockupOptions.calendarGridLeftIndent;
+    let y = this.mockupOptions.calendarGridTopIndent;
 
     // Global loop
     for (let i = 0; i < 12; i++) {
       // if new row...
-      if (i === 4 || i === 8) {
+      if (i % this.mockupOptions.numberOfColumns === 0) {
         // Increment y-movement
-        y += this.monthCellHeight + this.monthCellPadding;
-        x = this.calendarGridLeftIndent;
+        y +=
+          this.mockupOptions.monthCellHeight +
+          this.mockupOptions.monthCellPadding;
+        x = this.mockupOptions.calendarGridLeftIndent;
       }
 
       // Create month container
@@ -153,15 +130,16 @@ export class SinglePageCalendar extends Calendar {
         attributes: {
           x: x.toString(),
           y: y.toString(),
-          width: this.monthCellWidth.toString(),
-          height: this.monthCellHeight.toString(),
+          width: this.mockupOptions.monthCellWidth.toString(),
+          height: this.mockupOptions.monthCellHeight.toString(),
           ["data-month"]: this.monthCounter.toString(),
           ["data-year"]: this.year.toString(),
         },
       });
 
       // Increment x-movement
-      x += this.monthCellWidth + this.monthCellPadding;
+      x +=
+        this.mockupOptions.monthCellWidth + this.mockupOptions.monthCellPadding;
 
       const monthTitle = createSVGElement({
         elementName: "g",
@@ -169,9 +147,9 @@ export class SinglePageCalendar extends Calendar {
         parentToAppend: monthContainer,
         content: this.getOutline(
           this.monthsNamesList[this.monthCounter],
-          5,
-          3.5,
-          4
+          this.mockupOptions.monthTitleX,
+          this.mockupOptions.monthTitleY,
+          this.mockupOptions.monthTitleFontSize
         ),
       });
 
@@ -179,7 +157,12 @@ export class SinglePageCalendar extends Calendar {
         elementName: "g",
         id: "year-title",
         parentToAppend: monthContainer,
-        content: this.getOutline(`${this.year}`, 30, 3.5, 4),
+        content: this.getOutline(
+          `${this.year}`,
+          this.mockupOptions.yearTitleX,
+          this.mockupOptions.yearTitleY,
+          this.mockupOptions.yearTitleFontSize
+        ),
       });
 
       const daysTitles = createSVGElement({
@@ -201,9 +184,11 @@ export class SinglePageCalendar extends Calendar {
 
         const weekDayPath = this.getAndPlaceOutline(
           weekDayName,
-          this.dayCellWidth / 2,
-          descenderException ? 6.5 : 7,
-          this.lang === "ru" ? 2.9 : 2.6
+          this.mockupOptions.weekDayX,
+          descenderException
+            ? this.mockupOptions.descenderException
+            : this.mockupOptions.weekDayY,
+          this.mockupOptions.weekDayFontSize
         );
 
         const weekDayCell = createSVGElement({
@@ -211,7 +196,8 @@ export class SinglePageCalendar extends Calendar {
           parentToAppend: daysTitles,
           attributes: {
             transform: `translate(${Number(
-              this.calendarGridX + this.dayCellWidth * i
+              this.mockupOptions.calendarGridX +
+                this.mockupOptions.dayCellWidth * i
             ).toFixed(2)} 0)`,
           },
           children: [weekDayPath],
@@ -235,10 +221,10 @@ export class SinglePageCalendar extends Calendar {
         this.getFirstDay(this.monthCounter - 1, this.year) - 1,
         this.daysInMonth(this.monthCounter, this.year),
         this.daysInMonth(this.monthCounter - 1, this.year) - 1,
-        this.calendarGridX,
-        this.calendarGridY,
-        this.daysFontSize,
-        "fill: none;stroke: none; stroke-width: 0; stroke-miterlimit: 0;"
+        this.mockupOptions.calendarGridX,
+        this.mockupOptions.calendarGridY,
+        this.mockupOptions.daysFontSize,
+        this.mockupOptions.dayCellStyles
       );
 
       // Append to main SVG
@@ -265,10 +251,10 @@ export class SinglePageCalendar extends Calendar {
         elementName: "image",
         parentToAppend: this.imageElementGroup,
         attributes: {
-          height: this.imagePlaceholderHeight.toString(),
-          width: this.imagePlaceholderWidth.toString(),
-          x: this.imagePlaceholderX.toString(),
-          y: this.imagePlaceholderY.toString(),
+          height: this.mockupOptions.imagePlaceholderHeight.toString(),
+          width: this.mockupOptions.imagePlaceholderWidth.toString(),
+          x: this.mockupOptions.imagePlaceholderX.toString(),
+          y: this.mockupOptions.imagePlaceholderY.toString(),
         },
         attributesNS: {
           href: imgURL,

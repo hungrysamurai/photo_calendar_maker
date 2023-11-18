@@ -5,6 +5,7 @@
   height: 100%;
   --dark: #231f20;
   --primary: #ff0073;
+  --new-calendar-controls-height: 4.5rem;
 }
 
 * {
@@ -26,7 +27,7 @@ body {
   align-items: center;
   justify-content: center;
   width: 100%;
-  height: 60px;
+  height: var(--new-calendar-controls-height);
   background-color: #231f20;
   position: fixed;
   top: 0;
@@ -54,47 +55,58 @@ body {
 
 .new-calendar-controls {
   display: flex;
-  align-items: center;
-  justify-content: center;
+  flex-direction: column;
   width: 100%;
-  height: 60px;
+  height: var(--new-calendar-controls-height);
   background-color: #231f20;
   position: fixed;
   top: 0;
   z-index: 2;
+  overflow: hidden;
 }
 
-.new-calendar-controls .mode-radio {
+.new-calendar-controls .row-1,
+.new-calendar-controls .row-2 {
+  width: 100%;
+  width: 700px;
+  max-width: 100%;
+  margin: 0 auto;
+  min-height: 40%;
+}
+
+.new-calendar-controls .row-1 .mode-radio-container {
   color: #fff;
   display: flex;
   align-items: flex-start;
   justify-content: space-around;
-  margin-right: 1rem;
-  padding: 0.1rem;
-  flex-direction: column;
+  padding: 0.5rem;
   height: 100%;
-  cursor: pointer;
 }
 
-.new-calendar-controls .mode-radio div {
+.new-calendar-controls .row-2 {
+  margin-top: 0.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+}
+
+.new-calendar-controls .row-2 .select-options-container {
   display: flex;
   align-items: center;
   justify-content: center;
+  height: 100%;
 }
 
-.new-calendar-controls .mode-radio label {
-  margin-left: 0.5rem;
-  margin-top: 0.1rem;
-  cursor: pointer;
-}
-
-.new-calendar-controls select {
-  font-size: 1.5rem;
-  padding: 0.5rem;
+.select-options-container select {
+  height: 100%;
+  font-size: 1rem;
+  padding: 0.25rem;
   font-family: inherit;
   font-weight: inherit;
-  margin-right: 1rem;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .new-calendar-controls select option {
@@ -102,8 +114,14 @@ body {
   font-weight: inherit;
 }
 
+.new-calendar-controls .row-2 .get-button-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .new-calendar-controls button {
-  font-size: 1.5rem;
+  height: 100%;
   padding: 0.5rem;
   font-family: inherit;
   font-weight: inherit;
@@ -125,9 +143,9 @@ body {
 
 .calendar-container {
   position: absolute;
-  top: 60px;
+  top: var(--new-calendar-controls-height);
   width: 100%;
-  height: calc(100% - 120px);
+  height: calc(100% - 60px - var(--new-calendar-controls-height));
 }
 
 .calendar-wrapper {
@@ -170,9 +188,9 @@ svg>svg {
 
 .loading-screen {
   position: absolute;
-  top: 60px;
+  top: var(--new-calendar-controls-height);
   width: 100%;
-  height: calc(100% - 120px);
+  height: calc(100% - 60px - var(--new-calendar-controls-height));
   left: 0;
   background-color: #fff;
   z-index: 4;
@@ -313,24 +331,6 @@ svg>svg {
 }
 
 @media (max-width: 768px) {
-  .new-project-container button {
-    font-size: 0.75rem;
-  }
-
-  .new-calendar-controls .mode-radio {
-    font-size: 0.75rem;
-    justify-content: center;
-  }
-
-  .new-calendar-controls select {
-    font-size: 0.75rem;
-    padding: 0.25rem;
-  }
-
-  .new-calendar-controls button {
-    font-size: 0.75rem;
-    padding: 0.25rem;
-  }
 
   .controls-container button,
   .controls-container label {
@@ -397,22 +397,24 @@ svg>svg {
 }
 
 @media (max-width: 500px) {
-
-  .new-calendar-controls .mode-radio,
-  .new-calendar-controls select {
-    margin-right: 0;
-    font-size: 0.5rem;
+  .new-calendar-controls .row-1 .mode-radio-container {
+    padding: 0.25rem;
   }
 
-  .new-calendar-controls .mode-radio div {
-    font-size: 0.5rem;
-    margin-right: 0.2rem;
+  .select-options-container select {
+    height: 100%;
+    font-size: 0.6rem;
     padding: 0.1rem;
+    font-family: inherit;
+    font-weight: inherit;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   .new-calendar-controls button {
-    font-size: 0.6rem;
-    margin-left: 0.2rem;
+    padding: 0.25rem;
   }
 
   .controls-container button svg,

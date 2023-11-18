@@ -4,9 +4,16 @@ import { Calendar } from "./Calendar";
  */
 import { icons } from "../assets/icons";
 
-import { CalendarLanguage, CalendarType, LoadingState, PDFPagesRangeToDownload } from "../../types.d";
+import {
+  CalendarLanguage,
+  CalendarType,
+  FormatName,
+  LoadingState,
+  PDFPagesRangeToDownload,
+} from "../../types.d";
 import { createHTMLElement } from "./utils/createElement/createHTMLElement";
 import { createSVGElement } from "./utils/createElement/createSVGElement";
+import { A_FormatMultiPageMockupOptions } from "../assets/A_FormatOptions/A_FormatOptions";
 
 /**
  * Class that generates Multi Page Calendar (each month on separate SVG)
@@ -29,6 +36,8 @@ export class MultiPageCalendar extends Calendar {
   static multipleImagesInput: HTMLInputElement;
   static uploadMultipleImgsBtn: HTMLLabelElement;
 
+  mockupOptions: MultiPageMockupOutputOptions;
+
   constructor(
     public firstMonthIndex: number,
     public year: number,
@@ -37,7 +46,8 @@ export class MultiPageCalendar extends Calendar {
     public cropControlsContainer: HTMLDivElement,
     public lang: CalendarLanguage,
     public type: CalendarType,
-    public currentFont: FontArray
+    public currentFont: FontArray,
+    public format: FormatName
   ) {
     super(
       firstMonthIndex,
@@ -47,107 +57,84 @@ export class MultiPageCalendar extends Calendar {
       cropControlsContainer,
       lang,
       type,
-      currentFont
+      currentFont,
+      format
     );
 
     MultiPageCalendar.current = this;
-
     this.weekDaysNamesList = this.getWeekDays("long");
 
-
-    this.mockupHeight = Number(
-      (Calendar.outputDimensions[Calendar.currentSize].height / 11.8).toFixed()
-    );
-
-    this.mockupWidth = Number(
-      (Calendar.outputDimensions[Calendar.currentSize].width / 11.8).toFixed()
-    );
-
-    // Mockup pre-defined dimensions
-    this.dayCellHeight = 15;
-    this.dayCellWidth = 25;
-
-    this.calendarGridX = 17;
-    this.calendarGridY = 195.8;
-    this.daysFontSize = 7.5;
-
-    this.imagePlaceholderWidth = 188.3;
-    this.imagePlaceholderHeight = 155;
-    this.imagePlaceholderX = 10.9;
-    this.imagePlaceholderY = 11.4;
+    this.mockupOptions = new A_FormatMultiPageMockupOptions(format)[format];
 
     if (Calendar.isNewType) {
       MultiPageCalendar.createMultiPageControls(this.controlsContainer);
       MultiPageCalendar.initMultiPageControlsEvents();
     }
 
-
     this.createSVGMockup();
-
-    this.pagesArray = [...this.calendarInner.querySelectorAll("svg")];
   }
 
   /**
- * @property {Function} createMultiPageControls - Creates controls of multi page calendar in DOM
- */
+   * @property {Function} createMultiPageControls - Creates controls of multi page calendar in DOM
+   */
   static createMultiPageControls(controlsContainer: HTMLDivElement): void {
     this.allPDFDownloadBtn = createHTMLElement({
-      elementName: 'button',
-      id: 'pdf-download-all',
+      elementName: "button",
+      id: "pdf-download-all",
       content: icons.pdfMulti,
       insertTo: {
         element: controlsContainer,
-        position: 'afterbegin'
-      }
+        position: "afterbegin",
+      },
     });
 
     this.prevBtn = createHTMLElement({
-      elementName: 'button',
-      id: 'prev-month',
+      elementName: "button",
+      id: "prev-month",
       content: icons.prev,
       insertTo: {
         element: controlsContainer,
-        position: 'afterbegin',
-      }
+        position: "afterbegin",
+      },
     });
 
     this.multipleImagesInput = createHTMLElement({
-      elementName: 'input',
-      id: 'upload-multiple-input',
+      elementName: "input",
+      id: "upload-multiple-input",
       attributes: {
-        type: 'file',
-        multiple: 'multiple',
+        type: "file",
+        multiple: "multiple",
         hidden: new Boolean(true).toString(),
         accept: "image/jpeg, image/png, image/jpg",
         onclick: "this.value=null;",
       },
       insertTo: {
         element: controlsContainer,
-        position: 'beforeend'
-      }
+        position: "beforeend",
+      },
     });
 
     this.uploadMultipleImgsBtn = createHTMLElement({
-      elementName: 'label',
-      id: 'upload-multiple',
+      elementName: "label",
+      id: "upload-multiple",
       content: icons.uploadMulti,
       attributes: {
-        for: "upload-multiple-input"
+        for: "upload-multiple-input",
       },
       insertTo: {
         element: controlsContainer,
-        position: 'beforeend'
-      }
+        position: "beforeend",
+      },
     });
 
     this.nextBtn = createHTMLElement({
-      elementName: 'button',
-      id: 'next-month',
+      elementName: "button",
+      id: "next-month",
       content: icons.next,
       insertTo: {
         element: controlsContainer,
-        position: 'beforeend'
-      }
+        position: "beforeend",
+      },
     });
   }
 
@@ -205,119 +192,128 @@ export class MultiPageCalendar extends Calendar {
    */
   createSVGMockup(): void {
     this.calendarWrapper = createHTMLElement({
-      elementName: 'div',
+      elementName: "div",
       className: "calendar-wrapper",
-      parentToAppend: this.parentContainer
-    })
+      parentToAppend: this.parentContainer,
+    });
 
     this.calendarInner = createHTMLElement({
-      elementName: 'div',
+      elementName: "div",
       className: "calendar-inner",
-      parentToAppend: this.calendarWrapper
-    })
+      parentToAppend: this.calendarWrapper,
+    });
 
     MultiPageCalendar.setVisibleMonth();
 
     // Create months templates
     for (let i = 0; i < 12; i++) {
-
       const monthContainer = createHTMLElement({
-        elementName: 'div',
+        elementName: "div",
         className: "month-container",
         id: `month-${i}-container`,
         parentToAppend: this.calendarInner,
         attributes: {
           ["data-month"]: this.monthCounter.toString(),
           ["data-year"]: this.year.toString(),
-        }
+        },
       });
 
       const monthMockup = createSVGElement({
-        elementName: 'svg',
+        elementName: "svg",
         parentToAppend: monthContainer,
         id: `mockup-${i}`,
         attributes: {
-          viewBox: `0 0 ${this.mockupWidth} ${this.mockupHeight}`,
-        }
+          viewBox: `0 0 ${this.mockupOptions.mockupWidth} ${this.mockupOptions.mockupHeight}`,
+        },
       });
 
       const backgroundRect = createSVGElement({
-        elementName: 'rect',
+        elementName: "rect",
         id: `background-rect-${i}`,
         parentToAppend: monthMockup,
         attributes: {
-          width: this.mockupWidth.toString(),
-          height: this.mockupHeight.toString(),
-          style: "fill: #fff",
-        }
+          width: this.mockupOptions.mockupWidth.toString(),
+          height: this.mockupOptions.mockupHeight.toString(),
+          style: `fill: ${this.mockupOptions.mockupBackgroundFill}`,
+        },
       });
 
       const monthTextGroup = createSVGElement({
-        elementName: 'g',
+        elementName: "g",
         id: `days-grid-${i}`,
-        parentToAppend: monthMockup
+        parentToAppend: monthMockup,
       });
 
       const monthTextEl = createSVGElement({
-        elementName: 'g',
+        elementName: "g",
         id: `#month-title-${i}`,
         parentToAppend: monthTextGroup,
         content: this.getOutline(
           this.monthsNamesList[this.monthCounter],
-          30,
-          182.5,
-          14
-        )
+          this.mockupOptions.monthTitleX,
+          this.mockupOptions.monthTitleY,
+          this.mockupOptions.monthTitleFontSize
+        ),
       });
 
       const yearTextEl = createSVGElement({
-        elementName: 'g',
+        elementName: "g",
         id: `#year-title-${i}`,
         parentToAppend: monthTextGroup,
-        content: this.getOutline(`${this.year}`, 140, 182.5, 14)
+        content: this.getOutline(
+          `${this.year}`,
+          this.mockupOptions.yearTitleX,
+          this.mockupOptions.yearTitleY,
+          this.mockupOptions.yearTitleFontSize
+        ),
       });
 
       const daysTitles = createSVGElement({
-        elementName: 'g',
+        elementName: "g",
         id: `days-titles-${i}`,
-        parentToAppend: monthTextGroup
+        parentToAppend: monthTextGroup,
       });
 
       // Generate week days paths
       this.weekDaysNamesList.map((weekDayName, i) => {
         const weekDayCell = createSVGElement({
-          elementName: 'g',
+          elementName: "g",
           parentToAppend: daysTitles,
-          children: [this.getAndPlaceOutline(
-            weekDayName,
-            this.dayCellWidth / 2,
-            -1,
-            3.3
-          )],
+          children: [
+            this.getAndPlaceOutline(
+              weekDayName,
+              this.mockupOptions.weekDayX,
+              this.mockupOptions.weekDayY,
+              this.mockupOptions.weekDayFontSize
+            ),
+          ],
           attributes: {
-            transform: `translate(${this.calendarGridX + this.dayCellWidth * i} 192)`,
-          }
+            transform: `translate(${
+              this.mockupOptions.calendarGridX +
+              this.mockupOptions.dayCellWidth * i
+            } ${this.mockupOptions.weekDaysY})`,
+          },
         });
       });
 
       const monthImageGroup = createSVGElement({
-        elementName: 'g',
-        id: 'image-group',
-        parentToAppend: monthMockup
+        elementName: "g",
+        id: "image-group",
+        parentToAppend: monthMockup,
       });
 
       const imagePlaceholderRect = createSVGElement({
-        elementName: 'rect',
+        elementName: "rect",
         id: `image-placeholder-${i}`,
         parentToAppend: monthImageGroup,
         attributes: {
-          width: this.imagePlaceholderWidth.toString(),
-          height: this.imagePlaceholderHeight.toString(),
-          x: this.imagePlaceholderX.toString(),
-          y: this.imagePlaceholderY.toString(),
-          style: "fill: #e8e8e8"
-        }
-      })
+          width: this.mockupOptions.imagePlaceholderWidth.toString(),
+          height: this.mockupOptions.imagePlaceholderHeight.toString(),
+          x: this.mockupOptions.imagePlaceholderX.toString(),
+          y: this.mockupOptions.imagePlaceholderY.toString(),
+          style: "fill: #e8e8e8",
+        },
+      });
 
       if (i === 11) {
         this.lastMonth = this.monthCounter;
@@ -336,11 +332,13 @@ export class MultiPageCalendar extends Calendar {
         this.getFirstDay(this.monthCounter - 1, this.year) - 1,
         this.daysInMonth(this.monthCounter, this.year),
         this.daysInMonth(this.monthCounter - 1, this.year),
-        this.calendarGridX,
-        this.calendarGridY,
-        this.daysFontSize,
-        "fill: none; stroke:#999999; stroke-miterlimit: 10; stroke-width: .5px;"
+        this.mockupOptions.calendarGridX,
+        this.mockupOptions.calendarGridY,
+        this.mockupOptions.daysFontSize,
+        this.mockupOptions.dayCellStyles
       );
+
+      this.pagesArray.push(monthMockup);
     }
   }
 
@@ -348,7 +346,9 @@ export class MultiPageCalendar extends Calendar {
    * @property {Function} setVisibleMonth - show current month mockup in DOM by translate calendarInner container by X axis
    */
   static setVisibleMonth(): void {
-    this.current.calendarInner.style.left = `-${this.current.currentMonth * 100}%`;
+    this.current.calendarInner.style.left = `-${
+      this.current.currentMonth * 100
+    }%`;
   }
 
   /**
@@ -358,7 +358,6 @@ export class MultiPageCalendar extends Calendar {
    */
   static uploadMultipleImages(e: Event): void {
     if (e.target instanceof HTMLInputElement && e.target.files) {
-
       let files = [...e.target.files];
       let loadedFilesCounter = 0;
 
@@ -373,22 +372,25 @@ export class MultiPageCalendar extends Calendar {
           imageGroup.innerHTML = "";
 
           const imageEl = createSVGElement({
-            elementName: 'image',
+            elementName: "image",
             parentToAppend: imageGroup,
             attributes: {
-              height: this.current.imagePlaceholderHeight.toString(),
-              width: this.current.imagePlaceholderWidth.toString(),
-              x: this.current.imagePlaceholderX.toString(),
-              y: this.current.imagePlaceholderY.toString()
-            }
-          })
-
+              height:
+                this.current.mockupOptions.imagePlaceholderHeight.toString(),
+              width:
+                this.current.mockupOptions.imagePlaceholderWidth.toString(),
+              x: this.current.mockupOptions.imagePlaceholderX.toString(),
+              y: this.current.mockupOptions.imagePlaceholderY.toString(),
+            },
+          });
 
           // Image optimization
           const reduced = this.reduceImageSize(
             reader.result as string,
-            this.current.imagePlaceholderWidth * this.current.imageReduceSizeRate,
-            this.current.imagePlaceholderHeight * this.current.imageReduceSizeRate
+            this.current.mockupOptions.imagePlaceholderWidth *
+              this.current.imageReduceSizeRate,
+            this.current.mockupOptions.imagePlaceholderHeight *
+              this.current.imageReduceSizeRate
           );
 
           reduced
@@ -451,25 +453,24 @@ export class MultiPageCalendar extends Calendar {
         imageGroup.innerHTML = "";
 
         const imageEl = createSVGElement({
-          elementName: 'image',
+          elementName: "image",
           parentToAppend: imageGroup,
           attributes: {
-            height: this.imagePlaceholderHeight.toString(),
-            width: this.imagePlaceholderWidth.toString(),
-            x: this.imagePlaceholderX.toString(),
-            y: this.imagePlaceholderY.toString(),
+            height: this.mockupOptions.imagePlaceholderHeight.toString(),
+            width: this.mockupOptions.imagePlaceholderWidth.toString(),
+            x: this.mockupOptions.imagePlaceholderX.toString(),
+            y: this.mockupOptions.imagePlaceholderY.toString(),
           },
           attributesNS: {
-            href: imgURL
-          }
-        })
+            href: imgURL,
+          },
+        });
 
         loadingCounter++;
 
         if (loadingCounter === imagesArr.length) {
           Calendar.loading(LoadingState.Hide);
         }
-
       });
     });
   }
