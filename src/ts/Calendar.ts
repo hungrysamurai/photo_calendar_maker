@@ -416,7 +416,6 @@ export abstract class Calendar {
 
     // SVG attributes fix for proper rasterization
     let properAttributes: string;
-    console.log(this.current.mockupOptions.mockupWidth);
 
     properAttributes = svgData.replace(
       `viewBox="0 0 ${this.current.mockupOptions.mockupWidth} ${this.current.mockupOptions.mockupHeight}"`,
