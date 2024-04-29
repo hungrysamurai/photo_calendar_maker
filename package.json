@@ -5,7 +5,8 @@
   "browserslist": "> 0.5%, last 2 versions, not dead",
   "scripts": {
     "start": "parcel index.html --dist-dir ./dev",
-    "build": "parcel build index.html --dist-dir ./build"
+    "build": "node ../_scripts/cleanDir.js ./build && parcel build index.html --dist-dir ./build && node ../_scripts/cleanDir.js .parcel-cache",
+    "deploy": "node ../_scripts/cleanDir.js ../../server/dist/public/projects/photo_calendar_maker && parcel build index.html --dist-dir ../../server/dist/public/projects/photo_calendar_maker && node ../_scripts/cleanDir.js .parcel-cache"
   },
   "repository": {
     "type": "git",
@@ -39,7 +40,7 @@
     "@types/node": "^20.8.10",
     "buffer": "^5.7.1",
     "events": "^3.3.0",
-    "parcel": "^2.8.3",
+    "parcel": "^2.12.0",
     "parcel-reporter-static-files-copy": "^1.5.2",
     "process": "^0.11.10",
     "stream-browserify": "^3.0.0",
