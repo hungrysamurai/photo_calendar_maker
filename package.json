@@ -3,10 +3,17 @@
   "version": "1.0.0",
   "description": "Ptoto calendar templates generator",
   "browserslist": "> 0.5%, last 2 versions, not dead",
+  "engines": {
+    "node": ">=20.0.0",
+    "pnpm": ">=10.0.0",
+    "npm": "please-use-pnpm"
+  },
   "scripts": {
     "start": "parcel index.html --dist-dir ./dev",
     "build": "node ../../_scripts/cleanDir.js ./build && parcel build index.html --dist-dir ./build && node ../../_scripts/cleanDir.js .parcel-cache",
-    "deploy": "node ../../_scripts/cleanDir.js ../../server/dist/public/projects/photo_calendar_maker && parcel build index.html --dist-dir ../../server/dist/public/projects/photo_calendar_maker && node ../../_scripts/cleanDir.js .parcel-cache"
+    "deploy": "node ../../_scripts/cleanDir.js ../../server/dist/public/projects/photo_calendar_maker && parcel build index.html --dist-dir ../../server/dist/public/projects/photo_calendar_maker && node ../../_scripts/cleanDir.js .parcel-cache",
+    "preinstall": "npx only-allow pnpm",
+    "postinstall": "node -e \"if(process.env.npm_execpath.indexOf('pnpm') === -1) { console.error('\\n\\x1b[31m✖ Please use pnpm to install dependencies\\x1b[0m\\n'); process.exit(1); }\""
   },
   "repository": {
     "type": "git",
@@ -46,6 +53,7 @@
     "process": "^0.11.10",
     "stream-browserify": "^3.0.0",
     "typescript": "^5.2.2",
-    "util": "^0.12.5"
+    "util": "^0.12.5",
+    "only-allow": "^1.2.1"
   }
 }
