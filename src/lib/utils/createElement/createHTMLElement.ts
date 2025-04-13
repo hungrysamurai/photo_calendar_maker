@@ -27,7 +27,7 @@ export const createHTMLElement = <TagName extends keyof HTMLElementTagNameMap>(
   }
 
   if (params.children) {
-    params.children.forEach((c) => element.appendChild(c));
+    params.children.forEach((c: Element) => element.appendChild(c));
   }
 
   if (params.insertTo) {

@@ -15,7 +15,7 @@ importers:
         specifier: ^0.1.3
         version: 0.1.3
       cropperjs:
-        specifier: ^1.5.13
+        specifier: ^1.6.2
         version: 1.6.2
       opentype.js:
         specifier: ^1.3.4
