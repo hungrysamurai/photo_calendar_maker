@@ -31,8 +31,7 @@
   },
   "homepage": "https://github.com/hungrysamurai/photo_calendar_maker#readme",
   "dependencies": {
-    "@parcel/config-default": "^2.13.2",
-    "@types/pdfkit": "^0.13.2",
+    "@types/opentype.js": "^1.3.8",
     "blob-stream": "^0.1.3",
     "cropperjs": "^1.5.13",
     "opentype.js": "^1.3.4",
@@ -45,15 +44,17 @@
     }
   },
   "devDependencies": {
+    "@parcel/config-default": "^2.13.2",
     "@types/node": "^20.8.10",
+    "@types/pdfkit": "^0.13.2",
     "buffer": "^5.7.1",
     "events": "^3.3.0",
-    "parcel": "^2.12.0",
+    "only-allow": "^1.2.1",
+    "parcel": "^2.13.2",
     "parcel-reporter-static-files-copy": "^1.5.2",
     "process": "^0.11.10",
     "stream-browserify": "^3.0.0",
     "typescript": "^5.2.2",
-    "util": "^0.12.5",
-    "only-allow": "^1.2.1"
+    "util": "^0.12.5"
   }
 }

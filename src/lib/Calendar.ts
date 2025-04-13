@@ -54,15 +54,15 @@ export abstract class Calendar {
 
   /**
    * @property {Fucntion} loading - toggle visibility of    loader element
-   * @param {string} state
+   * @param {string} targetState - turn loader to
    * @returns {void}
    */
-  static loading(state: LoadingState): void {
+  static loading(targetState: LoadingState): void {
     if (Calendar.current) {
-      if (state === LoadingState.Hide) {
+      if (targetState === LoadingState.Hide) {
         this.loadingScreen.classList.add("hide");
         Calendar.current.controlsContainer.style.pointerEvents = "auto";
-      } else if (state === LoadingState.Show) {
+      } else if (targetState === LoadingState.Show) {
         this.loadingScreen.classList.remove("hide");
         Calendar.current.controlsContainer.style.pointerEvents = "none";
       }
@@ -333,9 +333,9 @@ export abstract class Calendar {
         const reduced = this.reduceImageSize(
           reader.result as string,
           this.current.mockupOptions.imagePlaceholderWidth *
-            this.current.imageReduceSizeRate,
+          this.current.imageReduceSizeRate,
           this.current.mockupOptions.imagePlaceholderHeight *
-            this.current.imageReduceSizeRate
+          this.current.imageReduceSizeRate
         );
 
         reduced.then((reducedImage) => {

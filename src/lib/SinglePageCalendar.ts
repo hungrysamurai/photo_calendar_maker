@@ -6,7 +6,7 @@ import { createSVGElement } from "./utils/createElement/createSVGElement";
 import { CalendarLanguage, CalendarType, FormatName } from "../../types";
 
 import { A_FormatSinglePageMockupOptions } from "../assets/A_FormatOptions/A_FormatOptions";
-// import A_FormatYSinglePageInputOptions from "../assets/A_FormatOptions/A_FormatYSinglePageInputOptions";
+
 /**
  * Class that generates Single Page Calendar (all months on one page)
  */
@@ -192,7 +192,7 @@ export class SinglePageCalendar extends Calendar {
           attributes: {
             transform: `translate(${Number(
               this.mockupOptions.calendarGridX +
-                this.mockupOptions.dayCellWidth * i
+              this.mockupOptions.dayCellWidth * i
             ).toFixed(2)} 0)`,
           },
           children: [weekDayPath],

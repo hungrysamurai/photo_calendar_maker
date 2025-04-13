@@ -1,59 +1,71 @@
 <!DOCTYPE html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="stylesheet"
+      href="./node_modules/cropperjs/dist/cropper.min.css"
+    />
+    <link rel="stylesheet" href="./src/styles/style.css" />
+    <title>Calendar Templates Generator</title>
+  </head>
 
-<head>
-  <meta charset="UTF-8" />
-  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="stylesheet" href="./node_modules/cropperjs/dist/cropper.min.css" />
-  <link rel="stylesheet" href="./src/style.css" />
-  <title>Calendar Templates Generator</title>
-</head>
-
-<body>
-  <div class="new-project-container">
-    <button id="new-project">Create new calendar</button>
-  </div>
-  <div class="new-calendar-controls">
-    <div class="row-1">
-      <div class="mode-radio-container">
-        <div class="single">
-          <input type="radio" id="single-page" name="calendar-mode" value="single-page" />
-          <label for="single-page">Single-page</label>
+  <body>
+    <div class="new-project-container">
+      <button id="new-project">Create new calendar</button>
+    </div>
+    <div class="new-calendar-controls">
+      <div class="row-1">
+        <div class="mode-radio-container">
+          <div class="single">
+            <input
+              type="radio"
+              id="single-page"
+              name="calendar-mode"
+              value="single-page"
+            />
+            <label for="single-page">Single-page</label>
+          </div>
+          <div class="multi">
+            <input
+              type="radio"
+              id="multi-page"
+              name="calendar-mode"
+              value="multi-page"
+              checked
+            />
+            <label for="multi-page">Multi-page</label><br />
+          </div>
         </div>
-        <div class="multi">
-          <input type="radio" id="multi-page" name="calendar-mode" value="multi-page" checked />
-          <label for="multi-page">Multi-page</label><br />
+      </div>
+
+      <div class="row-2">
+        <div class="select-options-container">
+          <select id="year-input"></select>
+
+          <select id="month-input"></select>
+
+          <select id="lang-input">
+            <option value="ru">Ru</option>
+            <option value="en">En</option>
+          </select>
+
+          <select id="font-input"></select>
+          <select id="format-input"></select>
+        </div>
+
+        <div class="get-button-container">
+          <button id="get-button">Get!</button>
         </div>
       </div>
     </div>
 
-    <div class="row-2">
-      <div class="select-options-container">
-        <select id="year-input"></select>
+    <div class="calendar-container"></div>
+    <div class="controls-container"></div>
+    <div class="crop-controls-container hide"></div>
+  </body>
 
-        <select id="month-input"></select>
-
-        <select id="lang-input">
-          <option value="ru">Ru</option>
-          <option value="en">En</option>
-        </select>
-
-        <select id="font-input"></select>
-        <select id="format-input"></select>
-      </div>
-
-      <div class="get-button-container">
-        <button id="get-button">Get!</button>
-      </div>
-    </div>
-  </div>
-
-  <div class="calendar-container"></div>
-  <div class="controls-container"></div>
-  <div class="crop-controls-container hide"></div>
-</body>
-
-<script type="module" src="./src/ts/script.ts"></script>
-
+  <script type="module" src="./src/lib/script.ts"></script>
 </html>
