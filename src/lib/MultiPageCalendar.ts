@@ -10,7 +10,7 @@ import {
   FormatName,
   LoadingState,
   PDFPagesRangeToDownload,
-} from "../../types.d";
+} from "../../types";
 import { createHTMLElement } from "./utils/createElement/createHTMLElement";
 import { createSVGElement } from "./utils/createElement/createSVGElement";
 import { A_FormatMultiPageMockupOptions } from "../assets/A_FormatOptions/A_FormatOptions";

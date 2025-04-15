@@ -15,7 +15,7 @@ import {
   CalendarLanguage,
   LoadingState,
   PDFPagesRangeToDownload,
-} from "../../types.d";
+} from "../../types";
 import { createSVGElement } from "./utils/createElement/createSVGElement";
 
 /**

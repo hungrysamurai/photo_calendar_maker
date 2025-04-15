@@ -1,4 +1,4 @@
-import { FormatName } from "../../../types.d";
+import { FormatName } from "../../../types";
 import { A_outputFormats } from "./A_OutputDimensions";
 import A_FormatMultiplierMap from "./A_FormatMultiplierMap";
 
@@ -13,7 +13,7 @@ import {
 } from "./A_FormatMultiPageInputOptions";
 
 abstract class A_FormatOptions<I, O> {
-  public options: I;
+  public options!: I;
 
   constructor(public targetFormat: FormatName) {}
 

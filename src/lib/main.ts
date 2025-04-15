@@ -2,16 +2,16 @@ import { SinglePageCalendar } from "./SinglePageCalendar";
 import { MultiPageCalendar } from "./MultiPageCalendar";
 import { Calendar } from "./Calendar";
 
-import { collectDataFromInputs } from "./utils/collectDataFromInputs.ts";
+import { collectDataFromInputs } from "./utils/collectDataFromInputs";
 
-import { createYearsOptions } from "./utils/initializers/createYearsOptions.ts";
-import { createFontsOptions } from "./utils/initializers/createFontsOptions.ts";
-import { createMonthsOptions } from "./utils/initializers/createMonthsOptions.ts";
-import { createFormatsOptions } from "./utils/initializers/createFormatsOptions.ts";
+import { createYearsOptions } from "./utils/initializers/createYearsOptions";
+import { createFontsOptions } from "./utils/initializers/createFontsOptions";
+import { createMonthsOptions } from "./utils/initializers/createMonthsOptions";
+import { createFormatsOptions } from "./utils/initializers/createFormatsOptions";
 
-import { loadFonts } from "./utils/initializers/loadFonts.ts";
+import { loadFonts } from "./utils/initializers/loadFonts";
 
-import { CalendarType } from "../../types.d";
+import { CalendarType } from "../../types";
 
 const newProjectContainer = document.querySelector(
   ".new-project-container"
@@ -31,7 +31,9 @@ const yearInput = document.querySelector("#year-input") as HTMLSelectElement;
 const multiModeBtn = document.querySelector("#multi-page") as HTMLInputElement;
 const langInput = document.querySelector("#lang-input") as HTMLSelectElement;
 const fontInput = document.querySelector("#font-input") as HTMLSelectElement;
-const formatInput = document.querySelector('#format-input') as HTMLSelectElement;
+const formatInput = document.querySelector(
+  "#format-input"
+) as HTMLSelectElement;
 
 const calendarContainer = document.querySelector(
   ".calendar-container"
@@ -59,7 +61,6 @@ function newProject() {
     formatInput,
     multiModeBtn
   );
-
 
   // Purge all current content
   calendarContainer.innerHTML = "";
@@ -162,7 +163,7 @@ function newProjectIDB({
       lang,
       type,
       font,
-      format
+      format,
     });
 
     // Remove old images
