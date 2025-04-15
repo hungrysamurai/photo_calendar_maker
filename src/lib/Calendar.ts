@@ -1,9 +1,5 @@
 import Cropper from "cropperjs";
 
-import SVGtoPDF from "svg-to-pdfkit";
-import BlobStream from "blob-stream";
-import PDFDocument from "pdfkit/js/pdfkit.standalone";
-
 import { getMonthsList } from "./utils/getMonthsList";
 import { createHTMLElement } from "./utils/createElement/createHTMLElement";
 
@@ -333,9 +329,9 @@ export abstract class Calendar {
         const reduced = this.reduceImageSize(
           reader.result as string,
           this.current.mockupOptions.imagePlaceholderWidth *
-          this.current.imageReduceSizeRate,
+            this.current.imageReduceSizeRate,
           this.current.mockupOptions.imagePlaceholderHeight *
-          this.current.imageReduceSizeRate
+            this.current.imageReduceSizeRate
         );
 
         reduced.then((reducedImage) => {
@@ -449,43 +445,44 @@ export abstract class Calendar {
   static downloadPDF(range: PDFPagesRangeToDownload): void {
     Calendar.loading(LoadingState.Show);
     let pagesArray: SVGElement[] = [];
+    console.log(pagesArray);
 
-    const doc = new PDFDocument({
-      size: [
-        this.outputDimensions[this.current.format].width,
-        this.outputDimensions[this.current.format].height,
-      ],
-    });
-    const stream = doc.pipe(BlobStream());
+    // const doc = new PDFDocument({
+    //   size: [
+    //     this.outputDimensions[this.current.format].width,
+    //     this.outputDimensions[this.current.format].height,
+    //   ],
+    // });
+    // const stream = doc.pipe(BlobStream());
 
-    if (range === PDFPagesRangeToDownload.Current) {
-      pagesArray.push(this.getCurrentMockup("svg"));
-      doc.info["Title"] = this.getFileName();
-    }
+    // if (range === PDFPagesRangeToDownload.Current) {
+    //   pagesArray.push(this.getCurrentMockup("svg"));
+    //   doc.info["Title"] = this.getFileName();
+    // }
 
-    if (range === PDFPagesRangeToDownload.All) {
-      pagesArray = this.current.pagesArray;
-      doc.info["Title"] = this.getFileName(true);
-    }
+    // if (range === PDFPagesRangeToDownload.All) {
+    //   pagesArray = this.current.pagesArray;
+    //   doc.info["Title"] = this.getFileName(true);
+    // }
 
-    pagesArray.forEach((page, i) => {
-      SVGtoPDF(doc, page, 0, 0);
+    // pagesArray.forEach((page, i) => {
+    //   SVGtoPDF(doc, page, 0, 0);
 
-      if (i !== pagesArray.length - 1) doc.addPage();
-    });
+    //   if (i !== pagesArray.length - 1) doc.addPage();
+    // });
 
-    doc.end();
+    // doc.end();
 
-    stream.on("finish", () => {
-      Calendar.loading(LoadingState.Hide);
-      const url = stream.toBlobURL("application/pdf");
+    // stream.on("finish", () => {
+    //   Calendar.loading(LoadingState.Hide);
+    //   const url = stream.toBlobURL("application/pdf");
 
-      const a = document.createElement("a");
-      const my_evt = new MouseEvent("click");
-      a.download = doc.info["Title"];
-      a.href = url;
-      a.dispatchEvent(my_evt);
-    });
+    //   const a = document.createElement("a");
+    //   const my_evt = new MouseEvent("click");
+    //   a.download = doc.info["Title"];
+    //   a.href = url;
+    //   a.dispatchEvent(my_evt);
+    // });
   }
 
   /**
