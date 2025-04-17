@@ -153,6 +153,7 @@ declare global {
     calendarGridTopIndent: number;
     descenderException: number;
     numberOfColumns: number;
+    [key: string]: string | number | FormatWidthHeigth;
   }
 
   interface SinglePageMockupOutputOptions extends SinglePageMockupInputOptions {
@@ -164,6 +165,7 @@ declare global {
 
   interface MultiPageMockupInputOptions extends MockupInputOptions {
     weekDaysY: number;
+    [key: string]: string | number | FormatWidthHeigth;
   }
 
   interface MultiPageMockupOutputOptions extends MultiPageMockupInputOptions {

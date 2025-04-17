@@ -67,7 +67,12 @@ abstract class A_FormatOptions<I, O> {
 
   protected getMultiplier(): number {
     const format = this.targetFormat.slice(0, 2);
-    return Number(Math.pow(1.414285, A_FormatMultiplierMap[format]).toFixed(4));
+    return Number(
+      Math.pow(
+        1.414285,
+        A_FormatMultiplierMap[format as keyof typeof A_FormatMultiplierMap]
+      ).toFixed(4)
+    );
   }
 
   protected abstract get A6(): O;

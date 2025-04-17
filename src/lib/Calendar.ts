@@ -15,6 +15,7 @@ import {
   CalendarLanguage,
   LoadingState,
   PDFPagesRangeToDownload,
+  FontSubfamily,
 } from "../../types";
 import { createSVGElement } from "./utils/createElement/createSVGElement";
 
@@ -154,8 +155,9 @@ export abstract class Calendar {
   ) {
     // Add subfamilies to fonts object
     for (let i = 0; i < currentFont.length; i++) {
-      this.fonts[currentFont[i]?.names?.fontSubfamily.en.toLowerCase()] =
-        currentFont[i];
+      this.fonts[
+        currentFont[i]?.names?.fontSubfamily.en.toLowerCase() as FontSubfamily
+      ] = currentFont[i];
     }
 
     this.monthsNamesList = getMonthsList(this.lang);
