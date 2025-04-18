@@ -74,7 +74,7 @@ declare global {
   };
 
   type FontData = {
-    [key in FontSubfamily]?: Font;
+    [key: string]: Font
   };
 
   interface CreateHTMLElementParams<TagName> {

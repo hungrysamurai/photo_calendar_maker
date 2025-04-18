@@ -331,9 +331,9 @@ export abstract class Calendar {
         const reduced = this.reduceImageSize(
           reader.result as string,
           this.current.mockupOptions.imagePlaceholderWidth *
-            this.current.imageReduceSizeRate,
+          this.current.imageReduceSizeRate,
           this.current.mockupOptions.imagePlaceholderHeight *
-            this.current.imageReduceSizeRate
+          this.current.imageReduceSizeRate
         );
 
         reduced.then((reducedImage) => {
@@ -743,7 +743,7 @@ export abstract class Calendar {
   ): string {
     const outline = this.fonts[fontWeight].getPath(string, x, y, fontSize);
     outline.fill = fill;
-    return outline.toSVG();
+    return outline.toSVG(1);
   }
 
   /**
@@ -774,7 +774,7 @@ export abstract class Calendar {
     const pathElement = createSVGElement({
       elementName: "path",
       attributes: {
-        d: outline.toPathData(),
+        d: outline.toPathData(1),
         transform: `translate(-${xShift} ${yShift})`,
         fill,
       },
