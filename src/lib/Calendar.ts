@@ -50,7 +50,7 @@ export abstract class Calendar {
   }
 
   /**
-   * @property {Fucntion} loading - toggle visibility of    loader element
+   * @property {Fucntion} loading - toggle visibility of loader element
    * @param {string} targetState - turn loader to
    * @returns {void}
    */
@@ -159,7 +159,6 @@ export abstract class Calendar {
         currentFont[i]?.names?.fontSubfamily.en.toLowerCase() as FontSubfamily
       ] = currentFont[i];
     }
-
     this.monthsNamesList = getMonthsList(this.lang);
 
     /**
@@ -331,9 +330,9 @@ export abstract class Calendar {
         const reduced = this.reduceImageSize(
           reader.result as string,
           this.current.mockupOptions.imagePlaceholderWidth *
-          this.current.imageReduceSizeRate,
+            this.current.imageReduceSizeRate,
           this.current.mockupOptions.imagePlaceholderHeight *
-          this.current.imageReduceSizeRate
+            this.current.imageReduceSizeRate
         );
 
         reduced.then((reducedImage) => {

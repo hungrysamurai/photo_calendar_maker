@@ -1,8 +1,8 @@
 import opentype from "opentype.js";
-import fontsData from "../../../assets/fontsData";
+import fontsData from "../../../assets/sourceFontsData";
 
 export const loadFonts = async (): Promise<LoadedFontsObject> => {
-  const loadedFonts = {};
+  const loadedFonts: LoadedFontsObject = {};
 
   for (const [fontTitle, fontVariants] of Object.entries(fontsData)) {
     const { fontNameBold, fontNameRegular } = fontVariants;
@@ -21,7 +21,6 @@ export const loadFonts = async (): Promise<LoadedFontsObject> => {
       })
     );
 
-    // const fontsArray = await Promise.all(fonts);
     loadedFonts[fontTitle] = fonts;
   }
 
