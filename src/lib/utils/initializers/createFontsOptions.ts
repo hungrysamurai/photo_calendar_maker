@@ -1,4 +1,4 @@
-import fontsData from "../../../assets/fontsData";
+import fontsData from "../../../assets/sourceFontsData";
 
 /**
  * @property {Function} createFontsOptions - Generate fonts options for input
