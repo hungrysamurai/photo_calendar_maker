@@ -1,5 +1,5 @@
 import Cropper from "cropperjs";
-import { PDFDocument, PDFImage } from "pdf-lib";
+import { PDFDocument } from "pdf-lib";
 
 import { getMonthsList } from "./utils/getMonthsList";
 import { createHTMLElement } from "./utils/createElement/createHTMLElement";
