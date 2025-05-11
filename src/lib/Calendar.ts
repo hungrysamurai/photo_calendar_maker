@@ -330,9 +330,9 @@ export abstract class Calendar {
         const reduced = this.reduceImageSize(
           reader.result as string,
           this.current.mockupOptions.imagePlaceholderWidth *
-            this.current.imageReduceSizeRate,
+          this.current.imageReduceSizeRate,
           this.current.mockupOptions.imagePlaceholderHeight *
-            this.current.imageReduceSizeRate
+          this.current.imageReduceSizeRate
         );
 
         reduced.then((reducedImage) => {
@@ -406,28 +406,23 @@ export abstract class Calendar {
     const svg = this.getCurrentMockup("svg");
     const svgData = new XMLSerializer().serializeToString(svg);
 
-    const canvas = document.createElement("canvas");
-    canvas.width = this.outputDimensions[this.current.format].width;
-    canvas.height = this.outputDimensions[this.current.format].height;
-    const ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
-
-    // SVG attributes fix for proper rasterization
-    let properAttributes: string;
-
-    properAttributes = svgData.replace(
-      `viewBox="0 0 ${this.current.mockupOptions.mockupWidth} ${this.current.mockupOptions.mockupHeight}"`,
-      `width="${this.current.mockupOptions.mockupWidth}" height="${this.current.mockupOptions.mockupHeight}" version="1.1"`
-    );
+    const svgBlob = new Blob([svgData], {
+      type: "image/svg+xml;charset=utf-8",
+    });
+    const svgBlobURL = URL.createObjectURL(svgBlob);
 
     const img = new Image();
-    img.setAttribute(
-      "src",
-      "data:image/svg+xml;base64," + btoa(properAttributes)
-    );
+    img.src = svgBlobURL;
 
     img.onload = () => {
-      // Draw svg-to-img on canvas
-      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
+
+      canvas.width = this.outputDimensions[this.current.format].width;
+      canvas.height = this.outputDimensions[this.current.format].height;
+
+      ctx.drawImage(img, 0, 0);
+
       const dataURL = canvas.toDataURL("image/jpeg");
       const fileName = this.getFileName();
 
@@ -435,8 +430,10 @@ export abstract class Calendar {
       a.download = fileName;
       a.href = dataURL;
       a.click();
+
       a.remove();
-    };
+      URL.revokeObjectURL(svgBlobURL);
+    }
   }
 
   /**
