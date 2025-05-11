@@ -331,9 +331,9 @@ export abstract class Calendar {
         const reduced = this.reduceImageSize(
           reader.result as string,
           this.current.mockupOptions.imagePlaceholderWidth *
-          this.current.imageReduceSizeRate,
+            this.current.imageReduceSizeRate,
           this.current.mockupOptions.imagePlaceholderHeight *
-          this.current.imageReduceSizeRate
+            this.current.imageReduceSizeRate
         );
 
         reduced.then((reducedImage) => {
@@ -401,121 +401,48 @@ export abstract class Calendar {
   }
 
   /**
+   * @async
    * @property {Function} SVGToCanvas - convert given SVG to Canvas
-   * @param svg 
+   * @param {SVGElement} svg
    */
   static async SVGToCanvas(svg: SVGElement): Promise<HTMLCanvasElement> {
-    return new Promise((resolve) => {
-      const svgData = new XMLSerializer().serializeToString(svg);
+    const svgData = new XMLSerializer().serializeToString(svg);
+    const svgBlob = new Blob([svgData], {
+      type: "image/svg+xml;charset=utf-8",
+    });
+    const svgBlobURL = URL.createObjectURL(svgBlob);
 
-      const svgBlob = new Blob([svgData], {
-        type: "image/svg+xml;charset=utf-8",
-      });
-      const svgBlobURL = URL.createObjectURL(svgBlob);
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
 
-      const canvas = document.createElement("canvas");
-      const ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
+    canvas.width = this.outputDimensions[this.current.format].width;
+    canvas.height = this.outputDimensions[this.current.format].height;
 
-      canvas.width = this.outputDimensions[this.current.format].width;
-      canvas.height = this.outputDimensions[this.current.format].height;
+    const img = new Image();
 
-      const img = new Image();
-      img.src = svgBlobURL;
-
+    return new Promise((resolve, reject) => {
       img.onload = () => {
         ctx.drawImage(img, 0, 0);
         URL.revokeObjectURL(svgBlobURL);
-
         resolve(canvas);
-      }
-    })
+      };
+      img.onerror = () => {
+        URL.revokeObjectURL(svgBlobURL);
+        reject(new Error("Failed to load SVG image."));
+      };
+
+      img.src = svgBlobURL;
+    });
   }
 
   /**
-   * 
-   * @param canvas 
-   * @returns 
+   * @async
+   * @property {Function} getAllSVGAsCanvases - takes all SVG mockups and convert them to array of canvases
+   * @param {string} range - current mockup or all
    */
-  static async canvasToBlob(canvas: HTMLCanvasElement): Promise<Blob> {
-    return new Promise((resolve, reject) => {
-      canvas.toBlob(
-        (blob: Blob | null) => {
-          if (blob) {
-            resolve(blob);
-          } else {
-            reject()
-          }
-        },
-        'image/jpeg',
-        1
-      )
-    })
-  }
-
-  /**
-   * @property {Function} downloadCurrentJPG - Download current (visible) svg mockup
-   */
-  static async downloadCurrentJPG(): Promise<void> {
-    const svg = this.getCurrentMockup("svg");
-
-    const canvas = await this.SVGToCanvas(svg);
-
-    const dataURL = canvas.toDataURL("image/jpeg");
-    const fileName = this.getFileName();
-
-    const a = document.createElement("a");
-    a.download = fileName;
-    a.href = dataURL;
-    a.click();
-
-    a.remove();
-    canvas.remove();
-  }
-
-  /**
-   * @property {Function} downloadPDF - download as PDF
-   * @param {string} range - single-page/all pages
-   */
-  static async downloadPDF(range: PDFPagesRangeToDownload): Promise<void> {
-    Calendar.loading(LoadingState.Show);
-
-    const canvases = await this.getCanvases(range);
-
-    const pdf = await PDFDocument.create();
-
-    for (const canvas of canvases) {
-      const blob = await this.canvasToBlob(canvas);
-      const arrayBuffer = await blob.arrayBuffer();
-
-      const image = await pdf.embedJpg(arrayBuffer);
-
-      const page = pdf.addPage([canvas.width, canvas.height])
-
-      page.drawImage(image, {
-        x: 0,
-        y: 0,
-        width: canvas.width,
-        height: canvas.height,
-      })
-    }
-
-    const arrayBuffer = await pdf.save();
-
-    const blob = new Blob([arrayBuffer], { type: "application/pdf" });
-    const blobURL = URL.createObjectURL(blob);
-
-    Calendar.loading(LoadingState.Hide);
-
-    const a = document.createElement("a");
-    const my_evt = new MouseEvent("click");
-    a.download = this.getFileName(range === PDFPagesRangeToDownload.All);
-    a.href = blobURL;
-    a.dispatchEvent(my_evt);
-
-    URL.revokeObjectURL(blobURL)
-  }
-
-  private static async getCanvases(range: PDFPagesRangeToDownload): Promise<HTMLCanvasElement[]> {
+  private static async getAllSVGAsCanvases(
+    range: PDFPagesRangeToDownload
+  ): Promise<HTMLCanvasElement[]> {
     if (range === PDFPagesRangeToDownload.Current) {
       return [await this.SVGToCanvas(this.getCurrentMockup("svg"))];
     }
@@ -525,6 +452,96 @@ export abstract class Calendar {
       );
     }
     return [];
+  }
+
+  /**
+   * @async
+   * @property {Function} canvasToBlob - create blob object from given canvas
+   * @param canvas
+   * @returns
+   */
+  static async canvasToBlob(canvas: HTMLCanvasElement): Promise<Blob> {
+    return new Promise((resolve, reject) => {
+      canvas.toBlob(
+        (blob: Blob | null) => {
+          if (blob) {
+            resolve(blob);
+          } else {
+            reject(new Error("Failed to convert canvas to Blob."));
+          }
+        },
+        "image/jpeg",
+        1
+      );
+    });
+  }
+
+  /**
+   * @async
+   * @property {Function} downloadCurrentJPG - Download current (visible) svg mockup
+   */
+  static async downloadCurrentJPG(): Promise<void> {
+    const svg = this.getCurrentMockup("svg");
+    const canvas = await this.SVGToCanvas(svg);
+
+    const dataURL = canvas.toDataURL("image/jpeg");
+    const fileName = this.getFileName();
+
+    this.downloadElement(dataURL, fileName);
+  }
+
+  /**
+   * @async
+   * @property {Function} downloadPDF - download as PDF
+   * @param {string} range - single-page/all pages
+   */
+  static async downloadPDF(range: PDFPagesRangeToDownload): Promise<void> {
+    Calendar.loading(LoadingState.Show);
+
+    const canvases = await this.getAllSVGAsCanvases(range);
+
+    const pdf = await PDFDocument.create();
+
+    for (const canvas of canvases) {
+      const blob = await this.canvasToBlob(canvas);
+      const arrayBuffer = await blob.arrayBuffer();
+
+      const image = await pdf.embedJpg(arrayBuffer);
+
+      const page = pdf.addPage([canvas.width, canvas.height]);
+
+      page.drawImage(image, {
+        x: 0,
+        y: 0,
+        width: canvas.width,
+        height: canvas.height,
+      });
+    }
+
+    const arrayBuffer = await pdf.save();
+
+    const blob = new Blob([arrayBuffer], { type: "application/pdf" });
+    const blobURL = URL.createObjectURL(blob);
+
+    const fileName = this.getFileName(range === PDFPagesRangeToDownload.All);
+
+    this.downloadElement(blobURL, fileName);
+
+    Calendar.loading(LoadingState.Hide);
+    URL.revokeObjectURL(blobURL);
+  }
+
+  /**
+   * @property {Fucntion} downloadElement - create link element, download object, destroy link element
+   * @param {string} elementURL - URL of blob or canvas to download
+   * @param {string} fileName
+   */
+  private static downloadElement(elementURL: string, fileName: string): void {
+    const a = document.createElement("a");
+    a.download = fileName;
+    a.href = elementURL;
+    a.click();
+    a.remove();
   }
 
   /**
