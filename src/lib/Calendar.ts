@@ -1,5 +1,5 @@
 import Cropper from "cropperjs";
-import { PDFDocument, PDFImage } from "pdf-lib";
+import { PDFDocument } from "pdf-lib";
 
 import { getMonthsList } from "./utils/getMonthsList";
 import { createHTMLElement } from "./utils/createElement/createHTMLElement";
@@ -462,17 +462,13 @@ export abstract class Calendar {
    */
   static async canvasToBlob(canvas: HTMLCanvasElement): Promise<Blob> {
     return new Promise((resolve, reject) => {
-      canvas.toBlob(
-        (blob: Blob | null) => {
-          if (blob) {
-            resolve(blob);
-          } else {
-            reject(new Error("Failed to convert canvas to Blob."));
-          }
-        },
-        "image/jpeg",
-        1
-      );
+      canvas.toBlob((blob: Blob | null) => {
+        if (blob) {
+          resolve(blob);
+        } else {
+          reject(new Error("Failed to convert canvas to Blob."));
+        }
+      }, "image/jpeg");
     });
   }
 
