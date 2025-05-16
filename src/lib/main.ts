@@ -219,10 +219,11 @@ function loadSavedProject(): void {
 
     transaction.oncomplete = async function () {
       if (projectData) {
-        await newCalendar(projectData);
-
         if (imagesData) {
+          await newCalendar(projectData);
           currentCalendar.retrieveImages(imagesData);
+        } else {
+          await newCalendar(projectData);
         }
       }
       db.close();

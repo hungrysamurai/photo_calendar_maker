@@ -82,6 +82,8 @@ export abstract class Calendar {
 
   static isNewType: boolean = true;
 
+  static mockupsCache = []
+
   /**
    * Dimensions of document (px)
    */
@@ -331,9 +333,9 @@ export abstract class Calendar {
         const reduced = this.reduceImageSize(
           reader.result as string,
           this.current.mockupOptions.imagePlaceholderWidth *
-            this.current.imageReduceSizeRate,
+          this.current.imageReduceSizeRate,
           this.current.mockupOptions.imagePlaceholderHeight *
-            this.current.imageReduceSizeRate
+          this.current.imageReduceSizeRate
         );
 
         reduced.then((reducedImage) => {
@@ -400,6 +402,24 @@ export abstract class Calendar {
     });
   }
 
+  static async cacheMockup(mockupToCache: SVGSVGElement, index: number) {
+    const canvas = await this.SVGToCanvas(mockupToCache);
+    const blob = await this.canvasToBlob(canvas);
+
+    const cachedMockup = { canvas, blob };
+    this.mockupsCache[index] = cachedMockup;
+
+    console.log(this.mockupsCache);
+  }
+
+  static updateCachedMockup() {
+
+  }
+
+  static clearCache() {
+
+  }
+
   /**
    * @async
    * @property {Function} SVGToCanvas - convert given SVG to Canvas
@@ -423,6 +443,8 @@ export abstract class Calendar {
     return new Promise((resolve, reject) => {
       img.onload = () => {
         ctx.drawImage(img, 0, 0);
+        console.log('canvas loaded');
+
         URL.revokeObjectURL(svgBlobURL);
         resolve(canvas);
       };
@@ -443,6 +465,8 @@ export abstract class Calendar {
   private static async getAllSVGAsCanvases(
     range: PDFPagesRangeToDownload
   ): Promise<HTMLCanvasElement[]> {
+    console.log('getAllSVGAsCanvases starts...');
+
     if (range === PDFPagesRangeToDownload.Current) {
       return [await this.SVGToCanvas(this.getCurrentMockup("svg"))];
     }
@@ -494,16 +518,17 @@ export abstract class Calendar {
   static async downloadPDF(range: PDFPagesRangeToDownload): Promise<void> {
     Calendar.loading(LoadingState.Show);
 
-    const canvases = await this.getAllSVGAsCanvases(range);
+    // const canvases = await this.getAllSVGAsCanvases(range);
 
     const pdf = await PDFDocument.create();
 
-    for (const canvas of canvases) {
-      const blob = await this.canvasToBlob(canvas);
+    for (const { canvas, blob } of this.mockupsCache) {
+      console.log('working...');
+      // const blob = await this.canvasToBlob(canvas);
+      // console.log('done');
       const arrayBuffer = await blob.arrayBuffer();
 
       const image = await pdf.embedJpg(arrayBuffer);
-
       const page = pdf.addPage([canvas.width, canvas.height]);
 
       page.drawImage(image, {
@@ -512,6 +537,7 @@ export abstract class Calendar {
         width: canvas.width,
         height: canvas.height,
       });
+
     }
 
     const arrayBuffer = await pdf.save();
