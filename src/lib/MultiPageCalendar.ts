@@ -47,7 +47,8 @@ export class MultiPageCalendar extends Calendar {
     public lang: CalendarLanguage,
     public type: CalendarType,
     public currentFont: FontArray,
-    public format: FormatName
+    public format: FormatName,
+    public imagesFromIDB: ImageObject[] = []
   ) {
     super(
       firstMonthIndex,
@@ -190,7 +191,9 @@ export class MultiPageCalendar extends Calendar {
   /**
    * @property {Function} createSVGMockup - creates SVG mockup in DOM
    */
-  createSVGMockup(): void {
+  async createSVGMockup(): Promise<void> {
+    Calendar.loading(LoadingState.Show);
+
     this.calendarWrapper = createHTMLElement({
       elementName: "div",
       className: "calendar-wrapper",
@@ -288,9 +291,10 @@ export class MultiPageCalendar extends Calendar {
             ),
           ],
           attributes: {
-            transform: `translate(${this.mockupOptions.calendarGridX +
+            transform: `translate(${
+              this.mockupOptions.calendarGridX +
               this.mockupOptions.dayCellWidth * i
-              } ${this.mockupOptions.weekDaysY})`,
+            } ${this.mockupOptions.weekDaysY})`,
           },
         });
       });
@@ -301,18 +305,42 @@ export class MultiPageCalendar extends Calendar {
         parentToAppend: monthMockup,
       });
 
-      const imagePlaceholderRect = createSVGElement({
-        elementName: "rect",
-        id: `image-placeholder-${i}`,
-        parentToAppend: monthImageGroup,
-        attributes: {
-          width: this.mockupOptions.imagePlaceholderWidth.toString(),
-          height: this.mockupOptions.imagePlaceholderHeight.toString(),
-          x: this.mockupOptions.imagePlaceholderX.toString(),
-          y: this.mockupOptions.imagePlaceholderY.toString(),
-          style: "fill: #e8e8e8",
-        },
-      });
+      // Check if current month have a corresponding saved in IDB image
+      const imageInIDB = this.imagesFromIDB.find((el) => el.id === i);
+
+      if (imageInIDB) {
+        // ...fetch stored image and place it on mockup
+        const imageObject = await fetch(imageInIDB.image);
+        const imgURL = imageObject.url;
+
+        const imageEl = createSVGElement({
+          elementName: "image",
+          parentToAppend: monthImageGroup,
+          attributes: {
+            height: this.mockupOptions.imagePlaceholderHeight.toString(),
+            width: this.mockupOptions.imagePlaceholderWidth.toString(),
+            x: this.mockupOptions.imagePlaceholderX.toString(),
+            y: this.mockupOptions.imagePlaceholderY.toString(),
+          },
+          attributesNS: {
+            href: imgURL,
+          },
+        });
+      } else {
+        // if no saved image - just put placeholder
+        const imagePlaceholderRect = createSVGElement({
+          elementName: "rect",
+          id: `image-placeholder-${i}`,
+          parentToAppend: monthImageGroup,
+          attributes: {
+            width: this.mockupOptions.imagePlaceholderWidth.toString(),
+            height: this.mockupOptions.imagePlaceholderHeight.toString(),
+            x: this.mockupOptions.imagePlaceholderX.toString(),
+            y: this.mockupOptions.imagePlaceholderY.toString(),
+            style: "fill: #e8e8e8",
+          },
+        });
+      }
 
       if (i === 11) {
         this.lastMonth = this.monthCounter;
@@ -338,7 +366,10 @@ export class MultiPageCalendar extends Calendar {
       );
 
       this.pagesArray.push(monthMockup);
+
       Calendar.cacheMockup(monthMockup, i);
+
+      Calendar.loading(LoadingState.Hide);
     }
   }
 
@@ -346,8 +377,9 @@ export class MultiPageCalendar extends Calendar {
    * @property {Function} setVisibleMonth - show current month mockup in DOM by translate calendarInner container by X axis
    */
   static setVisibleMonth(): void {
-    this.current.calendarInner.style.left = `-${this.current.currentMonth * 100
-      }%`;
+    this.current.calendarInner.style.left = `-${
+      this.current.currentMonth * 100
+    }%`;
   }
 
   /**
@@ -363,7 +395,10 @@ export class MultiPageCalendar extends Calendar {
       for (let i = 0; i < files.length; i++) {
         const reader = new FileReader();
 
-        reader.onload = (e) => {
+        Calendar.loading(LoadingState.Show);
+
+        reader.readAsDataURL(files[i]);
+        reader.onload = async () => {
           const imageGroup = this.current.calendarInner.querySelector(
             `#month-${i}-container #image-group`
           ) as SVGGElement;
@@ -384,40 +419,35 @@ export class MultiPageCalendar extends Calendar {
           });
 
           // Image optimization
-          const reduced = this.reduceImageSize(
+          const reduced = await this.reduceImageSize(
             reader.result as string,
             this.current.mockupOptions.imagePlaceholderWidth *
-            this.current.imageReduceSizeRate,
+              this.current.imageReduceSizeRate,
             this.current.mockupOptions.imagePlaceholderHeight *
-            this.current.imageReduceSizeRate
+              this.current.imageReduceSizeRate
           );
 
-          reduced
-            .then((reducedImage) => {
-              const resultImage = reducedImage ? reducedImage : reader.result;
+          const resultImage = reduced ? reduced : reader.result;
 
-              this.current.saveToIDB(resultImage as string, i);
+          this.current.saveToIDB(resultImage as string, i);
 
-              imageEl.setAttributeNS(
-                "http://www.w3.org/1999/xlink",
-                "href",
-                resultImage as string
-              );
+          imageEl.setAttributeNS(
+            "http://www.w3.org/1999/xlink",
+            "href",
+            resultImage as string
+          );
 
-              loadedFilesCounter++;
-            })
-            .then(() => {
-              if (
-                loadedFilesCounter === files.length ||
-                loadedFilesCounter === 11
-              ) {
-                Calendar.loading(LoadingState.Hide);
-              }
-            });
+          Calendar.cacheMockup(Calendar.getMockupByIndex(i), i);
+
+          loadedFilesCounter++;
+
+          if (
+            loadedFilesCounter === files.length ||
+            loadedFilesCounter === 11
+          ) {
+            Calendar.loading(LoadingState.Hide);
+          }
         };
-
-        reader.readAsDataURL(files[i]);
-        Calendar.loading(LoadingState.Show);
 
         if (i === 11) {
           break;

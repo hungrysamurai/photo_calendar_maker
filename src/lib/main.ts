@@ -84,14 +84,10 @@ function newProject() {
  * @param {string} [newCalendarData.lang]
  * @param {string} [newCalendarData.type] - single-page/multi-page
  */
-async function newCalendar({
-  startYear,
-  firstMonthIndex,
-  lang,
-  font,
-  format,
-  type,
-}: CalendarData): Promise<void> {
+async function newCalendar(
+  { startYear, firstMonthIndex, lang, font, format, type }: CalendarData,
+  savedImages?: ImageObject[]
+): Promise<void> {
   const currentFont: FontArray = loadedFonts[font];
 
   if (type === CalendarType.MultiPage) {
@@ -104,7 +100,8 @@ async function newCalendar({
       lang,
       type,
       currentFont,
-      format
+      format,
+      savedImages
     );
   } else {
     currentCalendar = new SinglePageCalendar(
@@ -219,12 +216,7 @@ function loadSavedProject(): void {
 
     transaction.oncomplete = async function () {
       if (projectData) {
-        if (imagesData) {
-          await newCalendar(projectData);
-          currentCalendar.retrieveImages(imagesData);
-        } else {
-          await newCalendar(projectData);
-        }
+        await newCalendar(projectData, imagesData);
       }
       db.close();
     };

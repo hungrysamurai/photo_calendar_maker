@@ -74,8 +74,15 @@ declare global {
   };
 
   type FontData = {
-    [key: string]: Font
+    [key: string]: Font;
   };
+
+  type CachedMockup = {
+    canvas: HTMLCanvasElement;
+    blob: Blob;
+  };
+
+  type MockupsCache = CachedMockup[];
 
   interface CreateHTMLElementParams<TagName> {
     elementName: TagName;
