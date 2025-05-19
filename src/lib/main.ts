@@ -113,7 +113,8 @@ async function newCalendar(
       lang,
       type,
       currentFont,
-      format
+      format,
+      savedImages
     );
   }
 }

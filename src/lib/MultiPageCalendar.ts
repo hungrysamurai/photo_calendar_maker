@@ -419,7 +419,7 @@ export class MultiPageCalendar extends Calendar {
           });
 
           // Image optimization
-          const reduced = await this.reduceImageSize(
+          const reduced = await Calendar.reduceImageSize(
             reader.result as string,
             this.current.mockupOptions.imagePlaceholderWidth *
               this.current.imageReduceSizeRate,
@@ -454,53 +454,5 @@ export class MultiPageCalendar extends Calendar {
         }
       }
     }
-  }
-
-  /**
-   * @property {Fucntion} retrieveImages - load images from given array to DOM
-   * @param {Array} imagesArr - Array of images to load
-
-   */
-  async retrieveImages(imagesArr: ImageObject[]): Promise<void> {
-    Calendar.loading(LoadingState.Show);
-
-    if (imagesArr.length === 0) {
-      Calendar.loading(LoadingState.Hide);
-      return;
-    }
-    let loadingCounter = 0;
-
-    imagesArr.forEach((imageItem) => {
-      const currentMonthContainer = imageItem.id;
-
-      fetch(imageItem.image).then((res) => {
-        const imgURL = res.url;
-
-        const imageGroup = document.querySelector(
-          `#month-${currentMonthContainer}-container #image-group`
-        ) as SVGGElement;
-        imageGroup.innerHTML = "";
-
-        const imageEl = createSVGElement({
-          elementName: "image",
-          parentToAppend: imageGroup,
-          attributes: {
-            height: this.mockupOptions.imagePlaceholderHeight.toString(),
-            width: this.mockupOptions.imagePlaceholderWidth.toString(),
-            x: this.mockupOptions.imagePlaceholderX.toString(),
-            y: this.mockupOptions.imagePlaceholderY.toString(),
-          },
-          attributesNS: {
-            href: imgURL,
-          },
-        });
-
-        loadingCounter++;
-
-        if (loadingCounter === imagesArr.length) {
-          Calendar.loading(LoadingState.Hide);
-        }
-      });
-    });
   }
 }
