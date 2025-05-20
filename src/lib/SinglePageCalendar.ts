@@ -3,7 +3,7 @@ import { Calendar } from "./Calendar";
 import { createHTMLElement } from "./utils/createElement/createHTMLElement";
 import { createSVGElement } from "./utils/createElement/createSVGElement";
 
-import { CalendarLanguage, CalendarType, FormatName } from "../../types";
+import { CalendarLanguage, CalendarType, FormatName, LoadingState } from "../../types";
 
 import { A_FormatSinglePageMockupOptions } from "../assets/A_FormatOptions/A_FormatOptions";
 
@@ -49,6 +49,8 @@ export class SinglePageCalendar extends Calendar {
    * @property {Function} createSVGMockup - creates SVG mockup in DOM
    */
   async createSVGMockup(): Promise<void> {
+    Calendar.loading(LoadingState.Show);
+
     this.calendarWrapper = createHTMLElement({
       elementName: "div",
       className: "calendar-wrapper",
@@ -86,8 +88,8 @@ export class SinglePageCalendar extends Calendar {
       parentToAppend: mockup,
     });
 
-    const imageInIDB = this.imagesFromIDB[0];
-    console.log(imageInIDB);
+    const imageInIDB: ImageObject | undefined = this.imagesFromIDB[0];
+
     if (imageInIDB) {
       const imageObject = await fetch(imageInIDB.image);
       const imgURL = imageObject.url;
@@ -215,7 +217,7 @@ export class SinglePageCalendar extends Calendar {
           attributes: {
             transform: `translate(${Number(
               this.mockupOptions.calendarGridX +
-                this.mockupOptions.dayCellWidth * i
+              this.mockupOptions.dayCellWidth * i
             ).toFixed(2)} 0)`,
           },
           children: [weekDayPath],
@@ -248,5 +250,9 @@ export class SinglePageCalendar extends Calendar {
       // Append to main SVG
       mockup.appendChild(monthContainer);
     }
+
+    await Calendar.cacheMockup(mockup);
+
+    Calendar.loading(LoadingState.Hide);
   }
 }

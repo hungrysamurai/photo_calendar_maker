@@ -141,8 +141,6 @@ export abstract class Calendar {
   calendarWrapper: HTMLDivElement;
   imageElementGroup: SVGGElement;
 
-  pagesArray: SVGElement[] = [];
-
   weekDaysNamesList: string[];
 
   constructor(
@@ -298,10 +296,6 @@ export abstract class Calendar {
 
       this.uploadImg(e);
     });
-
-    // this.formatSelectInput.addEventListener("input", (e) => {
-    //   this.currentSize = (e.target as HTMLInputElement).value as FormatName;
-    // });
   }
 
   // Upload/download section
@@ -314,7 +308,6 @@ export abstract class Calendar {
   static async uploadImg(e: Event) {
     if (e.target instanceof HTMLInputElement && e.target.files) {
       const imageFile = e.target.files[0];
-
       const reader = new FileReader();
 
       Calendar.loading(LoadingState.Show);
@@ -340,9 +333,9 @@ export abstract class Calendar {
         const reduced = await this.reduceImageSize(
           reader.result as string,
           this.current.mockupOptions.imagePlaceholderWidth *
-            this.current.imageReduceSizeRate,
+          this.current.imageReduceSizeRate,
           this.current.mockupOptions.imagePlaceholderHeight *
-            this.current.imageReduceSizeRate
+          this.current.imageReduceSizeRate
         );
 
         const resultImage = reduced ? reduced : reader.result;
@@ -514,7 +507,8 @@ export abstract class Calendar {
   }
 
   // Caching
-  static async cacheMockup(mockupToCache: SVGElement, index: number) {
+
+  static async cacheMockup(mockupToCache: SVGElement, index = 0) {
     const canvas = await this.SVGToCanvas(mockupToCache);
     const blob = await this.canvasToBlob(canvas);
     const cachedMockup = { canvas, blob };
@@ -1045,7 +1039,10 @@ export abstract class Calendar {
    * @param {string} imageFile - image to save in IndexedDB
    * @param {number} [id=this.currentMonth] - index of month
    */
-  saveToIDB(imageFile: string, id: number = this.currentMonth): void {
+  saveToIDB(
+    imageFile: string,
+    id: number = this.currentMonth
+  ): void {
     const indexedDB =
       window.indexedDB ||
       window.mozIndexedDB ||
