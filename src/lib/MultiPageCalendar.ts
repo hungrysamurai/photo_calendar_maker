@@ -364,7 +364,7 @@ export class MultiPageCalendar extends Calendar {
         this.mockupOptions.dayCellStyles
       );
 
-      await Calendar.cacheMockup(monthMockup, i);
+      Calendar.cacheMockup(monthMockup, i);
     }
 
     Calendar.loading(LoadingState.Hide);

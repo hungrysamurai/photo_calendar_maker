@@ -82,7 +82,7 @@ export abstract class Calendar {
 
   static isNewType: boolean = true;
 
-  static mockupsCache: MockupsCache = [];
+  static mockupsCache: Blob[] = [];
 
   /**
    * Dimensions of document (px)
@@ -408,13 +408,10 @@ export abstract class Calendar {
    * @property {Function} downloadCurrentJPG - Download current (visible) svg mockup
    */
   static async downloadCurrentJPG(): Promise<void> {
-    const dataURL =
-      Calendar.mockupsCache[this.current.currentMonth].canvas.toDataURL(
-        "image/jpeg"
-      );
+    const url = URL.createObjectURL(Calendar.mockupsCache[this.current.currentMonth]);
     const fileName = this.getFileName();
 
-    this.downloadElement(dataURL, fileName);
+    this.downloadElement(url, fileName);
   }
 
   /**
@@ -432,17 +429,20 @@ export abstract class Calendar {
         ? this.mockupsCache
         : [this.mockupsCache[this.current.currentMonth]];
 
-    for (const { canvas, blob } of pagesToDownload) {
+    for (const blob of pagesToDownload) {
       const arrayBuffer = await blob.arrayBuffer();
 
       const image = await pdf.embedJpg(arrayBuffer);
-      const page = pdf.addPage([canvas.width, canvas.height]);
+      const page = pdf.addPage([
+        this.outputDimensions[this.current.format].width,
+        this.outputDimensions[this.current.format].height
+      ]);
 
       page.drawImage(image, {
         x: 0,
         y: 0,
-        width: canvas.width,
-        height: canvas.height,
+        width: this.outputDimensions[this.current.format].width,
+        height: this.outputDimensions[this.current.format].height
       });
     }
 
@@ -509,11 +509,23 @@ export abstract class Calendar {
   // Caching
 
   static async cacheMockup(mockupToCache: SVGElement, index = 0) {
-    const canvas = await this.SVGToCanvas(mockupToCache);
-    const blob = await this.canvasToBlob(canvas);
-    const cachedMockup = { canvas, blob };
 
-    this.mockupsCache[index] = cachedMockup;
+    const canvas = await this.SVGToCanvas(mockupToCache);
+    // const blob = await this.canvasToBlob(canvas);
+
+    const url = canvas.toDataURL();
+
+    const workerPath = new URL('cachingWorker.ts', import.meta.url);
+    const worker = new Worker(workerPath, { type: 'module' });
+
+    worker.onmessage = (e) => {
+      const { blob } = e.data;
+      this.mockupsCache[index] = blob;
+
+      worker.terminate();
+    }
+
+    worker.postMessage({ url });
 
     console.log(this.mockupsCache);
   }
