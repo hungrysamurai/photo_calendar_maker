@@ -251,7 +251,7 @@ export class SinglePageCalendar extends Calendar {
       mockup.appendChild(monthContainer);
     }
 
-    await Calendar.cacheMockup(mockup);
+    Calendar.cacheMockup(mockup);
 
     Calendar.loading(LoadingState.Hide);
   }

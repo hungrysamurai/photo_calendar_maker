@@ -432,7 +432,7 @@ export class MultiPageCalendar extends Calendar {
             "href",
             resultImage as string
           );
-          await Calendar.cacheMockup(Calendar.getMockupByIndex(i), i);
+          Calendar.cacheMockup(Calendar.getMockupByIndex(i), i);
 
           loadedFilesCounter++;
 

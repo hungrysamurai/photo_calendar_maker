@@ -349,7 +349,7 @@ export abstract class Calendar {
         this.current.saveToIDB(resultImage as string);
 
         // Cache mockup after change
-        await Calendar.cacheMockup(
+        Calendar.cacheMockup(
           this.getCurrentMockup("svg") as SVGElement,
           this.current.currentMonth
         );
@@ -513,7 +513,7 @@ export abstract class Calendar {
     const canvas = await this.SVGToCanvas(mockupToCache);
     // const blob = await this.canvasToBlob(canvas);
 
-    const url = canvas.toDataURL();
+    const url = canvas.toDataURL('image/jpeg');
 
     const workerPath = new URL('cachingWorker.ts', import.meta.url);
     const worker = new Worker(workerPath, { type: 'module' });
