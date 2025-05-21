@@ -1,11 +1,16 @@
-
-console.log('[Worker] Initialized');
-
 self.onmessage = async (e) => {
- const { url } = e.data;
+  const bmp = e.data;
 
- const response = await fetch(url);
- const blob = await response.blob();
+  const { width, height } = bmp;
 
- self.postMessage({ blob });
+  const offscreenCanvas = new OffscreenCanvas(width, height);
+  const ctx = offscreenCanvas.getContext("2d");
+
+  if (ctx) {
+    ctx.drawImage(bmp, 0, 0, width, height);
+  }
+
+  const blob = await offscreenCanvas.convertToBlob({ type: "image/jpeg" });
+
+  self.postMessage(blob);
 };

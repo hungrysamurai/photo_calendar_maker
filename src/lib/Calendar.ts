@@ -333,9 +333,9 @@ export abstract class Calendar {
         const reduced = await this.reduceImageSize(
           reader.result as string,
           this.current.mockupOptions.imagePlaceholderWidth *
-          this.current.imageReduceSizeRate,
+            this.current.imageReduceSizeRate,
           this.current.mockupOptions.imagePlaceholderHeight *
-          this.current.imageReduceSizeRate
+            this.current.imageReduceSizeRate
         );
 
         const resultImage = reduced ? reduced : reader.result;
@@ -408,7 +408,9 @@ export abstract class Calendar {
    * @property {Function} downloadCurrentJPG - Download current (visible) svg mockup
    */
   static async downloadCurrentJPG(): Promise<void> {
-    const url = URL.createObjectURL(Calendar.mockupsCache[this.current.currentMonth]);
+    const url = URL.createObjectURL(
+      Calendar.mockupsCache[this.current.currentMonth]
+    );
     const fileName = this.getFileName();
 
     this.downloadElement(url, fileName);
@@ -435,14 +437,14 @@ export abstract class Calendar {
       const image = await pdf.embedJpg(arrayBuffer);
       const page = pdf.addPage([
         this.outputDimensions[this.current.format].width,
-        this.outputDimensions[this.current.format].height
+        this.outputDimensions[this.current.format].height,
       ]);
 
       page.drawImage(image, {
         x: 0,
         y: 0,
         width: this.outputDimensions[this.current.format].width,
-        height: this.outputDimensions[this.current.format].height
+        height: this.outputDimensions[this.current.format].height,
       });
     }
 
@@ -509,25 +511,46 @@ export abstract class Calendar {
   // Caching
 
   static async cacheMockup(mockupToCache: SVGElement, index = 0) {
+    // Not Worker
 
-    const canvas = await this.SVGToCanvas(mockupToCache);
+    // const canvas = await this.SVGToCanvas(mockupToCache);
     // const blob = await this.canvasToBlob(canvas);
 
-    const url = canvas.toDataURL('image/jpeg');
+    // this.mockupsCache[index] = blob;
 
-    const workerPath = new URL('cachingWorker.ts', import.meta.url);
-    const worker = new Worker(workerPath, { type: 'module' });
+    // Worker
+    const svgData = new XMLSerializer().serializeToString(mockupToCache);
 
+    const svgBlob = new Blob([svgData], {
+      type: "image/svg+xml",
+    });
+
+    const img = new Image();
+    img.src = URL.createObjectURL(svgBlob);
+    await img.decode();
+    URL.revokeObjectURL(img.src);
+
+    const bmp = await createImageBitmap(
+      img,
+      0,
+      0,
+      this.outputDimensions[this.current.format].width,
+      this.outputDimensions[this.current.format].height,
+      {
+        resizeHeight: this.outputDimensions[this.current.format].height,
+        resizeWidth: this.outputDimensions[this.current.format].width,
+      }
+    );
+
+    const workerPath = new URL("cachingWorker.ts", import.meta.url);
+    const worker = new Worker(workerPath, { type: "module" });
     worker.onmessage = (e) => {
-      const { blob } = e.data;
+      const blob = e.data;
       this.mockupsCache[index] = blob;
 
-      worker.terminate();
-    }
-
-    worker.postMessage({ url });
-
-    console.log(this.mockupsCache);
+      // worker.terminate();
+    };
+    worker.postMessage(bmp, [bmp]);
   }
 
   static clearCache() {
@@ -1051,10 +1074,7 @@ export abstract class Calendar {
    * @param {string} imageFile - image to save in IndexedDB
    * @param {number} [id=this.currentMonth] - index of month
    */
-  saveToIDB(
-    imageFile: string,
-    id: number = this.currentMonth
-  ): void {
+  saveToIDB(imageFile: string, id: number = this.currentMonth): void {
     const indexedDB =
       window.indexedDB ||
       window.mozIndexedDB ||
