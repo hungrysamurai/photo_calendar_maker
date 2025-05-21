@@ -4,6 +4,8 @@ import { PDFDocument } from "pdf-lib";
 import { getMonthsList } from "./utils/getMonthsList";
 import { createHTMLElement } from "./utils/createElement/createHTMLElement";
 
+import WorkerPool from "./utils/WorkerPool/WorkerPool";
+
 /**
  * Object with SVG icons
  */
@@ -87,6 +89,8 @@ export abstract class Calendar {
     new URL("cachingWorker.ts", import.meta.url),
     { type: "module" }
   );
+
+  static cachingWorkersPool: WorkerPool;
 
   /**
    * Dimensions of document (px)
@@ -196,6 +200,11 @@ export abstract class Calendar {
       // Clean  mockup container
       Calendar.cleanUp(controlsContainer);
     }
+
+    Calendar.cachingWorkersPool = new WorkerPool(
+      12,
+      new URL("./utils/WorkerPool/cachingWorker.ts", import.meta.url)
+    );
 
     // Clear cache of mockups
     Calendar.mockupsCache = [];
@@ -559,7 +568,12 @@ export abstract class Calendar {
     //   worker.terminate();
     // };
     // worker.postMessage(bmp, [bmp]);
-    this.cacheWorker.postMessage({ bmp, index }, [bmp]);
+
+    this.mockupsCache[index] = await this.cachingWorkersPool.addWork({
+      bmp,
+    });
+
+    // this.cacheWorker.postMessage({ bmp, index }, [bmp]);
   }
 
   /**

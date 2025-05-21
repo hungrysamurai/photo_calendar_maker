@@ -1,6 +1,6 @@
 addEventListener("message", async (e) => {
-  const { bmp, index } = e.data;
-
+  const { bmp } = e.data;
+  console.log(bmp);
   const { width, height } = bmp;
 
   const offscreenCanvas = new OffscreenCanvas(width, height);
@@ -12,5 +12,5 @@ addEventListener("message", async (e) => {
 
   const blob = await offscreenCanvas.convertToBlob({ type: "image/jpeg" });
 
-  postMessage({ blob, index });
+  postMessage(blob);
 });
