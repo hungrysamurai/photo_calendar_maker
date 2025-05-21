@@ -85,12 +85,10 @@ export abstract class Calendar {
   static isNewType: boolean = true;
 
   static mockupsCache: Blob[] = [];
-  static cacheWorker = new Worker(
-    new URL("cachingWorker.ts", import.meta.url),
-    { type: "module" }
+  static cachingWorkersPool = new WorkerPool(
+    12,
+    new URL("./utils/WorkerPool/cachingWorker.ts", import.meta.url)
   );
-
-  static cachingWorkersPool: WorkerPool;
 
   /**
    * Dimensions of document (px)
@@ -187,11 +185,6 @@ export abstract class Calendar {
       Calendar.initBasicControls(controlsContainer);
       Calendar.initBasicControlsEvents();
 
-      Calendar.cacheWorker.onmessage = (e) => {
-        const { blob, index } = e.data;
-        Calendar.mockupsCache[index] = blob;
-      };
-
       Calendar.initCropperControls(cropControlsContainer);
     } else {
       // Check new type vs old type
@@ -200,11 +193,6 @@ export abstract class Calendar {
       // Clean  mockup container
       Calendar.cleanUp(controlsContainer);
     }
-
-    Calendar.cachingWorkersPool = new WorkerPool(
-      12,
-      new URL("./utils/WorkerPool/cachingWorker.ts", import.meta.url)
-    );
 
     // Clear cache of mockups
     Calendar.mockupsCache = [];
@@ -528,52 +516,47 @@ export abstract class Calendar {
 
   // Caching
 
+  /**
+   * @async
+   * @property {Fucntion} cacheMockup - cache newly generated SVG as jpeg Blob. Trying to use Workers
+   * @param mockupToCache
+   * @param index
+   */
   static async cacheMockup(mockupToCache: SVGElement, index = 0) {
-    // Not Worker
-
-    // const canvas = await this.SVGToCanvas(mockupToCache);
-    // const blob = await this.canvasToBlob(canvas);
-
-    // this.mockupsCache[index] = blob;
-
     // Worker
-    const svgData = new XMLSerializer().serializeToString(mockupToCache);
+    try {
+      const svgData = new XMLSerializer().serializeToString(mockupToCache);
 
-    const svgBlob = new Blob([svgData], {
-      type: "image/svg+xml",
-    });
+      const svgBlob = new Blob([svgData], {
+        type: "image/svg+xml",
+      });
 
-    const img = new Image();
-    img.src = URL.createObjectURL(svgBlob);
-    await img.decode();
-    URL.revokeObjectURL(img.src);
+      const img = new Image();
+      img.src = URL.createObjectURL(svgBlob);
+      await img.decode();
+      URL.revokeObjectURL(img.src);
 
-    const bmp = await createImageBitmap(
-      img,
-      0,
-      0,
-      this.outputDimensions[this.current.format].width,
-      this.outputDimensions[this.current.format].height,
-      {
-        resizeHeight: this.outputDimensions[this.current.format].height,
-        resizeWidth: this.outputDimensions[this.current.format].width,
-      }
-    );
-    // const workerPath = new URL("cachingWorker.ts", import.meta.url);
-    // const worker = new Worker(workerPath, { type: "module" });
-    // worker.onmessage = (e) => {
-    //   const blob = e.data;
-    //   this.mockupsCache[index] = blob;
+      const bmp = await createImageBitmap(
+        img,
+        0,
+        0,
+        this.outputDimensions[this.current.format].width,
+        this.outputDimensions[this.current.format].height,
+        {
+          resizeHeight: this.outputDimensions[this.current.format].height,
+          resizeWidth: this.outputDimensions[this.current.format].width,
+        }
+      );
 
-    //   worker.terminate();
-    // };
-    // worker.postMessage(bmp, [bmp]);
-
-    this.mockupsCache[index] = await this.cachingWorkersPool.addWork({
-      bmp,
-    });
-
-    // this.cacheWorker.postMessage({ bmp, index }, [bmp]);
+      this.mockupsCache[index] = await this.cachingWorkersPool.addWork({
+        bmp,
+      });
+    } catch (err) {
+      // If Worker fails...
+      const canvas = await this.SVGToCanvas(mockupToCache);
+      const blob = await this.canvasToBlob(canvas);
+      this.mockupsCache[index] = blob;
+    }
   }
 
   /**

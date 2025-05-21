@@ -1,9 +1,10 @@
 export default class WorkerPool {
-  numWorkers: number;
   workerSrc: string;
   idleWorkers: Worker[];
+  workQueue: CacheWorkerWorkQueue;
+  workerMap: CacheWorkerMap;
 
-  constructor(numWorkers, workerSrc) {
+  constructor(numWorkers: number, workerSrc: URL) {
     this.idleWorkers = [];
     this.workQueue = [];
     this.workerMap = new Map();
@@ -23,28 +24,35 @@ export default class WorkerPool {
     }
   }
 
-  _workerDone(worker, error, response) {
-    let [resolver, rejector] = this.workerMap.get(worker);
-    this.workerMap.delete(worker);
+  _workerDone(worker: Worker, error: ErrorEvent | null, response: Blob | null) {
+    let workerInMap = this.workerMap.get(worker);
 
-    if (this.workQueue.length === 0) {
-      this.idleWorkers.push(worker);
-    } else {
-      let [work, resolver, rejector] = this.workQueue.shift();
-      this.workerMap.set(worker, [resolver, rejector]);
-      worker.postMessage(work);
+    if (workerInMap) {
+      let [resolver, rejector] = workerInMap;
+
+      this.workerMap.delete(worker);
+
+      if (this.workQueue.length === 0) {
+        this.idleWorkers.push(worker);
+      } else {
+        let [work, resolver, rejector] =
+          this.workQueue.shift() as CacheWorkerWorkQueueUnit;
+        this.workerMap.set(worker, [resolver, rejector]);
+        worker.postMessage(work);
+      }
+
+      error === null ? resolver(response as Blob) : rejector(error);
     }
-
-    error === null ? resolver(response) : rejector(error);
   }
 
-  addWork(work): Promise<Blob> {
+  addWork(work: CacheWorkerWork): Promise<Blob> {
     const { bmp } = work;
 
     return new Promise((resolve, reject) => {
       if (this.idleWorkers.length > 0) {
-        let worker = this.idleWorkers.pop();
+        let worker = this.idleWorkers.pop() as Worker;
         this.workerMap.set(worker, [resolve, reject]);
+
         worker.postMessage({ bmp }, [bmp]);
       } else {
         this.workQueue.push([work, resolve, reject]);

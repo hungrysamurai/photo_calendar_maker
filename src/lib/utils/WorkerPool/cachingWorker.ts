@@ -1,6 +1,6 @@
 addEventListener("message", async (e) => {
-  const { bmp } = e.data;
-  console.log(bmp);
+  const { bmp } = e.data as CacheWorkerWork;
+
   const { width, height } = bmp;
 
   const offscreenCanvas = new OffscreenCanvas(width, height);

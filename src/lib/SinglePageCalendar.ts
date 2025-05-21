@@ -3,7 +3,12 @@ import { Calendar } from "./Calendar";
 import { createHTMLElement } from "./utils/createElement/createHTMLElement";
 import { createSVGElement } from "./utils/createElement/createSVGElement";
 
-import { CalendarLanguage, CalendarType, FormatName, LoadingState } from "../../types";
+import {
+  CalendarLanguage,
+  CalendarType,
+  FormatName,
+  LoadingState,
+} from "../../types";
 
 import { A_FormatSinglePageMockupOptions } from "../assets/A_FormatOptions/A_FormatOptions";
 
@@ -68,6 +73,8 @@ export class SinglePageCalendar extends Calendar {
       id: "mockup",
       attributes: {
         viewBox: `0 0 ${this.mockupOptions.mockupWidth} ${this.mockupOptions.mockupHeight}`,
+        width: Calendar.outputDimensions[this.format].width.toString(),
+        height: Calendar.outputDimensions[this.format].height.toString(),
       },
     });
 
@@ -217,7 +224,7 @@ export class SinglePageCalendar extends Calendar {
           attributes: {
             transform: `translate(${Number(
               this.mockupOptions.calendarGridX +
-              this.mockupOptions.dayCellWidth * i
+                this.mockupOptions.dayCellWidth * i
             ).toFixed(2)} 0)`,
           },
           children: [weekDayPath],

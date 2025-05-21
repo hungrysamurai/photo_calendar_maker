@@ -193,7 +193,6 @@ export class MultiPageCalendar extends Calendar {
    */
   async createSVGMockup(): Promise<void> {
     Calendar.loading(LoadingState.Show);
-    const startTime = performance.now();
 
     this.calendarWrapper = createHTMLElement({
       elementName: "div",
@@ -370,8 +369,7 @@ export class MultiPageCalendar extends Calendar {
 
       Calendar.cacheMockup(monthMockup, i);
     }
-    const resultTime = performance.now() - startTime;
-    console.log(resultTime);
+
     Calendar.loading(LoadingState.Hide);
   }
 
