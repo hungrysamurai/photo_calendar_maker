@@ -83,6 +83,10 @@ export abstract class Calendar {
   static isNewType: boolean = true;
 
   static mockupsCache: Blob[] = [];
+  static cacheWorker = new Worker(
+    new URL("cachingWorker.ts", import.meta.url),
+    { type: "module" }
+  );
 
   /**
    * Dimensions of document (px)
@@ -179,6 +183,11 @@ export abstract class Calendar {
       Calendar.initBasicControls(controlsContainer);
       Calendar.initBasicControlsEvents();
 
+      Calendar.cacheWorker.onmessage = (e) => {
+        const { blob, index } = e.data;
+        Calendar.mockupsCache[index] = blob;
+      };
+
       Calendar.initCropperControls(cropControlsContainer);
     } else {
       // Check new type vs old type
@@ -189,7 +198,7 @@ export abstract class Calendar {
     }
 
     // Clear cache of mockups
-    Calendar.clearCache();
+    Calendar.mockupsCache = [];
 
     Calendar.current = this;
   }
@@ -541,20 +550,16 @@ export abstract class Calendar {
         resizeWidth: this.outputDimensions[this.current.format].width,
       }
     );
+    // const workerPath = new URL("cachingWorker.ts", import.meta.url);
+    // const worker = new Worker(workerPath, { type: "module" });
+    // worker.onmessage = (e) => {
+    //   const blob = e.data;
+    //   this.mockupsCache[index] = blob;
 
-    const workerPath = new URL("cachingWorker.ts", import.meta.url);
-    const worker = new Worker(workerPath, { type: "module" });
-    worker.onmessage = (e) => {
-      const blob = e.data;
-      this.mockupsCache[index] = blob;
-
-      // worker.terminate();
-    };
-    worker.postMessage(bmp, [bmp]);
-  }
-
-  static clearCache() {
-    this.mockupsCache = [];
+    //   worker.terminate();
+    // };
+    // worker.postMessage(bmp, [bmp]);
+    this.cacheWorker.postMessage({ bmp, index }, [bmp]);
   }
 
   /**
