@@ -5,6 +5,7 @@ export default class WorkerPool {
   idleWorkers: Worker[];
   workQueue: CacheWorkerWorkQueue;
   workerMap: CacheWorkerMap;
+  currentState: "idle" | "work" = "idle";
 
   NUM_VORKERS = navigator.hardwareConcurrency - 1 || 1;
 
@@ -46,10 +47,18 @@ export default class WorkerPool {
       }
 
       error === null ? resolver(response as Blob) : rejector(error);
+
+      if (this.idleWorkers.length === this.NUM_VORKERS) {
+        this.currentState = "idle";
+      }
     }
   }
 
   addWork(work: CacheWorkerWork): Promise<Blob> {
+    if (this.currentState === "idle") {
+      this.currentState = "work";
+    }
+
     const { bmp } = work;
 
     return new Promise((resolve, reject) => {

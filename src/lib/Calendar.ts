@@ -87,6 +87,9 @@ export abstract class Calendar {
   static mockupsCache: Blob[] = [];
   static cachingWorkersPool = new WorkerPool();
 
+  static mockupsCachingState: "idle" | "work" = "idle";
+  static cachingsInProgress: number = 0;
+
   /**
    * Dimensions of document (px)
    */
@@ -519,40 +522,66 @@ export abstract class Calendar {
    * @param index
    */
   static async cacheMockup(mockupToCache: SVGElement, index = 0) {
-    // Worker
+    // Try Workers
     try {
-      const svgData = new XMLSerializer().serializeToString(mockupToCache);
-
-      const svgBlob = new Blob([svgData], {
-        type: "image/svg+xml",
-      });
-
-      const img = new Image();
-      img.src = URL.createObjectURL(svgBlob);
-      await img.decode();
-      URL.revokeObjectURL(img.src);
-
-      const bmp = await createImageBitmap(
-        img,
-        0,
-        0,
-        this.outputDimensions[this.current.format].width,
-        this.outputDimensions[this.current.format].height,
-        {
-          resizeHeight: this.outputDimensions[this.current.format].height,
-          resizeWidth: this.outputDimensions[this.current.format].width,
-        }
-      );
-
-      this.mockupsCache[index] = await this.cachingWorkersPool.addWork({
-        bmp,
-      });
+      // throw new Error();
+      await this.cacheSVG(mockupToCache, index);
+      this.mockupsCachingState = this.cachingWorkersPool.currentState;
     } catch (err) {
-      // If Worker fails...
+      // If Worker fails use 'inner' cache via converting SVG to canvas -> canvas to jpeg blob in main thread
+      this.cachingsInProgress++;
+
+      if (this.mockupsCachingState === "idle") {
+        this.mockupsCachingState = "work";
+      }
+
       const canvas = await this.SVGToCanvas(mockupToCache);
       const blob = await this.canvasToBlob(canvas);
       this.mockupsCache[index] = blob;
+
+      this.cachingsInProgress--;
+
+      if (this.cachingsInProgress === 0) {
+        this.mockupsCachingState = "idle";
+      }
     }
+
+    console.log(this.mockupsCachingState);
+  }
+
+  /**
+   * @async
+   * @property {Fucntion} cacheSVG - convert SVG to ImageBitmap -> add bmp to WorkerPool -> in WorkerPool draw bmt on offscreenCanvas, convert to jpeg Blob -> add blob to cache array
+   * @param mockupToCache
+   * @param index
+   */
+  static async cacheSVG(mockupToCache: SVGElement, index = 0) {
+    const svgData = new XMLSerializer().serializeToString(mockupToCache);
+
+    const svgBlob = new Blob([svgData], {
+      type: "image/svg+xml",
+    });
+
+    const img = new Image();
+    img.src = URL.createObjectURL(svgBlob);
+    await img.decode();
+    URL.revokeObjectURL(img.src);
+
+    const bmp = await createImageBitmap(
+      img,
+      0,
+      0,
+      this.outputDimensions[this.current.format].width,
+      this.outputDimensions[this.current.format].height,
+      {
+        resizeHeight: this.outputDimensions[this.current.format].height,
+        resizeWidth: this.outputDimensions[this.current.format].width,
+      }
+    );
+
+    this.mockupsCache[index] = await this.cachingWorkersPool.addWork({
+      bmp,
+    });
   }
 
   /**
