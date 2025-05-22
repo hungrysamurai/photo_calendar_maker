@@ -1,16 +1,20 @@
+import CachingWorker from "./cachingWorker?worker&url";
+
 export default class WorkerPool {
   workerSrc: string;
   idleWorkers: Worker[];
   workQueue: CacheWorkerWorkQueue;
   workerMap: CacheWorkerMap;
 
-  constructor(numWorkers: number, workerSrc: URL) {
+  NUM_VORKERS = navigator.hardwareConcurrency - 1 || 1;
+
+  constructor() {
     this.idleWorkers = [];
     this.workQueue = [];
     this.workerMap = new Map();
 
-    for (let i = 0; i < numWorkers; i++) {
-      let worker = new Worker(workerSrc, { type: "module" });
+    for (let i = 0; i < this.NUM_VORKERS; i++) {
+      let worker = new Worker(CachingWorker, { type: "module" });
 
       worker.onmessage = (message) => {
         this._workerDone(worker, null, message.data);

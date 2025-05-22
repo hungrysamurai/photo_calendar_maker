@@ -1,11 +1,11 @@
 import Cropper from "cropperjs";
-import { PDFDocument } from "pdf-lib";
 
 import { getMonthsList } from "./utils/getMonthsList";
 import { createHTMLElement } from "./utils/createElement/createHTMLElement";
 
 import WorkerPool from "./utils/WorkerPool/WorkerPool";
 
+import CachingWorker from "./utils/WorkerPool/cachingWorker.ts?worker";
 /**
  * Object with SVG icons
  */
@@ -23,7 +23,7 @@ import {
 import { createSVGElement } from "./utils/createElement/createSVGElement";
 
 /**
- * Class that includes basic logic of calendar grid creation, methods to init basic DOM elements, upload/download documents (single), Cropper functionality, image compression, saving to IndexedDB (single) and loader
+ * Class that includes basic logic of calendar grid creation, methods to init basic DOM elements, upload/download documents (single), caching mockups, Cropper functionality, image compression, saving to IndexedDB (single) and loader
  */
 export abstract class Calendar {
   static _currentCalendar: Calendar;
@@ -85,10 +85,7 @@ export abstract class Calendar {
   static isNewType: boolean = true;
 
   static mockupsCache: Blob[] = [];
-  static cachingWorkersPool = new WorkerPool(
-    12,
-    new URL("./utils/WorkerPool/cachingWorker.ts", import.meta.url)
-  );
+  static cachingWorkersPool = new WorkerPool();
 
   /**
    * Dimensions of document (px)
@@ -167,7 +164,6 @@ export abstract class Calendar {
       ] = currentFont[i];
     }
     this.monthsNamesList = getMonthsList(this.lang);
-
     /**
      * Counter of months
      */
@@ -429,7 +425,7 @@ export abstract class Calendar {
    */
   static async downloadPDF(range: PDFPagesRangeToDownload): Promise<void> {
     Calendar.loading(LoadingState.Show);
-
+    const { PDFDocument } = await import("pdf-lib");
     const pdf = await PDFDocument.create();
 
     const pagesToDownload =
