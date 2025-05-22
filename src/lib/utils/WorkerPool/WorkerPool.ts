@@ -1,6 +1,6 @@
 import CachingWorker from "./cachingWorker?worker&url";
 
-export default class WorkerPool {
+export default class WorkerPool extends EventTarget {
   workerSrc: string;
   idleWorkers: Worker[];
   workQueue: CacheWorkerWorkQueue;
@@ -10,6 +10,7 @@ export default class WorkerPool {
   NUM_VORKERS = navigator.hardwareConcurrency - 1 || 1;
 
   constructor() {
+    super();
     this.idleWorkers = [];
     this.workQueue = [];
     this.workerMap = new Map();
@@ -50,6 +51,12 @@ export default class WorkerPool {
 
       if (this.idleWorkers.length === this.NUM_VORKERS) {
         this.currentState = "idle";
+
+        this.dispatchEvent(
+          new CustomEvent("workDone", {
+            detail: { state: this.currentState },
+          })
+        );
       }
     }
   }
@@ -57,6 +64,11 @@ export default class WorkerPool {
   addWork(work: CacheWorkerWork): Promise<Blob> {
     if (this.currentState === "idle") {
       this.currentState = "work";
+      this.dispatchEvent(
+        new CustomEvent("workStart", {
+          detail: { state: this.currentState },
+        })
+      );
     }
 
     const { bmp } = work;

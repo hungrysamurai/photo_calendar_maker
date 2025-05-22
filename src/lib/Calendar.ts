@@ -5,7 +5,6 @@ import { createHTMLElement } from "./utils/createElement/createHTMLElement";
 
 import WorkerPool from "./utils/WorkerPool/WorkerPool";
 
-import CachingWorker from "./utils/WorkerPool/cachingWorker.ts?worker";
 /**
  * Object with SVG icons
  */
@@ -185,6 +184,12 @@ export abstract class Calendar {
       Calendar.initBasicControlsEvents();
 
       Calendar.initCropperControls(cropControlsContainer);
+
+      ["workStart", "workDone"].forEach((event) => {
+        Calendar.cachingWorkersPool.addEventListener(event, (e) => {
+          Calendar.mockupsCachingState = e.detail.state;
+        });
+      });
     } else {
       // Check new type vs old type
       Calendar.isNewType = type !== Calendar.current.type;
@@ -526,7 +531,9 @@ export abstract class Calendar {
     try {
       // throw new Error();
       await this.cacheSVG(mockupToCache, index);
-      this.mockupsCachingState = this.cachingWorkersPool.currentState;
+
+      console.log(this.mockupsCachingState);
+      // this.mockupsCachingState = this.cachingWorkersPool.currentState;
     } catch (err) {
       // If Worker fails use 'inner' cache via converting SVG to canvas -> canvas to jpeg blob in main thread
       this.cachingsInProgress++;
@@ -545,8 +552,6 @@ export abstract class Calendar {
         this.mockupsCachingState = "idle";
       }
     }
-
-    console.log(this.mockupsCachingState);
   }
 
   /**
