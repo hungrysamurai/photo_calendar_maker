@@ -293,10 +293,9 @@ export class MultiPageCalendar extends Calendar {
             ),
           ],
           attributes: {
-            transform: `translate(${
-              this.mockupOptions.calendarGridX +
+            transform: `translate(${this.mockupOptions.calendarGridX +
               this.mockupOptions.dayCellWidth * i
-            } ${this.mockupOptions.weekDaysY})`,
+              } ${this.mockupOptions.weekDaysY})`,
           },
         });
       });
@@ -368,6 +367,13 @@ export class MultiPageCalendar extends Calendar {
       );
 
       Calendar.cacheMockup(monthMockup, i);
+
+      this.cache.cacheMockup(
+        monthMockup,
+        i,
+        Calendar.outputDimensions[this.format].width,
+        Calendar.outputDimensions[this.format].height
+      )
     }
 
     Calendar.loading(LoadingState.Hide);
@@ -377,9 +383,8 @@ export class MultiPageCalendar extends Calendar {
    * @property {Function} setVisibleMonth - show current month mockup in DOM by translate calendarInner container by X axis
    */
   static setVisibleMonth(): void {
-    this.current.calendarInner.style.left = `-${
-      this.current.currentMonth * 100
-    }%`;
+    this.current.calendarInner.style.left = `-${this.current.currentMonth * 100
+      }%`;
   }
 
   /**
@@ -422,9 +427,9 @@ export class MultiPageCalendar extends Calendar {
           const reduced = await Calendar.reduceImageSize(
             reader.result as string,
             this.current.mockupOptions.imagePlaceholderWidth *
-              this.current.imageReduceSizeRate,
+            this.current.imageReduceSizeRate,
             this.current.mockupOptions.imagePlaceholderHeight *
-              this.current.imageReduceSizeRate
+            this.current.imageReduceSizeRate
           );
 
           const resultImage = reduced ? reduced : reader.result;

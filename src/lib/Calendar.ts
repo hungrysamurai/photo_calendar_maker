@@ -20,6 +20,7 @@ import {
   FontSubfamily,
 } from "../../types";
 import { createSVGElement } from "./utils/createElement/createSVGElement";
+import MockupsCache from "./entities/MockupsCache/MockupsCache";
 
 /**
  * Class that includes basic logic of calendar grid creation, methods to init basic DOM elements, upload/download documents (single), caching mockups, Cropper functionality, image compression, saving to IndexedDB (single) and loader
@@ -88,6 +89,8 @@ export abstract class Calendar {
 
   static mockupsCachingState: "idle" | "work" = "idle";
   static cachingsInProgress: number = 0;
+
+  cache = new MockupsCache()
 
   /**
    * Dimensions of document (px)
@@ -188,6 +191,12 @@ export abstract class Calendar {
       ["workStart", "workDone"].forEach((event) => {
         Calendar.cachingWorkersPool.addEventListener(event, (e) => {
           Calendar.mockupsCachingState = e.detail.state;
+        });
+      });
+
+      ["workStart", "workDone"].forEach((event) => {
+        this.cache.addEventListener(event, (e) => {
+          console.log(this.cache.cachedMockups);
         });
       });
     } else {
@@ -343,9 +352,9 @@ export abstract class Calendar {
         const reduced = await this.reduceImageSize(
           reader.result as string,
           this.current.mockupOptions.imagePlaceholderWidth *
-            this.current.imageReduceSizeRate,
+          this.current.imageReduceSizeRate,
           this.current.mockupOptions.imagePlaceholderHeight *
-            this.current.imageReduceSizeRate
+          this.current.imageReduceSizeRate
         );
 
         const resultImage = reduced ? reduced : reader.result;
