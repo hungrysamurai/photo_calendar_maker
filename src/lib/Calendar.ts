@@ -84,13 +84,7 @@ export abstract class Calendar {
 
   static isNewType: boolean = true;
 
-  static mockupsCache: Blob[] = [];
-  static cachingWorkersPool = new WorkerPool();
-
-  static mockupsCachingState: "idle" | "work" = "idle";
-  static cachingsInProgress: number = 0;
-
-  cache = new MockupsCache()
+  static cache = new MockupsCache()
 
   /**
    * Dimensions of document (px)
@@ -188,17 +182,8 @@ export abstract class Calendar {
 
       Calendar.initCropperControls(cropControlsContainer);
 
-      ["workStart", "workDone"].forEach((event) => {
-        Calendar.cachingWorkersPool.addEventListener(event, (e) => {
-          Calendar.mockupsCachingState = e.detail.state;
-        });
-      });
+      Calendar.initCacheEvents()
 
-      ["workStart", "workDone"].forEach((event) => {
-        this.cache.addEventListener(event, (e) => {
-          console.log(e.type);
-        });
-      });
     } else {
       // Check new type vs old type
       Calendar.isNewType = type !== Calendar.current.type;
@@ -208,7 +193,7 @@ export abstract class Calendar {
     }
 
     // Clear cache of mockups
-    Calendar.mockupsCache = [];
+    // Calendar.mockupsCache = [];
 
     Calendar.current = this;
   }
@@ -317,6 +302,18 @@ export abstract class Calendar {
     });
   }
 
+  static initCacheEvents() {
+
+    this.cache.addEventListener('workStart', () => {
+      console.log('work start....');
+
+    });
+
+    this.cache.addEventListener('workDone', () => {
+      console.log('...work done!');
+    });
+  }
+
   // Upload/download section
 
   /**
@@ -368,13 +365,7 @@ export abstract class Calendar {
         this.current.saveToIDB(resultImage as string);
 
         // Cache mockup after change
-        Calendar.cacheMockup(
-          this.getCurrentMockup("svg") as SVGElement,
-          this.current.currentMonth
-        );
-
-
-        this.current.cache.cacheMockup(
+        this.cache.cacheMockup(
           Calendar.getMockupByIndex(0),
           0,
           Calendar.outputDimensions[this.current.format].width,
@@ -437,7 +428,7 @@ export abstract class Calendar {
    */
   static async downloadCurrentJPG(): Promise<void> {
     const url = URL.createObjectURL(
-      Calendar.mockupsCache[this.current.currentMonth]
+      this.cache.cachedMockups[this.current.currentMonth]
     );
     const fileName = this.getFileName();
 
@@ -456,8 +447,8 @@ export abstract class Calendar {
 
     const pagesToDownload =
       range === PDFPagesRangeToDownload.All
-        ? this.mockupsCache
-        : [this.mockupsCache[this.current.currentMonth]];
+        ? this.cache.cachedMockups
+        : [this.cache.cachedMockups[this.current.currentMonth]];
 
     for (const blob of pagesToDownload) {
       const arrayBuffer = await blob.arrayBuffer();
@@ -536,130 +527,6 @@ export abstract class Calendar {
     return `${monthName}_${year}`;
   }
 
-  // Caching
-
-  /**
-   * @async
-   * @property {Fucntion} cacheMockup - cache newly generated SVG as jpeg Blob. Trying to use Workers
-   * @param mockupToCache
-   * @param index
-   */
-  static async cacheMockup(mockupToCache: SVGElement, index = 0) {
-    // Try Workers
-    try {
-      // throw new Error();
-      await this.cacheSVG(mockupToCache, index);
-
-      console.log(this.mockupsCachingState);
-      // this.mockupsCachingState = this.cachingWorkersPool.currentState;
-    } catch (err) {
-      // If Worker fails use 'inner' cache via converting SVG to canvas -> canvas to jpeg blob in main thread
-      this.cachingsInProgress++;
-
-      if (this.mockupsCachingState === "idle") {
-        this.mockupsCachingState = "work";
-      }
-
-      const canvas = await this.SVGToCanvas(mockupToCache);
-      const blob = await this.canvasToBlob(canvas);
-      this.mockupsCache[index] = blob;
-
-      this.cachingsInProgress--;
-
-      if (this.cachingsInProgress === 0) {
-        this.mockupsCachingState = "idle";
-      }
-    }
-  }
-
-  /**
-   * @async
-   * @property {Fucntion} cacheSVG - convert SVG to ImageBitmap -> add bmp to WorkerPool -> in WorkerPool draw bmt on offscreenCanvas, convert to jpeg Blob -> add blob to cache array
-   * @param mockupToCache
-   * @param index
-   */
-  static async cacheSVG(mockupToCache: SVGElement, index = 0) {
-    const svgData = new XMLSerializer().serializeToString(mockupToCache);
-
-    const svgBlob = new Blob([svgData], {
-      type: "image/svg+xml",
-    });
-
-    const img = new Image();
-    img.src = URL.createObjectURL(svgBlob);
-    await img.decode();
-    URL.revokeObjectURL(img.src);
-
-    const bmp = await createImageBitmap(
-      img,
-      0,
-      0,
-      this.outputDimensions[this.current.format].width,
-      this.outputDimensions[this.current.format].height,
-      {
-        resizeHeight: this.outputDimensions[this.current.format].height,
-        resizeWidth: this.outputDimensions[this.current.format].width,
-      }
-    );
-
-    this.mockupsCache[index] = await this.cachingWorkersPool.addWork({
-      bmp,
-    });
-  }
-
-  /**
-   * @async
-   * @property {Function} SVGToCanvas - convert given SVG to Canvas
-   * @param {SVGElement} svg
-   */
-  static async SVGToCanvas(svg: SVGElement): Promise<HTMLCanvasElement> {
-    const svgData = new XMLSerializer().serializeToString(svg);
-    const svgBlob = new Blob([svgData], {
-      type: "image/svg+xml;charset=utf-8",
-    });
-    const svgBlobURL = URL.createObjectURL(svgBlob);
-
-    const canvas = document.createElement("canvas");
-    const ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
-
-    canvas.width = this.outputDimensions[this.current.format].width;
-    canvas.height = this.outputDimensions[this.current.format].height;
-
-    const img = new Image();
-
-    return new Promise((resolve, reject) => {
-      img.onload = () => {
-        ctx.drawImage(img, 0, 0);
-
-        URL.revokeObjectURL(svgBlobURL);
-        resolve(canvas);
-      };
-      img.onerror = () => {
-        URL.revokeObjectURL(svgBlobURL);
-        reject(new Error("Failed to load SVG image."));
-      };
-
-      img.src = svgBlobURL;
-    });
-  }
-
-  /**
-   * @async
-   * @property {Function} canvasToBlob - create blob object from given canvas
-   * @param canvas
-   * @returns
-   */
-  static async canvasToBlob(canvas: HTMLCanvasElement): Promise<Blob> {
-    return new Promise((resolve, reject) => {
-      canvas.toBlob((blob: Blob | null) => {
-        if (blob) {
-          resolve(blob);
-        } else {
-          reject(new Error("Failed to convert canvas to Blob."));
-        }
-      }, "image/jpeg");
-    });
-  }
 
   // Crop functionality section
 
@@ -792,9 +659,7 @@ export abstract class Calendar {
       this.removeCropper();
 
       // Update cache
-      this.cacheMockup(this.getCurrentMockup("svg"), this.current.currentMonth);
-
-      this.current.cache.cacheMockup(this.getCurrentMockup("svg"), this.current.currentMonth,
+      this.cache.cacheMockup(this.getCurrentMockup("svg"), this.current.currentMonth,
         this.outputDimensions[this.current.format].width, this.outputDimensions[this.current.format].height)
     }
   }

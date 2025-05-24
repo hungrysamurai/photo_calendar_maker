@@ -224,7 +224,7 @@ export class SinglePageCalendar extends Calendar {
           attributes: {
             transform: `translate(${Number(
               this.mockupOptions.calendarGridX +
-                this.mockupOptions.dayCellWidth * i
+              this.mockupOptions.dayCellWidth * i
             ).toFixed(2)} 0)`,
           },
           children: [weekDayPath],
@@ -258,7 +258,12 @@ export class SinglePageCalendar extends Calendar {
       mockup.appendChild(monthContainer);
     }
 
-    Calendar.cacheMockup(mockup);
+    Calendar.cache.cacheMockup(
+      Calendar.getMockupByIndex(0),
+      0,
+      Calendar.outputDimensions[this.format].width,
+      Calendar.outputDimensions[this.format].height
+    )
 
     Calendar.loading(LoadingState.Hide);
   }

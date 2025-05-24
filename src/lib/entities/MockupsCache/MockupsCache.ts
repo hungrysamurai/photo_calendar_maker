@@ -3,17 +3,17 @@ import WorkerPool from "./WorkerPool/WorkerPool";
 export default class MockupsCache extends EventTarget {
 
  private mockupsCache: Blob[] = [];
+
+ private cachingWorkersPool = new WorkerPool();
+
  private cachingsInProgress: number = 0;
  private mockupsCacheState: "idle" | "work" = "idle";
- private cachingWorkersPool = new WorkerPool();
 
  constructor() {
   super();
 
   ["workStart", "workDone"].forEach((event) => {
    this.cachingWorkersPool.addEventListener(event, (e) => {
-
-    this.state = (<CustomEvent>e).detail.state;
     this.dispatchOnStateChange(e.type as MockupCacheEventType);
    });
   });
@@ -34,9 +34,7 @@ export default class MockupsCache extends EventTarget {
  private dispatchOnStateChange(eventType: MockupCacheEventType) {
 
   this.dispatchEvent(
-   new CustomEvent(eventType, {
-    detail: { state: this.state },
-   })
+   new CustomEvent(eventType)
   );
  }
 

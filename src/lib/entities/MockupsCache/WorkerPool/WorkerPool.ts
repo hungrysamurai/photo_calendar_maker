@@ -64,6 +64,7 @@ export default class WorkerPool extends EventTarget {
   addWork(work: CacheWorkerWork): Promise<Blob> {
     if (this.currentState === "idle") {
       this.currentState = "work";
+
       this.dispatchEvent(
         new CustomEvent("workStart", {
           detail: { state: this.currentState },
@@ -84,5 +85,4 @@ export default class WorkerPool extends EventTarget {
       }
     });
   }
-
 }

@@ -366,9 +366,7 @@ export class MultiPageCalendar extends Calendar {
         this.mockupOptions.dayCellStyles
       );
 
-      Calendar.cacheMockup(monthMockup, i);
-
-      this.cache.cacheMockup(
+      Calendar.cache.cacheMockup(
         monthMockup,
         i,
         Calendar.outputDimensions[this.format].width,
@@ -441,9 +439,8 @@ export class MultiPageCalendar extends Calendar {
             "href",
             resultImage as string
           );
-          Calendar.cacheMockup(Calendar.getMockupByIndex(i), i);
 
-          this.current.cache.cacheMockup(
+          Calendar.cache.cacheMockup(
             Calendar.getMockupByIndex(i),
             i,
             Calendar.outputDimensions[this.current.format].width,
