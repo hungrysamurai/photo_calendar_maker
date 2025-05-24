@@ -77,19 +77,18 @@ declare global {
     [key: string]: Font;
   };
 
-  type CachedMockup = {
-    canvas: HTMLCanvasElement;
-    blob: Blob;
-  };
+  type MockupCacheEventType = 'workStart' | 'workDone';
 
-  type MockupsCache = CachedMockup[];
   type CacheWorkerWork = { bmp: ImageBitmap };
+
   type CacheWorkerWorkQueueUnit = [
     work: CacheWorkerWork,
     resolver: (value: Blob | PromiseLike<Blob>) => void,
     rejecter: (reason?: any) => void
   ];
+
   type CacheWorkerWorkQueue = CacheWorkerWorkQueueUnit[];
+
   type CacheWorkerMap = Map<
     Worker,
     [

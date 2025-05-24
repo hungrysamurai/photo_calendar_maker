@@ -3,7 +3,7 @@ import Cropper from "cropperjs";
 import { getMonthsList } from "./utils/getMonthsList";
 import { createHTMLElement } from "./utils/createElement/createHTMLElement";
 
-import WorkerPool from "./utils/WorkerPool/WorkerPool";
+import WorkerPool from "./entities/MockupsCache/WorkerPool/WorkerPool";
 
 /**
  * Object with SVG icons
@@ -196,7 +196,7 @@ export abstract class Calendar {
 
       ["workStart", "workDone"].forEach((event) => {
         this.cache.addEventListener(event, (e) => {
-          console.log(this.cache.cachedMockups);
+          console.log(e.type);
         });
       });
     } else {
@@ -372,6 +372,15 @@ export abstract class Calendar {
           this.getCurrentMockup("svg") as SVGElement,
           this.current.currentMonth
         );
+
+
+        this.current.cache.cacheMockup(
+          Calendar.getMockupByIndex(0),
+          0,
+          Calendar.outputDimensions[this.current.format].width,
+          Calendar.outputDimensions[this.current.format].height
+        )
+
 
         Calendar.loading(LoadingState.Hide);
       };
@@ -784,6 +793,9 @@ export abstract class Calendar {
 
       // Update cache
       this.cacheMockup(this.getCurrentMockup("svg"), this.current.currentMonth);
+
+      this.current.cache.cacheMockup(this.getCurrentMockup("svg"), this.current.currentMonth,
+        this.outputDimensions[this.current.format].width, this.outputDimensions[this.current.format].height)
     }
   }
 

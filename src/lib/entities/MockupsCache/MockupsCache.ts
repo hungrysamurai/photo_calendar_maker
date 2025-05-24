@@ -1,4 +1,4 @@
-import WorkerPool from "../../utils/WorkerPool/WorkerPool";
+import WorkerPool from "./WorkerPool/WorkerPool";
 
 export default class MockupsCache extends EventTarget {
 
@@ -12,8 +12,9 @@ export default class MockupsCache extends EventTarget {
 
   ["workStart", "workDone"].forEach((event) => {
    this.cachingWorkersPool.addEventListener(event, (e) => {
-    this.state = e.detail.state;
-    this.dispatchOnStateChange(e.type);
+
+    this.state = (<CustomEvent>e).detail.state;
+    this.dispatchOnStateChange(e.type as MockupCacheEventType);
    });
   });
  }
@@ -30,7 +31,7 @@ export default class MockupsCache extends EventTarget {
   return this.mockupsCache;
  }
 
- private dispatchOnStateChange(eventType: 'workStart' | 'workDone') {
+ private dispatchOnStateChange(eventType: MockupCacheEventType) {
 
   this.dispatchEvent(
    new CustomEvent(eventType, {

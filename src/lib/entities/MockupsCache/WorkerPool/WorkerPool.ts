@@ -84,4 +84,5 @@ export default class WorkerPool extends EventTarget {
       }
     });
   }
+
 }

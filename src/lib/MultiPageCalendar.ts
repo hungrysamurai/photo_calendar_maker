@@ -443,6 +443,14 @@ export class MultiPageCalendar extends Calendar {
           );
           Calendar.cacheMockup(Calendar.getMockupByIndex(i), i);
 
+          this.current.cache.cacheMockup(
+            Calendar.getMockupByIndex(i),
+            i,
+            Calendar.outputDimensions[this.current.format].width,
+            Calendar.outputDimensions[this.current.format].height
+          )
+
+
           loadedFilesCounter++;
 
           if (
