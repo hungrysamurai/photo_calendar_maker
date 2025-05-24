@@ -7,7 +7,7 @@ export default class WorkerPool extends EventTarget {
   workerMap: CacheWorkerMap;
   currentState: "idle" | "work" = "idle";
 
-  NUM_VORKERS = navigator.hardwareConcurrency - 1 || 1;
+  NUM_WORKERS = navigator.hardwareConcurrency - 1 || 1;
 
   constructor() {
     super();
@@ -15,7 +15,7 @@ export default class WorkerPool extends EventTarget {
     this.workQueue = [];
     this.workerMap = new Map();
 
-    for (let i = 0; i < this.NUM_VORKERS; i++) {
+    for (let i = 0; i < this.NUM_WORKERS; i++) {
       let worker = new Worker(CachingWorker, { type: "module" });
 
       worker.onmessage = (message) => {
@@ -49,13 +49,11 @@ export default class WorkerPool extends EventTarget {
 
       error === null ? resolver(response as Blob) : rejector(error);
 
-      if (this.idleWorkers.length === this.NUM_VORKERS) {
+      if (this.idleWorkers.length === this.NUM_WORKERS) {
         this.currentState = "idle";
 
         this.dispatchEvent(
-          new CustomEvent("workDone", {
-            detail: { state: this.currentState },
-          })
+          new CustomEvent("workDone")
         );
       }
     }
@@ -66,9 +64,7 @@ export default class WorkerPool extends EventTarget {
       this.currentState = "work";
 
       this.dispatchEvent(
-        new CustomEvent("workStart", {
-          detail: { state: this.currentState },
-        })
+        new CustomEvent("workStart")
       );
     }
 

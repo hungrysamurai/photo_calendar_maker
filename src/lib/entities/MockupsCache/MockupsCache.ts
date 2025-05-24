@@ -1,5 +1,8 @@
 import WorkerPool from "./WorkerPool/WorkerPool";
 
+/**
+ * 
+ */
 export default class MockupsCache extends EventTarget {
 
  private mockupsCache: Blob[] = [];
@@ -32,7 +35,6 @@ export default class MockupsCache extends EventTarget {
  }
 
  private dispatchOnStateChange(eventType: MockupCacheEventType) {
-
   this.dispatchEvent(
    new CustomEvent(eventType)
   );

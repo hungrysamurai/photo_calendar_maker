@@ -84,6 +84,7 @@ export abstract class Calendar {
 
   static isNewType: boolean = true;
 
+
   static cache = new MockupsCache()
 
   /**
@@ -306,7 +307,6 @@ export abstract class Calendar {
 
     this.cache.addEventListener('workStart', () => {
       console.log('work start....');
-
     });
 
     this.cache.addEventListener('workDone', () => {
