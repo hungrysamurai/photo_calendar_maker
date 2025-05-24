@@ -81,22 +81,6 @@ declare global {
 
   type CacheWorkerWork = { bmp: ImageBitmap };
 
-  type CacheWorkerWorkQueueUnit = [
-    work: CacheWorkerWork,
-    resolver: (value: Blob | PromiseLike<Blob>) => void,
-    rejecter: (reason?: any) => void
-  ];
-
-  type CacheWorkerWorkQueue = CacheWorkerWorkQueueUnit[];
-
-  type CacheWorkerMap = Map<
-    Worker,
-    [
-      resolver: (value: Blob | PromiseLike<Blob>) => void,
-      rejecter: (reason?: any) => void
-    ]
-  >;
-
   interface CreateHTMLElementParams<TagName> {
     elementName: TagName;
     id?: string;

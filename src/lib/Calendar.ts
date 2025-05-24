@@ -84,7 +84,9 @@ export abstract class Calendar {
 
   static isNewType: boolean = true;
 
-
+  /**
+   * Cache of mockups
+   */
   static cache = new MockupsCache()
 
   /**
@@ -303,14 +305,19 @@ export abstract class Calendar {
     });
   }
 
-  static initCacheEvents() {
+  static performanceTest: number;
 
+  static initCacheEvents() {
     this.cache.addEventListener('workStart', () => {
       console.log('work start....');
+      this.performanceTest = performance.now();
     });
 
     this.cache.addEventListener('workDone', () => {
       console.log('...work done!');
+
+      console.log(performance.now() - this.performanceTest);
+
     });
   }
 
