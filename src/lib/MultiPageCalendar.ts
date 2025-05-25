@@ -378,8 +378,6 @@ export class MultiPageCalendar extends Calendar {
         this.mockupOptions.dayCellStyles
       );
 
-      console.log(`start caching ${i}`);
-
       this.cache.cacheMockup(
         monthMockup,
         i,
