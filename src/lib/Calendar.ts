@@ -3,8 +3,6 @@ import Cropper from "cropperjs";
 import { getMonthsList } from "./utils/getMonthsList";
 import { createHTMLElement } from "./utils/createElement/createHTMLElement";
 
-import WorkerPool from "./entities/MockupsCache/WorkerPool/WorkerPool";
-
 /**
  * Object with SVG icons
  */
@@ -87,7 +85,7 @@ export abstract class Calendar {
   /**
    * Cache of mockups
    */
-  static cache = new MockupsCache()
+  cache: MockupsCache;
 
   /**
    * Dimensions of document (px)
@@ -159,6 +157,13 @@ export abstract class Calendar {
     public currentFont: FontArray,
     public format: FormatName
   ) {
+    // Init caching
+    if (Calendar.current) {
+      Calendar.current.cache.reset();
+    }
+
+    this.cache = new MockupsCache();
+
     // Add subfamilies to fonts object
     for (let i = 0; i < currentFont.length; i++) {
       this.fonts[
@@ -180,13 +185,10 @@ export abstract class Calendar {
     if (!Calendar.current) {
       // First initialization
       Calendar.createLoader(parentContainer);
+
       Calendar.initBasicControls(controlsContainer);
       Calendar.initBasicControlsEvents();
-
       Calendar.initCropperControls(cropControlsContainer);
-
-      Calendar.initCacheEvents()
-
     } else {
       // Check new type vs old type
       Calendar.isNewType = type !== Calendar.current.type;
@@ -195,9 +197,7 @@ export abstract class Calendar {
       Calendar.cleanUp(controlsContainer);
     }
 
-    // Clear cache of mockups
-    // Calendar.mockupsCache = [];
-
+    this.initCacheEvents();
     Calendar.current = this;
   }
 
@@ -305,19 +305,15 @@ export abstract class Calendar {
     });
   }
 
-  static performanceTest: number;
-
-  static initCacheEvents() {
-    this.cache.addEventListener('workStart', () => {
-      console.log('work start....');
-      this.performanceTest = performance.now();
+  initCacheEvents() {
+    this.cache.addEventListener("workStart", () => {
+      Calendar.jpgDownloadBtn.disabled = true;
+      Calendar.currentPDFDownloadBtn.disabled = true;
     });
 
-    this.cache.addEventListener('workDone', () => {
-      console.log('...work done!');
-
-      console.log(performance.now() - this.performanceTest);
-
+    this.cache.addEventListener("workDone", () => {
+      Calendar.jpgDownloadBtn.disabled = false;
+      Calendar.currentPDFDownloadBtn.disabled = false;
     });
   }
 
@@ -356,9 +352,9 @@ export abstract class Calendar {
         const reduced = await this.reduceImageSize(
           reader.result as string,
           this.current.mockupOptions.imagePlaceholderWidth *
-          this.current.imageReduceSizeRate,
+            this.current.imageReduceSizeRate,
           this.current.mockupOptions.imagePlaceholderHeight *
-          this.current.imageReduceSizeRate
+            this.current.imageReduceSizeRate
         );
 
         const resultImage = reduced ? reduced : reader.result;
@@ -372,13 +368,12 @@ export abstract class Calendar {
         this.current.saveToIDB(resultImage as string);
 
         // Cache mockup after change
-        this.cache.cacheMockup(
+        this.current.cache.cacheMockup(
           Calendar.getMockupByIndex(0),
           0,
           Calendar.outputDimensions[this.current.format].width,
           Calendar.outputDimensions[this.current.format].height
-        )
-
+        );
 
         Calendar.loading(LoadingState.Hide);
       };
@@ -435,7 +430,7 @@ export abstract class Calendar {
    */
   static async downloadCurrentJPG(): Promise<void> {
     const url = URL.createObjectURL(
-      this.cache.cachedMockups[this.current.currentMonth]
+      this.current.cache.cachedMockups[this.current.currentMonth]
     );
     const fileName = this.getFileName();
 
@@ -454,8 +449,8 @@ export abstract class Calendar {
 
     const pagesToDownload =
       range === PDFPagesRangeToDownload.All
-        ? this.cache.cachedMockups
-        : [this.cache.cachedMockups[this.current.currentMonth]];
+        ? this.current.cache.cachedMockups
+        : [this.current.cache.cachedMockups[this.current.currentMonth]];
 
     for (const blob of pagesToDownload) {
       const arrayBuffer = await blob.arrayBuffer();
@@ -533,7 +528,6 @@ export abstract class Calendar {
 
     return `${monthName}_${year}`;
   }
-
 
   // Crop functionality section
 
@@ -666,8 +660,12 @@ export abstract class Calendar {
       this.removeCropper();
 
       // Update cache
-      this.cache.cacheMockup(this.getCurrentMockup("svg"), this.current.currentMonth,
-        this.outputDimensions[this.current.format].width, this.outputDimensions[this.current.format].height)
+      this.current.cache.cacheMockup(
+        this.getCurrentMockup("svg"),
+        this.current.currentMonth,
+        this.outputDimensions[this.current.format].width,
+        this.outputDimensions[this.current.format].height
+      );
     }
   }
 
