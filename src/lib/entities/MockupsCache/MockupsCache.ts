@@ -66,6 +66,7 @@ export default class MockupsCache extends EventTarget {
     heigth: number
   ) {
     try {
+      console.log("begin caching with workers...");
       await this.cacheWithWorkers(mockupToCache, index, width, heigth);
     } catch (err) {
       this.cachingsInProgress++;
@@ -103,26 +104,28 @@ export default class MockupsCache extends EventTarget {
     width: number,
     heigth: number
   ) {
+    console.log("getting svg data");
     const svgData = new XMLSerializer().serializeToString(mockupToCache);
-
+    console.log("converting to blob");
     const svgBlob = new Blob([svgData], {
       type: "image/svg+xml",
     });
-
+    console.log("image stage...");
     const img = new Image();
     img.src = URL.createObjectURL(svgBlob);
     await img.decode();
     URL.revokeObjectURL(img.src);
-
+    console.log("creating bmp...");
     const bmp = await createImageBitmap(img, 0, 0, width, heigth, {
       resizeHeight: heigth,
       resizeWidth: width,
     });
-
+    console.log("adding work to pool...");
     this.mockupsCache[index] = await this.cachingWorkersPool.addWork({
       data: { bmp },
       transfer: [bmp],
     });
+    console.log(`done caching ${index}`);
   }
 
   /**

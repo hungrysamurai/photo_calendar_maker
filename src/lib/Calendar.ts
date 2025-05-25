@@ -369,8 +369,8 @@ export abstract class Calendar {
 
         // Cache mockup after change
         this.current.cache.cacheMockup(
-          Calendar.getMockupByIndex(0),
-          0,
+          this.getCurrentMockup("svg"),
+          this.current.currentMonth,
           Calendar.outputDimensions[this.current.format].width,
           Calendar.outputDimensions[this.current.format].height
         );

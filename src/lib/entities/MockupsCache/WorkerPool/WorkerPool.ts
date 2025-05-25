@@ -18,10 +18,10 @@ type WorkUnit<TIn, TOut> = [
 
 /**
  * A generic worker pool for distributing asynchronous tasks across multiple Web Workers.
- * 
+ *
  * @template TIn - The type of data input to each worker.
  * @template TOut - The type of data output from each worker.
- * 
+ *
  * Emits:
  * - `workStart`: when the pool begins processing a new batch of tasks.
  * - `workDone`: when all tasks have been processed and all workers are idle.
@@ -34,7 +34,10 @@ export default class WorkerPool<TIn, TOut> extends EventTarget {
   private workQueue: WorkUnit<TIn, TOut>[] = [];
 
   /** Maps active workers to their respective promise resolvers/rejectors. */
-  private workerMap: Map<Worker, [resolve: (value: TOut) => void, reject: (err?: any) => void]> = new Map();
+  private workerMap: Map<
+    Worker,
+    [resolve: (value: TOut) => void, reject: (err?: any) => void]
+  > = new Map();
 
   /** The source URL of the worker script. */
   private readonly workerSrc: string;
@@ -47,7 +50,7 @@ export default class WorkerPool<TIn, TOut> extends EventTarget {
 
   /**
    * Creates a new instance of the WorkerPool.
-   * 
+   *
    * @param workerUrl - URL of the JavaScript module for the worker.
    */
   constructor(workerUrl: string) {
@@ -70,23 +73,24 @@ export default class WorkerPool<TIn, TOut> extends EventTarget {
   }
 
   /**
- * The current state of the worker pool.
- * - `"idle"`: all tasks are completed.
- * - `"work"`: there are tasks in progress.
- */
+   * The current state of the worker pool.
+   * - `"idle"`: all tasks are completed.
+   * - `"work"`: there are tasks in progress.
+   */
   get state() {
     return this._state;
   }
 
   private set state(value: "idle" | "work") {
     this._state = value;
-    this.dispatchEvent(new CustomEvent(value === "work" ? "workStart" : "workDone"));
+    this.dispatchEvent(
+      new CustomEvent(value === "work" ? "workStart" : "workDone")
+    );
   }
-
 
   /**
    * Submits a new task to the worker pool.
-   * 
+   *
    * @param task - The task to be processed by a worker.
    * @returns A promise that resolves with the result from the worker.
    */
@@ -110,13 +114,17 @@ export default class WorkerPool<TIn, TOut> extends EventTarget {
   }
 
   /**
-  * Handles the completion of a worker's task, processing the next task if any.
-  * 
-  * @param worker - The worker that completed the task.
-  * @param error - Optional error event, if an error occurred.
-  * @param result - The result returned by the worker.
-  */
-  private _handleWorkerDone(worker: Worker, error: ErrorEvent | null, result: TOut | null) {
+   * Handles the completion of a worker's task, processing the next task if any.
+   *
+   * @param worker - The worker that completed the task.
+   * @param error - Optional error event, if an error occurred.
+   * @param result - The result returned by the worker.
+   */
+  private _handleWorkerDone(
+    worker: Worker,
+    error: ErrorEvent | null,
+    result: TOut | null
+  ) {
     const callbacks = this.workerMap.get(worker);
 
     if (!callbacks) return;
@@ -141,15 +149,18 @@ export default class WorkerPool<TIn, TOut> extends EventTarget {
 
     error ? reject(error) : resolve(result as TOut);
 
-    if (this.idleWorkers.length === this.NUM_WORKERS && this.workQueue.length === 0) {
+    if (
+      this.idleWorkers.length === this.NUM_WORKERS &&
+      this.workQueue.length === 0
+    ) {
       this.state = "idle";
     }
   }
 
   /**
- * Terminates all workers and clears internal state.
- * Use this when the pool is no longer needed to free resources.
- */
+   * Terminates all workers and clears internal state.
+   * Use this when the pool is no longer needed to free resources.
+   */
   public dispose() {
     for (const worker of [...this.idleWorkers, ...this.workerMap.keys()]) {
       worker.terminate();
