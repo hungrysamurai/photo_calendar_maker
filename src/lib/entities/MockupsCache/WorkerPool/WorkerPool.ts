@@ -22,11 +22,8 @@ type WorkUnit<TIn, TOut> = [
  * @template TIn - The type of data input to each worker.
  * @template TOut - The type of data output from each worker.
  *
- * Emits:
- * - `workStart`: when the pool begins processing a new batch of tasks.
- * - `workDone`: when all tasks have been processed and all workers are idle.
  */
-export default class WorkerPool<TIn, TOut> extends EventTarget {
+export default class WorkerPool<TIn, TOut> {
   /** The pool of currently idle workers. */
   private idleWorkers: Worker[] = [];
 
@@ -42,9 +39,6 @@ export default class WorkerPool<TIn, TOut> extends EventTarget {
   /** The source URL of the worker script. */
   private readonly workerSrc: string;
 
-  /** Internal state of the pool: "idle" or "work". */
-  private _state: "idle" | "work" = "idle";
-
   /** Number of worker threads to spawn (defaults to one less than CPU cores). */
   private readonly NUM_WORKERS = Math.max(navigator.hardwareConcurrency - 1, 1);
 
@@ -54,7 +48,6 @@ export default class WorkerPool<TIn, TOut> extends EventTarget {
    * @param workerUrl - URL of the JavaScript module for the worker.
    */
   constructor(workerUrl: string) {
-    super();
     this.workerSrc = workerUrl;
 
     for (let i = 0; i < this.NUM_WORKERS; i++) {
@@ -73,30 +66,12 @@ export default class WorkerPool<TIn, TOut> extends EventTarget {
   }
 
   /**
-   * The current state of the worker pool.
-   * - `"idle"`: all tasks are completed.
-   * - `"work"`: there are tasks in progress.
-   */
-  get state() {
-    return this._state;
-  }
-
-  private set state(value: "idle" | "work") {
-    this._state = value;
-    this.dispatchEvent(
-      new CustomEvent(value === "work" ? "workStart" : "workDone")
-    );
-  }
-
-  /**
    * Submits a new task to the worker pool.
    *
    * @param task - The task to be processed by a worker.
    * @returns A promise that resolves with the result from the worker.
    */
   public addWork(task: WorkerTask<TIn, TOut>): Promise<TOut> {
-    if (this.state === "idle") this.state = "work";
-
     return new Promise((resolve, reject) => {
       if (this.idleWorkers.length > 0) {
         const worker = this.idleWorkers.pop()!;
@@ -148,17 +123,10 @@ export default class WorkerPool<TIn, TOut> extends EventTarget {
     }
 
     error ? reject(error) : resolve(result as TOut);
-
-    if (
-      this.idleWorkers.length === this.NUM_WORKERS &&
-      this.workQueue.length === 0
-    ) {
-      this.state = "idle";
-    }
   }
 
   /**
-   * Terminates all workers and clears internal state.
+   * Terminates all workers.
    * Use this when the pool is no longer needed to free resources.
    */
   public dispose() {
@@ -168,6 +136,5 @@ export default class WorkerPool<TIn, TOut> extends EventTarget {
     this.idleWorkers = [];
     this.workerMap.clear();
     this.workQueue = [];
-    this._state = "idle";
   }
 }

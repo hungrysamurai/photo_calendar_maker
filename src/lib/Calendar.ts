@@ -307,6 +307,8 @@ export abstract class Calendar {
 
   initCacheEvents() {
     this.cache.addEventListener("workStart", () => {
+      console.log('work start...');
+
       Calendar.jpgDownloadBtn.disabled = true;
       Calendar.currentPDFDownloadBtn.disabled = true;
     });
@@ -314,6 +316,8 @@ export abstract class Calendar {
     this.cache.addEventListener("workDone", () => {
       Calendar.jpgDownloadBtn.disabled = false;
       Calendar.currentPDFDownloadBtn.disabled = false;
+
+      console.log('...work done');
     });
   }
 
@@ -352,9 +356,9 @@ export abstract class Calendar {
         const reduced = await this.reduceImageSize(
           reader.result as string,
           this.current.mockupOptions.imagePlaceholderWidth *
-            this.current.imageReduceSizeRate,
+          this.current.imageReduceSizeRate,
           this.current.mockupOptions.imagePlaceholderHeight *
-            this.current.imageReduceSizeRate
+          this.current.imageReduceSizeRate
         );
 
         const resultImage = reduced ? reduced : reader.result;

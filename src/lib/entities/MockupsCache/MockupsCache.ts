@@ -15,12 +15,6 @@ export default class MockupsCache extends EventTarget {
 
   constructor() {
     super();
-
-    ["workStart", "workDone"].forEach((event) => {
-      this.cachingWorkersPool.addEventListener(event, (e) => {
-        this.dispatchOnStateChange(e.type as MockupCacheEventType);
-      });
-    });
   }
 
   /**
@@ -65,27 +59,26 @@ export default class MockupsCache extends EventTarget {
     width: number,
     heigth: number
   ) {
+    this.cachingsInProgress++;
+    if (this.state === "idle") {
+      this.state = "work";
+      this.dispatchOnStateChange("workStart");
+    }
+
     try {
       await this.cacheWithWorkers(mockupToCache, index, width, heigth);
+      this.cachingsInProgress--;
     } catch (err) {
-      this.cachingsInProgress++;
-
-      if (this.state === "idle") {
-        this.state = "work";
-        this.dispatchOnStateChange("workStart");
-      }
-
       const canvas = await this.SVGToCanvas(mockupToCache, width, heigth);
       const blob = await this.canvasToBlob(canvas);
       this.mockupsCache[index] = blob;
 
       this.cachingsInProgress--;
-
-      if (this.cachingsInProgress === 0) {
-        this.state = "idle";
-        this.dispatchOnStateChange("workDone");
-      }
     }
+    if (this.cachingsInProgress === 0) {
+      this.state = "idle";
+      this.dispatchOnStateChange("workDone");
+    };
   }
 
   /**
