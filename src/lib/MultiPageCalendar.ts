@@ -47,7 +47,8 @@ export class MultiPageCalendar extends Calendar {
     public lang: CalendarLanguage,
     public type: CalendarType,
     public currentFont: FontArray,
-    public format: FormatName
+    public format: FormatName,
+    public imagesFromIDB: ImageObject[] = []
   ) {
     super(
       firstMonthIndex,
@@ -71,6 +72,7 @@ export class MultiPageCalendar extends Calendar {
       MultiPageCalendar.initMultiPageControlsEvents();
     }
 
+    this.initCacheEventsForMultiPage();
     this.createSVGMockup();
   }
 
@@ -187,10 +189,24 @@ export class MultiPageCalendar extends Calendar {
     });
   }
 
+  initCacheEventsForMultiPage() {
+    this.cache.addEventListener("workStart", () => {
+      MultiPageCalendar.allPDFDownloadBtn.disabled = true;
+      MultiPageCalendar.multipleImagesInput.disabled = true;
+    });
+
+    this.cache.addEventListener("workDone", () => {
+      MultiPageCalendar.allPDFDownloadBtn.disabled = false;
+      MultiPageCalendar.multipleImagesInput.disabled = false;
+    });
+  }
+
   /**
    * @property {Function} createSVGMockup - creates SVG mockup in DOM
    */
-  createSVGMockup(): void {
+  async createSVGMockup(): Promise<void> {
+    Calendar.loading(LoadingState.Show);
+
     this.calendarWrapper = createHTMLElement({
       elementName: "div",
       className: "calendar-wrapper",
@@ -224,6 +240,8 @@ export class MultiPageCalendar extends Calendar {
         id: `mockup-${i}`,
         attributes: {
           viewBox: `0 0 ${this.mockupOptions.mockupWidth} ${this.mockupOptions.mockupHeight}`,
+          width: Calendar.outputDimensions[this.format].width.toString(),
+          height: Calendar.outputDimensions[this.format].height.toString(),
         },
       });
 
@@ -288,10 +306,9 @@ export class MultiPageCalendar extends Calendar {
             ),
           ],
           attributes: {
-            transform: `translate(${
-              this.mockupOptions.calendarGridX +
+            transform: `translate(${this.mockupOptions.calendarGridX +
               this.mockupOptions.dayCellWidth * i
-            } ${this.mockupOptions.weekDaysY})`,
+              } ${this.mockupOptions.weekDaysY})`,
           },
         });
       });
@@ -302,18 +319,42 @@ export class MultiPageCalendar extends Calendar {
         parentToAppend: monthMockup,
       });
 
-      const imagePlaceholderRect = createSVGElement({
-        elementName: "rect",
-        id: `image-placeholder-${i}`,
-        parentToAppend: monthImageGroup,
-        attributes: {
-          width: this.mockupOptions.imagePlaceholderWidth.toString(),
-          height: this.mockupOptions.imagePlaceholderHeight.toString(),
-          x: this.mockupOptions.imagePlaceholderX.toString(),
-          y: this.mockupOptions.imagePlaceholderY.toString(),
-          style: "fill: #e8e8e8",
-        },
-      });
+      // Check if current month have a corresponding saved in IDB image
+      const imageInIDB = this.imagesFromIDB.find((el) => el.id === i);
+
+      if (imageInIDB) {
+        // ...fetch stored image and place it on mockup
+        const imageObject = await fetch(imageInIDB.image);
+        const imgURL = imageObject.url;
+
+        const imageEl = createSVGElement({
+          elementName: "image",
+          parentToAppend: monthImageGroup,
+          attributes: {
+            height: this.mockupOptions.imagePlaceholderHeight.toString(),
+            width: this.mockupOptions.imagePlaceholderWidth.toString(),
+            x: this.mockupOptions.imagePlaceholderX.toString(),
+            y: this.mockupOptions.imagePlaceholderY.toString(),
+          },
+          attributesNS: {
+            href: imgURL,
+          },
+        });
+      } else {
+        // if no saved image - just put placeholder
+        const imagePlaceholderRect = createSVGElement({
+          elementName: "rect",
+          id: `image-placeholder-${i}`,
+          parentToAppend: monthImageGroup,
+          attributes: {
+            width: this.mockupOptions.imagePlaceholderWidth.toString(),
+            height: this.mockupOptions.imagePlaceholderHeight.toString(),
+            x: this.mockupOptions.imagePlaceholderX.toString(),
+            y: this.mockupOptions.imagePlaceholderY.toString(),
+            style: "fill: #e8e8e8",
+          },
+        });
+      }
 
       if (i === 11) {
         this.lastMonth = this.monthCounter;
@@ -338,17 +379,23 @@ export class MultiPageCalendar extends Calendar {
         this.mockupOptions.dayCellStyles
       );
 
-      this.pagesArray.push(monthMockup);
+      this.cache.cacheMockup(
+        monthMockup,
+        i,
+        Calendar.outputDimensions[this.format].width,
+        Calendar.outputDimensions[this.format].height
+      );
     }
+
+    Calendar.loading(LoadingState.Hide);
   }
 
   /**
    * @property {Function} setVisibleMonth - show current month mockup in DOM by translate calendarInner container by X axis
    */
   static setVisibleMonth(): void {
-    this.current.calendarInner.style.left = `-${
-      this.current.currentMonth * 100
-    }%`;
+    this.current.calendarInner.style.left = `-${this.current.currentMonth * 100
+      }%`;
   }
 
   /**
@@ -356,7 +403,7 @@ export class MultiPageCalendar extends Calendar {
    * @param {e} e - Event Object object with files
    * @returns {void}
    */
-  static uploadMultipleImages(e: Event): void {
+  static async uploadMultipleImages(e: Event): Promise<void> {
     if (e.target instanceof HTMLInputElement && e.target.files) {
       let files = [...e.target.files];
       let loadedFilesCounter = 0;
@@ -364,7 +411,10 @@ export class MultiPageCalendar extends Calendar {
       for (let i = 0; i < files.length; i++) {
         const reader = new FileReader();
 
-        reader.onload = (e) => {
+        Calendar.loading(LoadingState.Show);
+
+        reader.readAsDataURL(files[i]);
+        reader.onload = async () => {
           const imageGroup = this.current.calendarInner.querySelector(
             `#month-${i}-container #image-group`
           ) as SVGGElement;
@@ -385,93 +435,45 @@ export class MultiPageCalendar extends Calendar {
           });
 
           // Image optimization
-          const reduced = this.reduceImageSize(
+          const reduced = await Calendar.reduceImageSize(
             reader.result as string,
             this.current.mockupOptions.imagePlaceholderWidth *
-              this.current.imageReduceSizeRate,
+            this.current.imageReduceSizeRate,
             this.current.mockupOptions.imagePlaceholderHeight *
-              this.current.imageReduceSizeRate
+            this.current.imageReduceSizeRate
           );
 
-          reduced
-            .then((reducedImage) => {
-              const resultImage = reducedImage ? reducedImage : reader.result;
+          const resultImage = reduced ? reduced : reader.result;
 
-              this.current.saveToIDB(resultImage as string, i);
+          this.current.saveToIDB(resultImage as string, i);
 
-              imageEl.setAttributeNS(
-                "http://www.w3.org/1999/xlink",
-                "href",
-                resultImage as string
-              );
+          imageEl.setAttributeNS(
+            "http://www.w3.org/1999/xlink",
+            "href",
+            resultImage as string
+          );
 
-              loadedFilesCounter++;
-            })
-            .then(() => {
-              if (
-                loadedFilesCounter === files.length ||
-                loadedFilesCounter === 11
-              ) {
-                Calendar.loading(LoadingState.Hide);
-              }
-            });
+          this.current.cache.cacheMockup(
+            Calendar.getMockupByIndex(i),
+            i,
+            Calendar.outputDimensions[this.current.format].width,
+            Calendar.outputDimensions[this.current.format].height
+          );
+
+          loadedFilesCounter++;
+
+          if (
+            loadedFilesCounter === files.length ||
+            loadedFilesCounter === 11
+          ) {
+            Calendar.loading(LoadingState.Hide);
+          }
         };
-
-        reader.readAsDataURL(files[i]);
-        Calendar.loading(LoadingState.Show);
 
         if (i === 11) {
           break;
         }
       }
     }
-  }
-
-  /**
-   * @property {Fucntion} retrieveImages - load images from given array to DOM
-   * @param {Array} imagesArr - Array of images to load
-
-   */
-  async retrieveImages(imagesArr: ImageObject[]): Promise<void> {
-    Calendar.loading(LoadingState.Show);
-
-    if (imagesArr.length === 0) {
-      Calendar.loading(LoadingState.Hide);
-      return;
-    }
-    let loadingCounter = 0;
-
-    imagesArr.forEach((imageItem) => {
-      const currentMonthContainer = imageItem.id;
-
-      fetch(imageItem.image).then((res) => {
-        const imgURL = res.url;
-
-        const imageGroup = document.querySelector(
-          `#month-${currentMonthContainer}-container #image-group`
-        ) as SVGGElement;
-        imageGroup.innerHTML = "";
-
-        const imageEl = createSVGElement({
-          elementName: "image",
-          parentToAppend: imageGroup,
-          attributes: {
-            height: this.mockupOptions.imagePlaceholderHeight.toString(),
-            width: this.mockupOptions.imagePlaceholderWidth.toString(),
-            x: this.mockupOptions.imagePlaceholderX.toString(),
-            y: this.mockupOptions.imagePlaceholderY.toString(),
-          },
-          attributesNS: {
-            href: imgURL,
-          },
-        });
-
-        loadingCounter++;
-
-        if (loadingCounter === imagesArr.length) {
-          Calendar.loading(LoadingState.Hide);
-        }
-      });
-    });
   }
 }

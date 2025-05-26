@@ -74,8 +74,12 @@ declare global {
   };
 
   type FontData = {
-    [key: string]: Font
+    [key: string]: Font;
   };
+
+  type MockupCacheEventType = 'workStart' | 'workDone';
+
+  type CacheWorkerWork = { bmp: ImageBitmap };
 
   interface CreateHTMLElementParams<TagName> {
     elementName: TagName;
