@@ -157,13 +157,6 @@ export abstract class Calendar {
     public currentFont: FontArray,
     public format: FormatName
   ) {
-    // Init caching
-    if (Calendar.current) {
-      Calendar.current.cache.reset();
-    }
-
-    this.cache = new MockupsCache();
-
     // Add subfamilies to fonts object
     for (let i = 0; i < currentFont.length; i++) {
       this.fonts[
@@ -189,10 +182,14 @@ export abstract class Calendar {
       Calendar.initBasicControls(controlsContainer);
       Calendar.initBasicControlsEvents();
       Calendar.initCropperControls(cropControlsContainer);
+
+      this.cache = new MockupsCache();
     } else {
       // Check new type vs old type
       Calendar.isNewType = type !== Calendar.current.type;
 
+      Calendar.current.cache.reset();
+      this.cache = new MockupsCache();
       // Clean  mockup container
       Calendar.cleanUp(controlsContainer);
     }
@@ -307,8 +304,6 @@ export abstract class Calendar {
 
   initCacheEvents() {
     this.cache.addEventListener("workStart", () => {
-      console.log('work start...');
-
       Calendar.jpgDownloadBtn.disabled = true;
       Calendar.currentPDFDownloadBtn.disabled = true;
     });
@@ -316,8 +311,6 @@ export abstract class Calendar {
     this.cache.addEventListener("workDone", () => {
       Calendar.jpgDownloadBtn.disabled = false;
       Calendar.currentPDFDownloadBtn.disabled = false;
-
-      console.log('...work done');
     });
   }
 
