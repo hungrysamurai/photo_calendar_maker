@@ -1,5 +1,5 @@
 export const A_FormatYSinglePageInputOptions: SinglePageMockupInputOptions = {
-  mockupBackgroundFill: "#fff",
+  mockupBackgroundFill: '#fff',
   dayCellHeight: 2.23,
   dayCellWidth: 3.3,
   calendarGridX: 0,
@@ -14,8 +14,7 @@ export const A_FormatYSinglePageInputOptions: SinglePageMockupInputOptions = {
   imagePlaceholderY: 5,
   calendarGridLeftIndent: 5,
   calendarGridTopIndent: 65,
-  dayCellStyles:
-    "fill: none;stroke: none; stroke-width: 0; stroke-miterlimit: 0;",
+  dayCellStyles: 'fill: none;stroke: none; stroke-width: 0; stroke-miterlimit: 0;',
   monthTitleX: 2.5,
   monthTitleY: 1.8,
   monthTitleFontSize: 2,
@@ -29,7 +28,7 @@ export const A_FormatYSinglePageInputOptions: SinglePageMockupInputOptions = {
 };
 
 export const A_FormatXSinglePageInputOptions: SinglePageMockupInputOptions = {
-  mockupBackgroundFill: "#fff",
+  mockupBackgroundFill: '#fff',
   dayCellHeight: 1.75,
   dayCellWidth: 2.8,
   calendarGridX: 0,
@@ -44,8 +43,7 @@ export const A_FormatXSinglePageInputOptions: SinglePageMockupInputOptions = {
   imagePlaceholderY: 5,
   calendarGridLeftIndent: 104,
   calendarGridTopIndent: -11.75,
-  dayCellStyles:
-    "fill: none;stroke: none; stroke-width: 0; stroke-miterlimit: 0;",
+  dayCellStyles: 'fill: none;stroke: none; stroke-width: 0; stroke-miterlimit: 0;',
   monthTitleX: 2.5,
   monthTitleY: 1.8,
   monthTitleFontSize: 2,

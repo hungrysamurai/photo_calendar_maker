@@ -3,6 +3,8 @@
  * @template TIn - The type of data to be passed to the worker.
  * @template _TOut - The type of result expected from the worker (used for typing purposes).
  */
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export type WorkerTask<TIn, _TOut> = {
   /** The input data to be processed by the worker. */
   data: TIn;
@@ -13,7 +15,7 @@ export type WorkerTask<TIn, _TOut> = {
 type WorkUnit<TIn, TOut> = [
   task: WorkerTask<TIn, TOut>,
   resolve: (value: TOut) => void,
-  reject: (reason?: any) => void
+  reject: (reason?: unknown) => void,
 ];
 
 /**
@@ -33,7 +35,7 @@ export default class WorkerPool<TIn, TOut> {
   /** Maps active workers to their respective promise resolvers/rejectors. */
   private workerMap: Map<
     Worker,
-    [resolve: (value: TOut) => void, reject: (err?: any) => void]
+    [resolve: (value: TOut) => void, reject: (err?: unknown) => void]
   > = new Map();
 
   /** The source URL of the worker script. */
@@ -51,7 +53,7 @@ export default class WorkerPool<TIn, TOut> {
     this.workerSrc = workerUrl;
 
     for (let i = 0; i < this.NUM_WORKERS; i++) {
-      let worker = new Worker(workerUrl, { type: "module" });
+      const worker = new Worker(workerUrl, { type: 'module' });
 
       worker.onmessage = (message) => {
         this._handleWorkerDone(worker, null, message.data);
@@ -95,11 +97,7 @@ export default class WorkerPool<TIn, TOut> {
    * @param error - Optional error event, if an error occurred.
    * @param result - The result returned by the worker.
    */
-  private _handleWorkerDone(
-    worker: Worker,
-    error: ErrorEvent | null,
-    result: TOut | null
-  ) {
+  private _handleWorkerDone(worker: Worker, error: ErrorEvent | null, result: TOut | null) {
     const callbacks = this.workerMap.get(worker);
 
     if (!callbacks) return;
@@ -122,7 +120,11 @@ export default class WorkerPool<TIn, TOut> {
       this.idleWorkers.push(worker);
     }
 
-    error ? reject(error) : resolve(result as TOut);
+    if (error) {
+      reject(error);
+    } else {
+      resolve(result as TOut);
+    }
   }
 
   /**

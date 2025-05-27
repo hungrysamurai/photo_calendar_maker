@@ -1,16 +1,16 @@
-import { FormatName } from "../../../types";
-import { A_outputFormats } from "./A_OutputDimensions";
-import A_FormatMultiplierMap from "./A_FormatMultiplierMap";
+import { FormatName } from '../../types';
+import A_FormatMultiplierMap from './A_FormatMultiplierMap';
+import { A_outputFormats } from './A_OutputDimensions';
 
 import {
-  A_FormatYSinglePageInputOptions,
   A_FormatXSinglePageInputOptions,
-} from "./A_FormatSinglePageInputOptions";
+  A_FormatYSinglePageInputOptions,
+} from './A_FormatSinglePageInputOptions';
 
 import {
-  A_FormatYMultiPageInputOptions,
   A_FormatXMultiPageInputOptions,
-} from "./A_FormatMultiPageInputOptions";
+  A_FormatYMultiPageInputOptions,
+} from './A_FormatMultiPageInputOptions';
 
 abstract class A_FormatOptions<I, O> {
   public options!: I;
@@ -70,8 +70,8 @@ abstract class A_FormatOptions<I, O> {
     return Number(
       Math.pow(
         1.414285,
-        A_FormatMultiplierMap[format as keyof typeof A_FormatMultiplierMap]
-      ).toFixed(4)
+        A_FormatMultiplierMap[format as keyof typeof A_FormatMultiplierMap],
+      ).toFixed(4),
     );
   }
 
@@ -87,9 +87,9 @@ export class A_FormatSinglePageMockupOptions extends A_FormatOptions<
   constructor(public targetFormat: FormatName) {
     super(targetFormat);
 
-    if (targetFormat.endsWith("Y")) {
+    if (targetFormat.endsWith('Y')) {
       this.options = A_FormatYSinglePageInputOptions;
-    } else if (targetFormat.endsWith("X")) {
+    } else if (targetFormat.endsWith('X')) {
       this.options = A_FormatXSinglePageInputOptions;
     }
   }
@@ -102,7 +102,7 @@ export class A_FormatSinglePageMockupOptions extends A_FormatOptions<
         mockupHeight: this.getMockupHeight(),
         weekDayX: this.options.dayCellWidth / 2,
       },
-      this.options
+      this.options,
     );
   }
 
@@ -110,7 +110,7 @@ export class A_FormatSinglePageMockupOptions extends A_FormatOptions<
     const options = Object.assign({}, this.options);
 
     for (const [key, value] of Object.entries(options)) {
-      if (typeof value === "number") {
+      if (typeof value === 'number') {
         options[key] = Number((value * this.getMultiplier()).toFixed(2));
       }
     }
@@ -131,9 +131,9 @@ export class A_FormatMultiPageMockupOptions extends A_FormatOptions<
 > {
   constructor(public targetFormat: FormatName) {
     super(targetFormat);
-    if (targetFormat.endsWith("Y")) {
+    if (targetFormat.endsWith('Y')) {
       this.options = A_FormatYMultiPageInputOptions;
-    } else if (targetFormat.endsWith("X")) {
+    } else if (targetFormat.endsWith('X')) {
       this.options = A_FormatXMultiPageInputOptions;
     }
   }
@@ -146,7 +146,7 @@ export class A_FormatMultiPageMockupOptions extends A_FormatOptions<
         mockupHeight: this.getMockupHeight(),
         weekDayX: this.options.dayCellWidth / 2,
       },
-      this.options
+      this.options,
     );
   }
 
@@ -154,7 +154,7 @@ export class A_FormatMultiPageMockupOptions extends A_FormatOptions<
     const options = Object.assign({}, this.options);
 
     for (const [key, value] of Object.entries(options)) {
-      if (typeof value === "number") {
+      if (typeof value === 'number') {
         options[key] = Number((value * this.getMultiplier()).toFixed(2));
       }
     }

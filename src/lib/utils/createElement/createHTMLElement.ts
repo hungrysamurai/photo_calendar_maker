@@ -2,7 +2,7 @@
  * @property {Function} createHTMLElement - create DOM HTML Elements with given params
  */
 export const createHTMLElement = <TagName extends keyof HTMLElementTagNameMap>(
-  params: CreateHTMLElementParams<TagName>
+  params: CreateHTMLElementParams<TagName>,
 ): HTMLElementTagNameMap[TagName] => {
   const element = document.createElement<TagName>(params.elementName);
 
@@ -31,10 +31,7 @@ export const createHTMLElement = <TagName extends keyof HTMLElementTagNameMap>(
   }
 
   if (params.insertTo) {
-    params.insertTo.element.insertAdjacentElement(
-      params.insertTo.position,
-      element
-    );
+    params.insertTo.element.insertAdjacentElement(params.insertTo.position, element);
   }
 
   if (params.attributes) {

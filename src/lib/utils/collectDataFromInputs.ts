@@ -1,4 +1,4 @@
-import { CalendarLanguage, CalendarType, FormatName } from "../../../types";
+import { CalendarLanguage, CalendarType, FormatName } from '../../types';
 
 export const collectDataFromInputs = (
   yearInput: HTMLSelectElement,
@@ -6,7 +6,7 @@ export const collectDataFromInputs = (
   langInput: HTMLSelectElement,
   fontInput: HTMLSelectElement,
   formatInput: HTMLSelectElement,
-  multiModeBtn: HTMLInputElement
+  multiModeBtn: HTMLInputElement,
 ): CalendarData => {
   // Collect data from inputs
 

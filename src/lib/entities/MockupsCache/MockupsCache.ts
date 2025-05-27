@@ -1,17 +1,15 @@
-import WorkerPool from "./WorkerPool/WorkerPool";
-import CachingWorker from "./WorkerPool/cachingWorker?worker&url";
+import WorkerPool from './WorkerPool/WorkerPool';
+import CachingWorker from './WorkerPool/cachingWorker?worker&url';
 /**
  * MockupsCache manages caching of SVG-based mockups as image blobs. Uses WorkerPool to offload caching tasks to workers when possible. Falls back to main thread rendering if workers fail.
  */
 export default class MockupsCache extends EventTarget {
   private mockupsCache: Blob[] = [];
 
-  private cachingWorkersPool = new WorkerPool<CacheWorkerWork, Blob>(
-    CachingWorker
-  );
+  private cachingWorkersPool = new WorkerPool<CacheWorkerWork, Blob>(CachingWorker);
 
   private cachingsInProgress: number = 0;
-  private mockupsCacheState: "idle" | "work" = "idle";
+  private mockupsCacheState: 'idle' | 'work' = 'idle';
 
   constructor() {
     super();
@@ -53,22 +51,19 @@ export default class MockupsCache extends EventTarget {
    * @param {number} width - Target width of the output image.
    * @param {number} heigth - Target height of the output image.
    */
-  public async cacheMockup(
-    mockupToCache: SVGElement,
-    index = 0,
-    width: number,
-    heigth: number
-  ) {
+  public async cacheMockup(mockupToCache: SVGElement, index = 0, width: number, heigth: number) {
     this.cachingsInProgress++;
-    if (this.state === "idle") {
-      this.state = "work";
-      this.dispatchOnStateChange("workStart");
+    if (this.state === 'idle') {
+      this.state = 'work';
+      this.dispatchOnStateChange('workStart');
     }
 
     try {
       await this.cacheWithWorkers(mockupToCache, index, width, heigth);
       this.cachingsInProgress--;
     } catch (err) {
+      console.log(err);
+
       const canvas = await this.SVGToCanvas(mockupToCache, width, heigth);
       const blob = await this.canvasToBlob(canvas);
       this.mockupsCache[index] = blob;
@@ -76,9 +71,9 @@ export default class MockupsCache extends EventTarget {
       this.cachingsInProgress--;
     }
     if (this.cachingsInProgress === 0) {
-      this.state = "idle";
-      this.dispatchOnStateChange("workDone");
-    };
+      this.state = 'idle';
+      this.dispatchOnStateChange('workDone');
+    }
   }
 
   /**
@@ -94,12 +89,12 @@ export default class MockupsCache extends EventTarget {
     mockupToCache: SVGElement,
     index = 0,
     width: number,
-    heigth: number
+    heigth: number,
   ) {
     const svgData = new XMLSerializer().serializeToString(mockupToCache);
 
     const svgBlob = new Blob([svgData], {
-      type: "image/svg+xml",
+      type: 'image/svg+xml',
     });
 
     const img = new Image();
@@ -131,16 +126,16 @@ export default class MockupsCache extends EventTarget {
   private async SVGToCanvas(
     svg: SVGElement,
     width: number,
-    height: number
+    height: number,
   ): Promise<HTMLCanvasElement> {
     const svgData = new XMLSerializer().serializeToString(svg);
     const svgBlob = new Blob([svgData], {
-      type: "image/svg+xml;charset=utf-8",
+      type: 'image/svg+xml;charset=utf-8',
     });
     const svgBlobURL = URL.createObjectURL(svgBlob);
 
-    const canvas = document.createElement("canvas");
-    const ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d') as CanvasRenderingContext2D;
 
     canvas.width = width;
     canvas.height = height;
@@ -156,7 +151,7 @@ export default class MockupsCache extends EventTarget {
       };
       img.onerror = () => {
         URL.revokeObjectURL(svgBlobURL);
-        reject(new Error("Failed to load SVG image."));
+        reject(new Error('Failed to load SVG image.'));
       };
 
       img.src = svgBlobURL;
@@ -175,9 +170,9 @@ export default class MockupsCache extends EventTarget {
         if (blob) {
           resolve(blob);
         } else {
-          reject(new Error("Failed to convert canvas to Blob."));
+          reject(new Error('Failed to convert canvas to Blob.'));
         }
-      }, "image/jpeg");
+      }, 'image/jpeg');
     });
   }
 

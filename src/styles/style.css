@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap");
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap');
 
 :root {
   touch-action: pan-x pan-y;
@@ -18,7 +18,7 @@ body {
   width: 100vw;
   height: 100vh;
   overflow: hidden;
-  font-family: "Montserrat", sans-serif;
+  font-family: 'Montserrat', sans-serif;
   font-weight: 700;
 }
 
@@ -182,7 +182,7 @@ svg {
   filter: drop-shadow(3px 3px 12px rgba(0, 0, 0, 0.33));
 }
 
-svg>svg {
+svg > svg {
   filter: initial;
 }
 
@@ -331,7 +331,6 @@ svg>svg {
 }
 
 @media (max-width: 768px) {
-
   .controls-container button,
   .controls-container label {
     font-size: 0.5rem;

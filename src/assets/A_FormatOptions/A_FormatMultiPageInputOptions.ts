@@ -1,5 +1,5 @@
 export const A_FormatYMultiPageInputOptions: MultiPageMockupInputOptions = {
-  mockupBackgroundFill: "#fff",
+  mockupBackgroundFill: '#fff',
   dayCellHeight: 7.55,
   dayCellWidth: 13.5,
   calendarGridX: 5,
@@ -9,8 +9,7 @@ export const A_FormatYMultiPageInputOptions: MultiPageMockupInputOptions = {
   imagePlaceholderHeight: 78,
   imagePlaceholderX: 5,
   imagePlaceholderY: 5,
-  dayCellStyles:
-    "fill: none; stroke:#999999; stroke-miterlimit: 10; stroke-width: 0.15%;",
+  dayCellStyles: 'fill: none; stroke:#999999; stroke-miterlimit: 10; stroke-width: 0.15%;',
   monthTitleX: 15,
   monthTitleY: 90,
   monthTitleFontSize: 7,
@@ -23,7 +22,7 @@ export const A_FormatYMultiPageInputOptions: MultiPageMockupInputOptions = {
 };
 
 export const A_FormatXMultiPageInputOptions: MultiPageMockupInputOptions = {
-  mockupBackgroundFill: "#fff",
+  mockupBackgroundFill: '#fff',
   dayCellHeight: 7.55,
   dayCellWidth: 9.7,
   calendarGridX: 77,
@@ -33,8 +32,7 @@ export const A_FormatXMultiPageInputOptions: MultiPageMockupInputOptions = {
   imagePlaceholderHeight: 95,
   imagePlaceholderX: 5,
   imagePlaceholderY: 5,
-  dayCellStyles:
-    "fill: none; stroke:#999999; stroke-miterlimit: 10; stroke-width: 0.15%;",
+  dayCellStyles: 'fill: none; stroke:#999999; stroke-miterlimit: 10; stroke-width: 0.15%;',
   monthTitleX: 82,
   monthTitleY: 30,
   monthTitleFontSize: 7,

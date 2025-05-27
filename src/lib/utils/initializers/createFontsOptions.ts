@@ -1,4 +1,4 @@
-import fontsData from "../../../assets/sourceFontsData";
+import fontsData from '../../../assets/sourceFontsData';
 
 /**
  * @property {Function} createFontsOptions - Generate fonts options for input
@@ -8,5 +8,5 @@ export const createFontsOptions = (): string => {
     .map((fontName) => {
       return `<option value=${fontName}>${fontName}</option>`;
     })
-    .join("");
+    .join('');
 };

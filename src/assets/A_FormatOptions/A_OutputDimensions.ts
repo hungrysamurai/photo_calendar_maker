@@ -1,4 +1,4 @@
-import { FormatName } from "../../../types";
+import { FormatName } from '../../types';
 
 export const A_outputFormats: OutputDimensions = {
   [FormatName.A6_Y]: { width: 1240, height: 1748 },

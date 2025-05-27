@@ -13,5 +13,5 @@ export const createYearsOptions = (numberOfYearsToAdd: number): string => {
     .map((year) => {
       return `<option value=${year}>${year}</option>`;
     })
-    .join("");
+    .join('');
 };

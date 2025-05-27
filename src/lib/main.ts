@@ -1,52 +1,38 @@
-import { SinglePageCalendar } from "./SinglePageCalendar";
-import { MultiPageCalendar } from "./MultiPageCalendar";
-import { Calendar } from "./Calendar";
+import { MultiPageCalendar } from './MultiPageCalendar';
+import { SinglePageCalendar } from './SinglePageCalendar';
 
-import { collectDataFromInputs } from "./utils/collectDataFromInputs";
+import { collectDataFromInputs } from './utils/collectDataFromInputs';
 
-import { createYearsOptions } from "./utils/initializers/createYearsOptions";
-import { createFontsOptions } from "./utils/initializers/createFontsOptions";
-import { createMonthsOptions } from "./utils/initializers/createMonthsOptions";
-import { createFormatsOptions } from "./utils/initializers/createFormatsOptions";
+import { createFontsOptions } from './utils/initializers/createFontsOptions';
+import { createFormatsOptions } from './utils/initializers/createFormatsOptions';
+import { createMonthsOptions } from './utils/initializers/createMonthsOptions';
+import { createYearsOptions } from './utils/initializers/createYearsOptions';
 
-import { loadFonts } from "./utils/initializers/loadFonts";
+import { loadFonts } from './utils/initializers/loadFonts';
 
-import { CalendarType } from "../../types";
+import { CalendarType } from '../types';
 
-const newProjectContainer = document.querySelector(
-  ".new-project-container"
-) as HTMLDivElement;
-const newProjectBtn = document.querySelector(
-  "#new-project"
-) as HTMLButtonElement;
+const newProjectContainer = document.querySelector('.new-project-container') as HTMLDivElement;
+const newProjectBtn = document.querySelector('#new-project') as HTMLButtonElement;
 
 const newCalendarInputsContainer = document.querySelector(
-  ".new-calendar-controls"
+  '.new-calendar-controls',
 ) as HTMLDivElement;
 
-const getButton = document.querySelector("#get-button") as HTMLButtonElement;
+const getButton = document.querySelector('#get-button') as HTMLButtonElement;
 
-const monthInput = document.querySelector("#month-input") as HTMLSelectElement;
-const yearInput = document.querySelector("#year-input") as HTMLSelectElement;
-const multiModeBtn = document.querySelector("#multi-page") as HTMLInputElement;
-const langInput = document.querySelector("#lang-input") as HTMLSelectElement;
-const fontInput = document.querySelector("#font-input") as HTMLSelectElement;
-const formatInput = document.querySelector(
-  "#format-input"
-) as HTMLSelectElement;
+const monthInput = document.querySelector('#month-input') as HTMLSelectElement;
+const yearInput = document.querySelector('#year-input') as HTMLSelectElement;
+const multiModeBtn = document.querySelector('#multi-page') as HTMLInputElement;
+const langInput = document.querySelector('#lang-input') as HTMLSelectElement;
+const fontInput = document.querySelector('#font-input') as HTMLSelectElement;
+const formatInput = document.querySelector('#format-input') as HTMLSelectElement;
 
-const calendarContainer = document.querySelector(
-  ".calendar-container"
-) as HTMLDivElement;
-const controlsContainer = document.querySelector(
-  ".controls-container"
-) as HTMLDivElement;
-const cropControlsContainer = document.querySelector(
-  ".crop-controls-container"
-) as HTMLDivElement;
+const calendarContainer = document.querySelector('.calendar-container') as HTMLDivElement;
+const controlsContainer = document.querySelector('.controls-container') as HTMLDivElement;
+const cropControlsContainer = document.querySelector('.crop-controls-container') as HTMLDivElement;
 
 // Globals
-let currentCalendar: Calendar;
 let loadedFonts: LoadedFontsObject;
 
 /**
@@ -59,11 +45,11 @@ function newProject() {
     langInput,
     fontInput,
     formatInput,
-    multiModeBtn
+    multiModeBtn,
   );
 
   // Purge all current content
-  calendarContainer.innerHTML = "";
+  calendarContainer.innerHTML = '';
 
   // Generate new calendar
   newCalendar(newCalendarData);
@@ -72,7 +58,7 @@ function newProject() {
   newProjectIDB(newCalendarData);
 
   // Hide new calendar inputs
-  newProjectContainer.style.top = "0px";
+  newProjectContainer.style.top = '0px';
 }
 
 /**
@@ -86,12 +72,12 @@ function newProject() {
  */
 async function newCalendar(
   { startYear, firstMonthIndex, lang, font, format, type }: CalendarData,
-  savedImages?: ImageObject[]
+  savedImages?: ImageObject[],
 ): Promise<void> {
   const currentFont: FontArray = loadedFonts[font];
 
   if (type === CalendarType.MultiPage) {
-    currentCalendar = new MultiPageCalendar(
+    new MultiPageCalendar(
       firstMonthIndex,
       startYear,
       calendarContainer,
@@ -101,10 +87,10 @@ async function newCalendar(
       type,
       currentFont,
       format,
-      savedImages
+      savedImages,
     );
   } else {
-    currentCalendar = new SinglePageCalendar(
+    new SinglePageCalendar(
       firstMonthIndex,
       startYear,
       calendarContainer,
@@ -114,7 +100,7 @@ async function newCalendar(
       type,
       currentFont,
       format,
-      savedImages
+      savedImages,
     );
   }
 }
@@ -143,15 +129,15 @@ function newProjectIDB({
     window.msIndexedDB ||
     window.shimIndexedDB;
 
-  const request = indexedDB.open("Photo Calendar Project", 1);
+  const request = indexedDB.open('Photo Calendar Project', 1);
 
   request.onsuccess = function () {
     const db = request.result;
 
-    const transaction = db.transaction(db.objectStoreNames, "readwrite");
+    const transaction = db.transaction(db.objectStoreNames, 'readwrite');
 
-    const dataStore = transaction.objectStore("current_project_data");
-    const imagesStore = transaction.objectStore("current_project_images");
+    const dataStore = transaction.objectStore('current_project_data');
+    const imagesStore = transaction.objectStore('current_project_images');
 
     // Add new data to db
     dataStore.put({
@@ -185,17 +171,17 @@ function loadSavedProject(): void {
     window.msIndexedDB ||
     window.shimIndexedDB;
 
-  const request = indexedDB.open("Photo Calendar Project", 1);
+  const request = indexedDB.open('Photo Calendar Project', 1);
 
   request.onsuccess = function () {
     // Check if there any data in DB
     const db = request.result;
 
     // Init transaction on all stored objects
-    const transaction = db.transaction(db.objectStoreNames, "readwrite");
+    const transaction = db.transaction(db.objectStoreNames, 'readwrite');
 
-    const dataStore = transaction.objectStore("current_project_data");
-    const imagesStore = transaction.objectStore("current_project_images");
+    const dataStore = transaction.objectStore('current_project_data');
+    const imagesStore = transaction.objectStore('current_project_images');
     // Get data object
     const dataQuery = dataStore.get(0);
     const imagesQuery = imagesStore.getAll();
@@ -228,26 +214,26 @@ function loadSavedProject(): void {
     const db = request.result;
 
     // Set data object
-    const dataStore = db.createObjectStore("current_project_data", {
-      keyPath: "id",
+    const dataStore = db.createObjectStore('current_project_data', {
+      keyPath: 'id',
     });
 
-    dataStore.createIndex("firstMonthIndex", ["firstMonthIndex"], {
+    dataStore.createIndex('firstMonthIndex', ['firstMonthIndex'], {
       unique: false,
     });
-    dataStore.createIndex("startYear", ["startYear"], { unique: false });
-    dataStore.createIndex("lang", ["lang"], { unique: false });
-    dataStore.createIndex("type", ["type"], { unique: false });
-    dataStore.createIndex("font", ["font"], { unique: false });
-    dataStore.createIndex("format", ["format"], { unique: false });
+    dataStore.createIndex('startYear', ['startYear'], { unique: false });
+    dataStore.createIndex('lang', ['lang'], { unique: false });
+    dataStore.createIndex('type', ['type'], { unique: false });
+    dataStore.createIndex('font', ['font'], { unique: false });
+    dataStore.createIndex('format', ['format'], { unique: false });
 
     // Set images object
-    const imagesStore = db.createObjectStore("current_project_images", {
-      keyPath: "id",
+    const imagesStore = db.createObjectStore('current_project_images', {
+      keyPath: 'id',
       autoIncrement: true,
     });
 
-    imagesStore.createIndex("images", ["images"], {
+    imagesStore.createIndex('images', ['images'], {
       unique: false,
     });
   };
@@ -255,7 +241,7 @@ function loadSavedProject(): void {
 
 // Init
 window.addEventListener(
-  "DOMContentLoaded",
+  'DOMContentLoaded',
   async () => {
     // Load fonts data
     loadedFonts = await loadFonts();
@@ -267,24 +253,24 @@ window.addEventListener(
     formatInput.innerHTML = createFormatsOptions();
 
     // Show/Hide "New calendar container"
-    newProjectBtn.addEventListener("click", () => {
-      newProjectContainer.style.top = "-100px";
+    newProjectBtn.addEventListener('click', () => {
+      newProjectContainer.style.top = '-100px';
     });
 
-    document.addEventListener("click", (e) => {
+    document.addEventListener('click', (e) => {
       if (
         !newCalendarInputsContainer.contains(e.target as Document) &&
         e.target !== newProjectBtn
       ) {
-        newProjectContainer.style.top = "0px";
+        newProjectContainer.style.top = '0px';
       }
     });
 
     // Generate new calendar from inputs
-    getButton.addEventListener("click", newProject);
+    getButton.addEventListener('click', newProject);
 
     // Init IndexedDB
     loadSavedProject();
   },
-  { once: true }
+  { once: true },
 );

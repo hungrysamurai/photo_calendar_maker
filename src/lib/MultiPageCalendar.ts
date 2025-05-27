@@ -1,19 +1,19 @@
-import { Calendar } from "./Calendar";
+import { Calendar } from './Calendar';
 /**
  * Object with SVG icons
  */
-import { icons } from "../assets/icons";
+import { icons } from '../assets/icons';
 
+import { A_FormatMultiPageMockupOptions } from '../assets/A_FormatOptions/A_FormatOptions';
 import {
   CalendarLanguage,
   CalendarType,
   FormatName,
   LoadingState,
   PDFPagesRangeToDownload,
-} from "../../types";
-import { createHTMLElement } from "./utils/createElement/createHTMLElement";
-import { createSVGElement } from "./utils/createElement/createSVGElement";
-import { A_FormatMultiPageMockupOptions } from "../assets/A_FormatOptions/A_FormatOptions";
+} from '../types';
+import { createHTMLElement } from './utils/createElement/createHTMLElement';
+import { createSVGElement } from './utils/createElement/createSVGElement';
 
 /**
  * Class that generates Multi Page Calendar (each month on separate SVG)
@@ -48,7 +48,7 @@ export class MultiPageCalendar extends Calendar {
     public type: CalendarType,
     public currentFont: FontArray,
     public format: FormatName,
-    public imagesFromIDB: ImageObject[] = []
+    public imagesFromIDB: ImageObject[] = [],
   ) {
     super(
       firstMonthIndex,
@@ -59,11 +59,11 @@ export class MultiPageCalendar extends Calendar {
       lang,
       type,
       currentFont,
-      format
+      format,
     );
 
     MultiPageCalendar.current = this;
-    this.weekDaysNamesList = this.getWeekDays("long");
+    this.weekDaysNamesList = this.getWeekDays('long');
 
     this.mockupOptions = new A_FormatMultiPageMockupOptions(format)[format];
 
@@ -81,61 +81,61 @@ export class MultiPageCalendar extends Calendar {
    */
   static createMultiPageControls(controlsContainer: HTMLDivElement): void {
     this.allPDFDownloadBtn = createHTMLElement({
-      elementName: "button",
-      id: "pdf-download-all",
+      elementName: 'button',
+      id: 'pdf-download-all',
       content: icons.pdfMulti,
       insertTo: {
         element: controlsContainer,
-        position: "afterbegin",
+        position: 'afterbegin',
       },
     });
 
     this.prevBtn = createHTMLElement({
-      elementName: "button",
-      id: "prev-month",
+      elementName: 'button',
+      id: 'prev-month',
       content: icons.prev,
       insertTo: {
         element: controlsContainer,
-        position: "afterbegin",
+        position: 'afterbegin',
       },
     });
 
     this.multipleImagesInput = createHTMLElement({
-      elementName: "input",
-      id: "upload-multiple-input",
+      elementName: 'input',
+      id: 'upload-multiple-input',
       attributes: {
-        type: "file",
-        multiple: "multiple",
+        type: 'file',
+        multiple: 'multiple',
         hidden: new Boolean(true).toString(),
-        accept: "image/jpeg, image/png, image/jpg",
-        onclick: "this.value=null;",
+        accept: 'image/jpeg, image/png, image/jpg',
+        onclick: 'this.value=null;',
       },
       insertTo: {
         element: controlsContainer,
-        position: "beforeend",
+        position: 'beforeend',
       },
     });
 
     this.uploadMultipleImgsBtn = createHTMLElement({
-      elementName: "label",
-      id: "upload-multiple",
+      elementName: 'label',
+      id: 'upload-multiple',
       content: icons.uploadMulti,
       attributes: {
-        for: "upload-multiple-input",
+        for: 'upload-multiple-input',
       },
       insertTo: {
         element: controlsContainer,
-        position: "beforeend",
+        position: 'beforeend',
       },
     });
 
     this.nextBtn = createHTMLElement({
-      elementName: "button",
-      id: "next-month",
+      elementName: 'button',
+      id: 'next-month',
       content: icons.next,
       insertTo: {
         element: controlsContainer,
-        position: "beforeend",
+        position: 'beforeend',
       },
     });
   }
@@ -145,7 +145,7 @@ export class MultiPageCalendar extends Calendar {
    * @returns {void}
    */
   static initMultiPageControlsEvents(): void {
-    this.nextBtn.addEventListener("click", () => {
+    this.nextBtn.addEventListener('click', () => {
       if (Calendar.cropper) {
         Calendar.removeCropper();
       }
@@ -159,7 +159,7 @@ export class MultiPageCalendar extends Calendar {
       this.setVisibleMonth();
     });
 
-    this.prevBtn.addEventListener("click", () => {
+    this.prevBtn.addEventListener('click', () => {
       if (Calendar.cropper) {
         Calendar.removeCropper();
       }
@@ -172,7 +172,7 @@ export class MultiPageCalendar extends Calendar {
       this.setVisibleMonth();
     });
 
-    this.multipleImagesInput.addEventListener("change", (e) => {
+    this.multipleImagesInput.addEventListener('change', (e) => {
       if (Calendar.cropper) {
         Calendar.removeCropper();
       }
@@ -180,7 +180,7 @@ export class MultiPageCalendar extends Calendar {
       this.uploadMultipleImages(e);
     });
 
-    this.allPDFDownloadBtn.addEventListener("click", () => {
+    this.allPDFDownloadBtn.addEventListener('click', () => {
       if (Calendar.cropper) {
         Calendar.removeCropper();
       }
@@ -190,12 +190,12 @@ export class MultiPageCalendar extends Calendar {
   }
 
   initCacheEventsForMultiPage() {
-    this.cache.addEventListener("workStart", () => {
+    this.cache.addEventListener('workStart', () => {
       MultiPageCalendar.allPDFDownloadBtn.disabled = true;
       MultiPageCalendar.multipleImagesInput.disabled = true;
     });
 
-    this.cache.addEventListener("workDone", () => {
+    this.cache.addEventListener('workDone', () => {
       MultiPageCalendar.allPDFDownloadBtn.disabled = false;
       MultiPageCalendar.multipleImagesInput.disabled = false;
     });
@@ -208,14 +208,14 @@ export class MultiPageCalendar extends Calendar {
     Calendar.loading(LoadingState.Show);
 
     this.calendarWrapper = createHTMLElement({
-      elementName: "div",
-      className: "calendar-wrapper",
+      elementName: 'div',
+      className: 'calendar-wrapper',
       parentToAppend: this.parentContainer,
     });
 
     this.calendarInner = createHTMLElement({
-      elementName: "div",
-      className: "calendar-inner",
+      elementName: 'div',
+      className: 'calendar-inner',
       parentToAppend: this.calendarWrapper,
     });
 
@@ -224,18 +224,18 @@ export class MultiPageCalendar extends Calendar {
     // Create months templates
     for (let i = 0; i < 12; i++) {
       const monthContainer = createHTMLElement({
-        elementName: "div",
-        className: "month-container",
+        elementName: 'div',
+        className: 'month-container',
         id: `month-${i}-container`,
         parentToAppend: this.calendarInner,
         attributes: {
-          ["data-month"]: this.monthCounter.toString(),
-          ["data-year"]: this.year.toString(),
+          ['data-month']: this.monthCounter.toString(),
+          ['data-year']: this.year.toString(),
         },
       });
 
       const monthMockup = createSVGElement({
-        elementName: "svg",
+        elementName: 'svg',
         parentToAppend: monthContainer,
         id: `mockup-${i}`,
         attributes: {
@@ -245,8 +245,8 @@ export class MultiPageCalendar extends Calendar {
         },
       });
 
-      const backgroundRect = createSVGElement({
-        elementName: "rect",
+      createSVGElement({
+        elementName: 'rect',
         id: `background-rect-${i}`,
         parentToAppend: monthMockup,
         attributes: {
@@ -257,66 +257,64 @@ export class MultiPageCalendar extends Calendar {
       });
 
       const monthTextGroup = createSVGElement({
-        elementName: "g",
+        elementName: 'g',
         id: `days-grid-${i}`,
         parentToAppend: monthMockup,
       });
 
-      const monthTextEl = createSVGElement({
-        elementName: "g",
+      createSVGElement({
+        elementName: 'g',
         id: `#month-title-${i}`,
         parentToAppend: monthTextGroup,
         content: this.getOutline(
           this.monthsNamesList[this.monthCounter],
           this.mockupOptions.monthTitleX,
           this.mockupOptions.monthTitleY,
-          this.mockupOptions.monthTitleFontSize
+          this.mockupOptions.monthTitleFontSize,
         ),
       });
 
-      const yearTextEl = createSVGElement({
-        elementName: "g",
+      createSVGElement({
+        elementName: 'g',
         id: `#year-title-${i}`,
         parentToAppend: monthTextGroup,
         content: this.getOutline(
           `${this.year}`,
           this.mockupOptions.yearTitleX,
           this.mockupOptions.yearTitleY,
-          this.mockupOptions.yearTitleFontSize
+          this.mockupOptions.yearTitleFontSize,
         ),
       });
 
       const daysTitles = createSVGElement({
-        elementName: "g",
+        elementName: 'g',
         id: `days-titles-${i}`,
         parentToAppend: monthTextGroup,
       });
 
       // Generate week days paths
       this.weekDaysNamesList.map((weekDayName, i) => {
-        const weekDayCell = createSVGElement({
-          elementName: "g",
+        createSVGElement({
+          elementName: 'g',
           parentToAppend: daysTitles,
           children: [
             this.getAndPlaceOutline(
               weekDayName,
               this.mockupOptions.weekDayX,
               this.mockupOptions.weekDayY,
-              this.mockupOptions.weekDayFontSize
+              this.mockupOptions.weekDayFontSize,
             ),
           ],
           attributes: {
-            transform: `translate(${
-              this.mockupOptions.calendarGridX +
-              this.mockupOptions.dayCellWidth * i
-            } ${this.mockupOptions.weekDaysY})`,
+            transform: `translate(
+            ${this.mockupOptions.calendarGridX + this.mockupOptions.dayCellWidth * i} ${this.mockupOptions.weekDaysY})`,
           },
         });
       });
 
       const monthImageGroup = createSVGElement({
-        elementName: "g",
-        id: "image-group",
+        elementName: 'g',
+        id: 'image-group',
         parentToAppend: monthMockup,
       });
 
@@ -328,8 +326,8 @@ export class MultiPageCalendar extends Calendar {
         const imageObject = await fetch(imageInIDB.image);
         const imgURL = imageObject.url;
 
-        const imageEl = createSVGElement({
-          elementName: "image",
+        createSVGElement({
+          elementName: 'image',
           parentToAppend: monthImageGroup,
           attributes: {
             height: this.mockupOptions.imagePlaceholderHeight.toString(),
@@ -343,8 +341,8 @@ export class MultiPageCalendar extends Calendar {
         });
       } else {
         // if no saved image - just put placeholder
-        const imagePlaceholderRect = createSVGElement({
-          elementName: "rect",
+        createSVGElement({
+          elementName: 'rect',
           id: `image-placeholder-${i}`,
           parentToAppend: monthImageGroup,
           attributes: {
@@ -352,7 +350,7 @@ export class MultiPageCalendar extends Calendar {
             height: this.mockupOptions.imagePlaceholderHeight.toString(),
             x: this.mockupOptions.imagePlaceholderX.toString(),
             y: this.mockupOptions.imagePlaceholderY.toString(),
-            style: "fill: #e8e8e8",
+            style: 'fill: #e8e8e8',
           },
         });
       }
@@ -377,14 +375,14 @@ export class MultiPageCalendar extends Calendar {
         this.mockupOptions.calendarGridX,
         this.mockupOptions.calendarGridY,
         this.mockupOptions.daysFontSize,
-        this.mockupOptions.dayCellStyles
+        this.mockupOptions.dayCellStyles,
       );
 
       this.cache.cacheMockup(
         monthMockup,
         i,
         Calendar.outputDimensions[this.format].width,
-        Calendar.outputDimensions[this.format].height
+        Calendar.outputDimensions[this.format].height,
       );
     }
 
@@ -405,7 +403,7 @@ export class MultiPageCalendar extends Calendar {
    */
   static async uploadMultipleImages(e: Event): Promise<void> {
     if (e.target instanceof HTMLInputElement && e.target.files) {
-      let files = [...e.target.files];
+      const files = [...e.target.files];
       let loadedFilesCounter = 0;
 
       for (let i = 0; i < files.length; i++) {
@@ -416,19 +414,17 @@ export class MultiPageCalendar extends Calendar {
         reader.readAsDataURL(files[i]);
         reader.onload = async () => {
           const imageGroup = this.current.calendarInner.querySelector(
-            `#month-${i}-container #image-group`
+            `#month-${i}-container #image-group`,
           ) as SVGGElement;
 
-          imageGroup.innerHTML = "";
+          imageGroup.innerHTML = '';
 
           const imageEl = createSVGElement({
-            elementName: "image",
+            elementName: 'image',
             parentToAppend: imageGroup,
             attributes: {
-              height:
-                this.current.mockupOptions.imagePlaceholderHeight.toString(),
-              width:
-                this.current.mockupOptions.imagePlaceholderWidth.toString(),
+              height: this.current.mockupOptions.imagePlaceholderHeight.toString(),
+              width: this.current.mockupOptions.imagePlaceholderWidth.toString(),
               x: this.current.mockupOptions.imagePlaceholderX.toString(),
               y: this.current.mockupOptions.imagePlaceholderY.toString(),
             },
@@ -437,35 +433,26 @@ export class MultiPageCalendar extends Calendar {
           // Image optimization
           const reduced = await Calendar.reduceImageSize(
             reader.result as string,
-            this.current.mockupOptions.imagePlaceholderWidth *
-              this.current.imageReduceSizeRate,
-            this.current.mockupOptions.imagePlaceholderHeight *
-              this.current.imageReduceSizeRate
+            this.current.mockupOptions.imagePlaceholderWidth * this.current.imageReduceSizeRate,
+            this.current.mockupOptions.imagePlaceholderHeight * this.current.imageReduceSizeRate,
           );
 
           const resultImage = reduced ? reduced : reader.result;
 
           this.current.saveToIDB(resultImage as string, i);
 
-          imageEl.setAttributeNS(
-            "http://www.w3.org/1999/xlink",
-            "href",
-            resultImage as string
-          );
+          imageEl.setAttributeNS('http://www.w3.org/1999/xlink', 'href', resultImage as string);
 
           this.current.cache.cacheMockup(
             Calendar.getMockupByIndex(i),
             i,
             Calendar.outputDimensions[this.current.format].width,
-            Calendar.outputDimensions[this.current.format].height
+            Calendar.outputDimensions[this.current.format].height,
           );
 
           loadedFilesCounter++;
 
-          if (
-            loadedFilesCounter === files.length ||
-            loadedFilesCounter === 11
-          ) {
+          if (loadedFilesCounter === files.length || loadedFilesCounter === 11) {
             Calendar.loading(LoadingState.Hide);
           }
         };

@@ -1,15 +1,15 @@
-const fontsData = {
+const fontsData: SourceFontsData = {
   Garamond: {
-    fontNameBold: "EBGaramondBold",
-    fontNameRegular: "EBGaramondRegular",
+    fontNameBold: 'EBGaramondBold',
+    fontNameRegular: 'EBGaramondRegular',
   },
   Montserrat: {
-    fontNameBold: "MontserratBold",
-    fontNameRegular: "MontserratMedium",
+    fontNameBold: 'MontserratBold',
+    fontNameRegular: 'MontserratMedium',
   },
   Caveat: {
-    fontNameBold: "CaveatBold",
-    fontNameRegular: "CaveatRegular",
+    fontNameBold: 'CaveatBold',
+    fontNameRegular: 'CaveatRegular',
   },
 };
 

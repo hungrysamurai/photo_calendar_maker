@@ -1,41 +1,41 @@
-import { Font } from "opentype.js";
+import { Font } from 'opentype.js';
 
 export enum CalendarLanguage {
-  RU = "ru",
-  EN = "en",
+  RU = 'ru',
+  EN = 'en',
 }
 
 export enum FormatName {
-  A6_Y = "A6_Y",
-  A6_X = "A6_X",
-  A5_Y = "A5_Y",
-  A5_X = "A5_X",
-  A4_Y = "A4_Y",
-  A4_X = "A4_X",
-  A3_Y = "A3_Y",
-  A3_X = "A3_X",
-  A2_Y = "A2_Y",
-  A2_X = "A2_X",
+  A6_Y = 'A6_Y',
+  A6_X = 'A6_X',
+  A5_Y = 'A5_Y',
+  A5_X = 'A5_X',
+  A4_Y = 'A4_Y',
+  A4_X = 'A4_X',
+  A3_Y = 'A3_Y',
+  A3_X = 'A3_X',
+  A2_Y = 'A2_Y',
+  A2_X = 'A2_X',
 }
 
 export enum CalendarType {
-  SinglePage = "single-page",
-  MultiPage = "multi-page",
+  SinglePage = 'single-page',
+  MultiPage = 'multi-page',
 }
 
 export enum FontSubfamily {
-  Bold = "bold",
-  Regular = "regular",
+  Bold = 'bold',
+  Regular = 'regular',
 }
 
 export enum LoadingState {
-  Show = "show",
-  Hide = "hide",
+  Show = 'show',
+  Hide = 'hide',
 }
 
 export enum PDFPagesRangeToDownload {
-  Current = "current",
-  All = "all",
+  Current = 'current',
+  All = 'all',
 }
 
 declare global {
@@ -68,6 +68,17 @@ declare global {
   };
 
   type FontArray = Font[];
+
+  type SourceFontData = {
+    fontNameBold: string;
+    fontNameRegular: string;
+  };
+
+  type SourceFontsData = {
+    Garamond: SourceFontData;
+    Montserrat: SourceFontData;
+    Caveat: SourceFontData;
+  };
 
   type LoadedFontsObject = {
     [key: string]: FontArray;
