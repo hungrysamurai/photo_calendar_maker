@@ -185,7 +185,6 @@ export abstract class Calendar {
 
     // Reassign current to newly created instance
     Calendar.current = this;
-    console.log(this);
   }
 
   /**
