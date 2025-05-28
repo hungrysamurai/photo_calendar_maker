@@ -14,6 +14,7 @@
     "build": "vite build --base=/ --outDir ./build",
     "deploy": "vite build --outDir ../../server/dist/public/projects/photo_calendar_maker --base=/projects/photo_calendar_maker/",
     "lint": "eslint src --ext .ts --max-warnings 0",
+    "format:check": "prettier . --check",
     "format:fix": "prettier --write .",
     "preinstall": "npx only-allow pnpm",
     "postinstall": "node -e \"if(process.env.npm_execpath.indexOf('pnpm') === -1) { console.error('\\n\\x1b[31m✖ Please use pnpm to install dependencies\\x1b[0m\\n'); process.exit(1); }\"",

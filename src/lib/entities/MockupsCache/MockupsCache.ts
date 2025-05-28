@@ -1,17 +1,17 @@
-import WorkerPool from './WorkerPool/WorkerPool';
-import CachingWorker from './WorkerPool/cachingWorker?worker&url';
+import WorkerPool from '../WorkerPool/WorkerPool';
 /**
  * MockupsCache manages caching of SVG-based mockups as image blobs. Uses WorkerPool to offload caching tasks to workers when possible. Falls back to main thread rendering if workers fail.
  */
 export default class MockupsCache extends EventTarget {
   private mockupsCache: Blob[] = [];
 
-  private cachingWorkersPool = new WorkerPool<CacheWorkerWork, Blob>(CachingWorker);
+  // private cachingWorkersPool: WorkerPool<CacheWorkerWork, Blob>;
+  // private cachingWorkersPool = new WorkerPool<CacheWorkerWork, Blob>(CachingWorker);
 
   private cachingsInProgress: number = 0;
   private mockupsCacheState: 'idle' | 'work' = 'idle';
 
-  constructor() {
+  constructor(public cachingWorkersPool: WorkerPool<CacheWorkerWork, Blob>) {
     super();
   }
 
@@ -177,7 +177,6 @@ export default class MockupsCache extends EventTarget {
   }
 
   public reset() {
-    this.cachingWorkersPool.dispose();
     this.mockupsCache = [];
   }
 }

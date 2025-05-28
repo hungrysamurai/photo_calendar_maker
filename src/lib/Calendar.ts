@@ -3,10 +3,10 @@ import Cropper from 'cropperjs';
 import { createHTMLElement } from './utils/createElement/createHTMLElement';
 import { getMonthsList } from './utils/getMonthsList';
 
+import { A_outputFormats } from '../assets/A_FormatOptions/A_OutputDimensions';
 /**
  * Object with SVG icons
  */
-import { A_outputFormats } from '../assets/A_FormatOptions/A_OutputDimensions';
 import { icons } from '../assets/icons';
 
 import {
@@ -17,7 +17,10 @@ import {
   LoadingState,
   PDFPagesRangeToDownload,
 } from '../types';
+
 import MockupsCache from './entities/MockupsCache/MockupsCache';
+import WorkerPool from './entities/WorkerPool/WorkerPool';
+import CachingWorker from './entities/WorkerPool/cachingWorker?worker&url';
 import { createSVGElement } from './utils/createElement/createSVGElement';
 
 /**
@@ -82,9 +85,7 @@ export abstract class Calendar {
 
   static isNewType: boolean = true;
 
-  /**
-   * Cache of mockups
-   */
+  workerPool: WorkerPool<CacheWorkerWork, Blob>;
   cache: MockupsCache;
 
   /**
@@ -119,30 +120,13 @@ export abstract class Calendar {
 
   // Rate to reduce uploading images size
   imageReduceSizeRate: number = 11.8;
+
   startYear: number;
   lastMonth: number;
   endYear: number;
 
-  mockupHeight: number;
-  mockupWidth: number;
-
-  imagePlaceholderWidth: number;
-  imagePlaceholderHeight: number;
-  imagePlaceholderX: number;
-  imagePlaceholderY: number;
-
-  dayCellHeight: number;
-  dayCellWidth: number;
-  calendarGridX: number;
-  calendarGridY: number;
-  daysFontSize: number;
-
-  calendarGridLeftIndent: number;
-  calendarGridTopIndent: number;
-
   calendarInner: HTMLDivElement;
   calendarWrapper: HTMLDivElement;
-  imageElementGroup: SVGGElement;
 
   weekDaysNamesList: string[];
 
@@ -157,6 +141,9 @@ export abstract class Calendar {
     public currentFont: FontArray,
     public format: FormatName,
   ) {
+    this.workerPool = new WorkerPool(CachingWorker);
+    this.cache = new MockupsCache(this.workerPool);
+
     // Add subfamilies to fonts object
     for (let i = 0; i < currentFont.length; i++) {
       this.fonts[currentFont[i]?.names?.fontSubfamily.en.toLowerCase() as FontSubfamily] =
@@ -181,20 +168,24 @@ export abstract class Calendar {
       Calendar.initBasicControls(controlsContainer);
       Calendar.initBasicControlsEvents();
       Calendar.initCropperControls(cropControlsContainer);
-
-      this.cache = new MockupsCache();
     } else {
       // Check new type vs old type
       Calendar.isNewType = type !== Calendar.current.type;
 
-      Calendar.current.cache.reset();
-      this.cache = new MockupsCache();
       // Clean  mockup container
       Calendar.cleanUp(controlsContainer);
+
+      // Reset worker pool & cache of previous instance
+      Calendar.current.workerPool.dispose();
+      Calendar.current.cache.reset();
     }
 
+    // Subscribe on cache events
     this.initCacheEvents();
+
+    // Reassign current to newly created instance
     Calendar.current = this;
+    console.log(this);
   }
 
   /**

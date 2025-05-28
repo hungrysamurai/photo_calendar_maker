@@ -84,7 +84,7 @@ export class SinglePageCalendar extends Calendar {
       },
     });
 
-    this.imageElementGroup = createSVGElement({
+    const imageElementGroup = createSVGElement({
       elementName: 'g',
       id: 'image-group',
       parentToAppend: mockup,
@@ -98,7 +98,7 @@ export class SinglePageCalendar extends Calendar {
 
       createSVGElement({
         elementName: 'image',
-        parentToAppend: this.imageElementGroup,
+        parentToAppend: imageElementGroup,
         attributes: {
           height: this.mockupOptions.imagePlaceholderHeight.toString(),
           width: this.mockupOptions.imagePlaceholderWidth.toString(),
@@ -113,7 +113,7 @@ export class SinglePageCalendar extends Calendar {
       createSVGElement({
         elementName: 'rect',
         id: 'image-placeholder',
-        parentToAppend: this.imageElementGroup,
+        parentToAppend: imageElementGroup,
         attributes: {
           x: this.mockupOptions.imagePlaceholderX.toString(),
           y: this.mockupOptions.imagePlaceholderY.toString(),
