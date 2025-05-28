@@ -5,6 +5,8 @@
     "source.fixAll": "explicit",
     "source.organizeImports": "explicit"
   },
+  "editor.tabSize": 2,
+  "editor.detectIndentation": false,
   "files.eol": "auto",
   "javascript.format.insertSpaceAfterOpeningAndBeforeClosingEmptyBraces": false,
   "typescript.format.insertSpaceAfterOpeningAndBeforeClosingEmptyBraces": false
