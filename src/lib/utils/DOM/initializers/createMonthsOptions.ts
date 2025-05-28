@@ -1,4 +1,4 @@
-import { getMonthsList } from '../getMonthsList';
+import { getMonthsList } from '../../getMonthsList';
 
 export const createMonthsOptions = (): string => {
   const monthsList = getMonthsList();
@@ -6,9 +6,7 @@ export const createMonthsOptions = (): string => {
 
   return monthsList
     .map((monthName, i) => {
-      return `<option value="${i}" data-name="${monthName}" ${
-        i === currentMonth ? 'selected' : ''
-      }>${monthName}</option>`;
+      return `<option value="${i}" data-name="${monthName}" ${i === currentMonth ? 'selected' : ''}>${monthName}</option>`;
     })
     .join('');
 };

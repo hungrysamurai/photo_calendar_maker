@@ -12,8 +12,11 @@ import {
   LoadingState,
   PDFPagesRangeToDownload,
 } from '../types';
-import { createHTMLElement } from './utils/createElement/createHTMLElement';
-import { createSVGElement } from './utils/createElement/createSVGElement';
+import { createHTMLElement } from './utils/DOM/createElement/createHTMLElement';
+import { createSVGElement } from './utils/DOM/createElement/createSVGElement';
+import getDaysInMonth from './utils/getDaysInMonth';
+import getMonthFirstDay from './utils/getMonthFirstDay';
+import getWeekDays from './utils/getWeekDays';
 
 /**
  * Class that generates Multi Page Calendar (each month on separate SVG)
@@ -63,7 +66,7 @@ export class MultiPageCalendar extends Calendar {
     );
 
     MultiPageCalendar.current = this;
-    this.weekDaysNamesList = this.getWeekDays('long');
+    this.weekDaysNamesList = getWeekDays('long', this.lang);
 
     this.mockupOptions = new A_FormatMultiPageMockupOptions(format)[format];
 
@@ -369,9 +372,9 @@ export class MultiPageCalendar extends Calendar {
 
       this.createMonthGrid(
         monthTextGroup,
-        this.getFirstDay(this.monthCounter - 1, this.year) - 1,
-        this.daysInMonth(this.monthCounter, this.year),
-        this.daysInMonth(this.monthCounter - 1, this.year),
+        getMonthFirstDay(this.monthCounter - 1, this.year) - 1,
+        getDaysInMonth(this.monthCounter, this.year),
+        getDaysInMonth(this.monthCounter - 1, this.year),
         this.mockupOptions.calendarGridX,
         this.mockupOptions.calendarGridY,
         this.mockupOptions.daysFontSize,

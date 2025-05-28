@@ -1,6 +1,6 @@
 import Cropper from 'cropperjs';
 
-import { createHTMLElement } from './utils/createElement/createHTMLElement';
+import { createHTMLElement } from './utils/DOM/createElement/createHTMLElement';
 import { getMonthsList } from './utils/getMonthsList';
 
 import { A_outputFormats } from '../assets/A_FormatOptions/A_OutputDimensions';
@@ -21,7 +21,7 @@ import {
 import MockupsCache from './entities/MockupsCache/MockupsCache';
 import WorkerPool from './entities/WorkerPool/WorkerPool';
 import CachingWorker from './entities/WorkerPool/cachingWorker?worker&url';
-import { createSVGElement } from './utils/createElement/createSVGElement';
+import { createSVGElement } from './utils/DOM/createElement/createSVGElement';
 
 /**
  * Class that includes basic logic of calendar grid creation, methods to init basic DOM elements, upload/download documents (single), caching mockups, Cropper functionality, image compression, saving to IndexedDB (single) and loader
@@ -773,24 +773,6 @@ export abstract class Calendar {
   }
 
   /**
-   * @property {Function} getWeekDays - generates array of week days
-   * @param {string} length - length of week day name
-   */
-  getWeekDays(length: 'long' | 'short' | 'narrow' | undefined): string[] {
-    return Array.from({ length: 7 }, (_, i) => {
-      let weekDay = new Intl.DateTimeFormat(this.lang, {
-        weekday: length,
-      }).format(new Date(0, 0, i + 1));
-
-      // Capitalize first letters
-      if (this.lang === 'ru') {
-        weekDay = weekDay[0].toUpperCase() + weekDay.slice(1);
-      }
-      return weekDay;
-    });
-  }
-
-  /**
    * @property {Function} createMonthGrid - Generates month grid in given DOM element with provided parameters
    * @param {SVGGElement} monthGrid - element to append calendar grid
    * @param {number} startIndex - first day of month
@@ -923,31 +905,6 @@ export abstract class Calendar {
     });
 
     return dayGroup;
-  }
-
-  // Date functions section
-
-  /**
-   * @property {Function} daysInMonth - gives number of days in current month
-   * @param {number} month - given month
-   * @param {number} year - given year
-   * @returns {number} - total number of days in given month
-   */
-  daysInMonth(month: number, year: number): number {
-    return new Date(year, month, 0).getDate();
-  }
-
-  /**
-   * @property {Function} getFirstDay - gives position of first day on month
-   * @param {number} month
-   * @param {number} year
-   */
-  getFirstDay(month: number, year: number): number {
-    const index = new Date(year, month, 1);
-    if (index.getDay() === 0) {
-      return 7;
-    }
-    return index.getDay();
   }
 
   /**

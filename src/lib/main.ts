@@ -1,14 +1,14 @@
 import { MultiPageCalendar } from './MultiPageCalendar';
 import { SinglePageCalendar } from './SinglePageCalendar';
 
-import { collectDataFromInputs } from './utils/collectDataFromInputs';
+import { collectDataFromInputs } from './utils/DOM/collectDataFromInputs';
 
-import { createFontsOptions } from './utils/initializers/createFontsOptions';
-import { createFormatsOptions } from './utils/initializers/createFormatsOptions';
-import { createMonthsOptions } from './utils/initializers/createMonthsOptions';
-import { createYearsOptions } from './utils/initializers/createYearsOptions';
+import { createFontsOptions } from './utils/DOM/initializers/createFontsOptions';
+import { createFormatsOptions } from './utils/DOM/initializers/createFormatsOptions';
+import { createMonthsOptions } from './utils/DOM/initializers/createMonthsOptions';
+import { createYearsOptions } from './utils/DOM/initializers/createYearsOptions';
 
-import { loadFonts } from './utils/initializers/loadFonts';
+import { loadFonts } from './utils/DOM/initializers/loadFonts';
 
 import { CalendarType } from '../types';
 

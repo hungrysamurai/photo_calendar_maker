@@ -1,11 +1,14 @@
 import { Calendar } from './Calendar';
 
-import { createHTMLElement } from './utils/createElement/createHTMLElement';
-import { createSVGElement } from './utils/createElement/createSVGElement';
+import { createHTMLElement } from './utils/DOM/createElement/createHTMLElement';
+import { createSVGElement } from './utils/DOM/createElement/createSVGElement';
 
 import { CalendarLanguage, CalendarType, FormatName, LoadingState } from '../types';
 
 import { A_FormatSinglePageMockupOptions } from '../assets/A_FormatOptions/A_FormatOptions';
+import getDaysInMonth from './utils/getDaysInMonth';
+import getMonthFirstDay from './utils/getMonthFirstDay';
+import getWeekDays from './utils/getWeekDays';
 
 /**
  * Class that generates Single Page Calendar (all months on one page)
@@ -39,7 +42,7 @@ export class SinglePageCalendar extends Calendar {
 
     this.mockupOptions = new A_FormatSinglePageMockupOptions(format)[format];
 
-    this.weekDaysNamesList = this.getWeekDays('short');
+    this.weekDaysNamesList = getWeekDays('short', this.lang);
 
     this.createSVGMockup();
   }
@@ -234,9 +237,9 @@ export class SinglePageCalendar extends Calendar {
 
       this.createMonthGrid(
         currentMonthGrid,
-        this.getFirstDay(this.monthCounter - 1, this.year) - 1,
-        this.daysInMonth(this.monthCounter, this.year),
-        this.daysInMonth(this.monthCounter - 1, this.year) - 1,
+        getMonthFirstDay(this.monthCounter - 1, this.year) - 1,
+        getDaysInMonth(this.monthCounter, this.year),
+        getDaysInMonth(this.monthCounter - 1, this.year) - 1,
         this.mockupOptions.calendarGridX,
         this.mockupOptions.calendarGridY,
         this.mockupOptions.daysFontSize,
