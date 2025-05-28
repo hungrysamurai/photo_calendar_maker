@@ -733,7 +733,7 @@ export abstract class Calendar {
   ): string {
     const outline = this.fonts[fontWeight].getPath(string, x, y, fontSize);
     outline.fill = fill;
-    return outline.toSVG(1);
+    return outline.toSVG(2);
   }
 
   /**
@@ -764,7 +764,7 @@ export abstract class Calendar {
     const pathElement = createSVGElement({
       elementName: 'path',
       attributes: {
-        d: outline.toPathData(1),
+        d: outline.toPathData(2),
         transform: `translate(-${xShift} ${yShift})`,
         fill,
       },
