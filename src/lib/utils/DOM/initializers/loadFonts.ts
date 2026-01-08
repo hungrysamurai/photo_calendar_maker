@@ -1,5 +1,5 @@
 import opentype from 'opentype.js';
-import fontsData from '../../../assets/sourceFontsData';
+import fontsData from '../../../../assets/sourceFontsData';
 
 export const loadFonts = async (): Promise<LoadedFontsObject> => {
   const loadedFonts: LoadedFontsObject = {};

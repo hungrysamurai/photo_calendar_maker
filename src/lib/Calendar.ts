@@ -446,7 +446,7 @@ export abstract class Calendar {
       });
     }
 
-    const arrayBuffer = await pdf.save();
+    const arrayBuffer = (await pdf.save()) as Uint8Array<ArrayBuffer>;
 
     const blob = new Blob([arrayBuffer], { type: 'application/pdf' });
     const blobURL = URL.createObjectURL(blob);
