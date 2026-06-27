@@ -28,11 +28,6 @@ export enum FontSubfamily {
   Regular = 'regular',
 }
 
-export enum LoadingState {
-  Show = 'show',
-  Hide = 'hide',
-}
-
 export enum PDFPagesRangeToDownload {
   Current = 'current',
   All = 'all',

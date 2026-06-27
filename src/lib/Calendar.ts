@@ -14,10 +14,10 @@ import {
   CalendarType,
   FontSubfamily,
   FormatName,
-  LoadingState,
   PDFPagesRangeToDownload,
 } from '../types';
 
+import loadingOverlay from './entities/LoadingOverlay';
 import MockupsCache from './entities/MockupsCache/MockupsCache';
 import WorkerPool from './entities/WorkerPool/WorkerPool';
 import CachingWorker from './entities/WorkerPool/cachingWorker?worker&url';
@@ -36,39 +36,6 @@ export abstract class Calendar {
 
   static set current(calendar: Calendar) {
     Calendar._currentCalendar = calendar;
-  }
-
-  static loadingScreen: HTMLDivElement;
-  /**
-   * @property {Fucntion} createLoader - creates loader element
-   */
-  static createLoader(element: HTMLElement): void {
-    Calendar.loadingScreen = createHTMLElement({
-      elementName: 'div',
-      className: 'loading-screen hide',
-      content: icons.loader,
-      insertTo: {
-        element,
-        position: 'beforebegin',
-      },
-    });
-  }
-
-  /**
-   * @property {Fucntion} loading - toggle visibility of loader element
-   * @param {string} targetState - turn loader to
-   * @returns {void}
-   */
-  static loading(targetState: LoadingState): void {
-    if (Calendar.current) {
-      if (targetState === LoadingState.Hide) {
-        this.loadingScreen.classList.add('hide');
-        Calendar.current.controlsContainer.style.pointerEvents = 'auto';
-      } else if (targetState === LoadingState.Show) {
-        this.loadingScreen.classList.remove('hide');
-        Calendar.current.controlsContainer.style.pointerEvents = 'none';
-      }
-    }
   }
 
   static cleanUp(controlsContainer: HTMLDivElement): void {
@@ -164,7 +131,7 @@ export abstract class Calendar {
 
     if (!Calendar.current) {
       // First initialization
-      Calendar.createLoader(parentContainer);
+      loadingOverlay.mount(parentContainer, controlsContainer);
 
       Calendar.initBasicControls(controlsContainer);
       Calendar.initBasicControlsEvents();
@@ -275,7 +242,7 @@ export abstract class Calendar {
       const currentImageElement = this.getCurrentMockup('image');
 
       if (currentImageElement) {
-        Calendar.loading(LoadingState.Show);
+        loadingOverlay.show();
 
         this.imageToCrop = currentImageElement as SVGImageElement;
         this.initCropper();
@@ -316,7 +283,7 @@ export abstract class Calendar {
       const imageFile = e.target.files[0];
       const reader = new FileReader();
 
-      Calendar.loading(LoadingState.Show);
+      loadingOverlay.show();
 
       reader.readAsDataURL(imageFile);
       reader.onload = async () => {
@@ -355,7 +322,7 @@ export abstract class Calendar {
           Calendar.outputDimensions[this.current.format].height,
         );
 
-        Calendar.loading(LoadingState.Hide);
+        loadingOverlay.hide();
       };
     }
   }
@@ -421,7 +388,7 @@ export abstract class Calendar {
    * @param {string} range - single-page/all pages
    */
   static async downloadPDF(range: PDFPagesRangeToDownload): Promise<void> {
-    Calendar.loading(LoadingState.Show);
+    loadingOverlay.show();
     const { PDFDocument } = await import('pdf-lib');
     const pdf = await PDFDocument.create();
 
@@ -456,7 +423,7 @@ export abstract class Calendar {
 
     this.downloadElement(blobURL, fileName);
 
-    Calendar.loading(LoadingState.Hide);
+    loadingOverlay.hide();
     URL.revokeObjectURL(blobURL);
   }
 
@@ -547,7 +514,7 @@ export abstract class Calendar {
             window.onresize = () => {
               this.updateCropperPosition();
             };
-            Calendar.loading(LoadingState.Hide);
+            loadingOverlay.hide();
           },
 
           zoom: (e) => {

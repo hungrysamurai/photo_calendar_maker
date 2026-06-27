@@ -3,9 +3,10 @@ import { Calendar } from './Calendar';
 import { createHTMLElement } from './utils/DOM/createElement/createHTMLElement';
 import { createSVGElement } from './utils/DOM/createElement/createSVGElement';
 
-import { CalendarLanguage, CalendarType, FormatName, LoadingState } from '../types';
+import { CalendarLanguage, CalendarType, FormatName } from '../types';
 
 import { A_FormatSinglePageMockupOptions } from '../assets/A_FormatOptions/A_FormatOptions';
+import loadingOverlay from './entities/LoadingOverlay';
 import getDaysInMonth from './utils/getDaysInMonth';
 import getMonthFirstDay from './utils/getMonthFirstDay';
 import getWeekDays from './utils/getWeekDays';
@@ -52,7 +53,7 @@ export class SinglePageCalendar extends Calendar {
    * @property {Function} createSVGMockup - creates SVG mockup in DOM
    */
   async createSVGMockup(): Promise<void> {
-    Calendar.loading(LoadingState.Show);
+    loadingOverlay.show();
 
     this.calendarWrapper = createHTMLElement({
       elementName: 'div',
@@ -257,6 +258,6 @@ export class SinglePageCalendar extends Calendar {
       Calendar.outputDimensions[this.format].height,
     );
 
-    Calendar.loading(LoadingState.Hide);
+    loadingOverlay.hide();
   }
 }

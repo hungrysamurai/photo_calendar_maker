@@ -5,13 +5,7 @@ import { Calendar } from './Calendar';
 import { icons } from '../assets/icons';
 
 import { A_FormatMultiPageMockupOptions } from '../assets/A_FormatOptions/A_FormatOptions';
-import {
-  CalendarLanguage,
-  CalendarType,
-  FormatName,
-  LoadingState,
-  PDFPagesRangeToDownload,
-} from '../types';
+import { CalendarLanguage, CalendarType, FormatName, PDFPagesRangeToDownload } from '../types';
 import { createHTMLElement } from './utils/DOM/createElement/createHTMLElement';
 import { createSVGElement } from './utils/DOM/createElement/createSVGElement';
 import getDaysInMonth from './utils/getDaysInMonth';
@@ -19,6 +13,7 @@ import getMonthFirstDay from './utils/getMonthFirstDay';
 import getWeekDays from './utils/getWeekDays';
 import saveImageIDB from './utils/IDB/saveImageIDB';
 
+import loadingOverlay from './entities/LoadingOverlay';
 /**
  * Class that generates Multi Page Calendar (each month on separate SVG)
  */
@@ -209,7 +204,7 @@ export class MultiPageCalendar extends Calendar {
    * @property {Function} createSVGMockup - creates SVG mockup in DOM
    */
   async createSVGMockup(): Promise<void> {
-    Calendar.loading(LoadingState.Show);
+    loadingOverlay.show();
 
     this.calendarWrapper = createHTMLElement({
       elementName: 'div',
@@ -390,7 +385,7 @@ export class MultiPageCalendar extends Calendar {
       );
     }
 
-    Calendar.loading(LoadingState.Hide);
+    loadingOverlay.hide();
   }
 
   /**
@@ -413,7 +408,7 @@ export class MultiPageCalendar extends Calendar {
       for (let i = 0; i < files.length; i++) {
         const reader = new FileReader();
 
-        Calendar.loading(LoadingState.Show);
+        loadingOverlay.show();
 
         reader.readAsDataURL(files[i]);
         reader.onload = async () => {
@@ -457,7 +452,7 @@ export class MultiPageCalendar extends Calendar {
           loadedFilesCounter++;
 
           if (loadedFilesCounter === files.length || loadedFilesCounter === 11) {
-            Calendar.loading(LoadingState.Hide);
+            loadingOverlay.hide();
           }
         };
 
