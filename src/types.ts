@@ -189,4 +189,9 @@ declare global {
     mockupWidth: number;
     weekDayX: number;
   }
+
+  type InitProjectFn = (
+    { startYear, firstMonthIndex, lang, font, format, type }: CalendarData,
+    svedImages?: ImageObject[],
+  ) => Promise<void>;
 }
