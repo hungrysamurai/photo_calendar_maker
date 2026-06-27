@@ -17,6 +17,7 @@ import { createSVGElement } from './utils/DOM/createElement/createSVGElement';
 import getDaysInMonth from './utils/getDaysInMonth';
 import getMonthFirstDay from './utils/getMonthFirstDay';
 import getWeekDays from './utils/getWeekDays';
+import saveImageIDB from './utils/IDB/saveImageIDB';
 
 /**
  * Class that generates Multi Page Calendar (each month on separate SVG)
@@ -442,7 +443,7 @@ export class MultiPageCalendar extends Calendar {
 
           const resultImage = reduced ? reduced : reader.result;
 
-          this.current.saveToIDB(resultImage as string, i);
+          saveImageIDB(resultImage as string, i);
 
           imageEl.setAttributeNS('http://www.w3.org/1999/xlink', 'href', resultImage as string);
 

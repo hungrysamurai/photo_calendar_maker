@@ -22,6 +22,7 @@ import MockupsCache from './entities/MockupsCache/MockupsCache';
 import WorkerPool from './entities/WorkerPool/WorkerPool';
 import CachingWorker from './entities/WorkerPool/cachingWorker?worker&url';
 import { createSVGElement } from './utils/DOM/createElement/createSVGElement';
+import saveImageIDB from './utils/IDB/saveImageIDB';
 
 /**
  * Class that includes basic logic of calendar grid creation, methods to init basic DOM elements, upload/download documents (single), caching mockups, Cropper functionality, image compression, saving to IndexedDB (single) and loader
@@ -344,7 +345,7 @@ export abstract class Calendar {
         imageEl.setAttributeNS('http://www.w3.org/1999/xlink', 'href', resultImage as string);
 
         // Save image to IDB
-        this.current.saveToIDB(resultImage as string);
+        saveImageIDB(resultImage as string, this.current.currentMonth);
 
         // Cache mockup after change
         this.current.cache.cacheMockup(
@@ -622,7 +623,7 @@ export abstract class Calendar {
 
       this.imageToCrop.setAttributeNS('http://www.w3.org/1999/xlink', 'href', resultURL);
       // Save cropped image to IDB
-      this.current.saveToIDB(resultURL);
+      saveImageIDB(resultURL, this.current.currentMonth);
       // Get rid of cropper
       this.removeCropper();
 
@@ -905,37 +906,6 @@ export abstract class Calendar {
     });
 
     return dayGroup;
-  }
-
-  /**
-   * @property {Function} saveToIDB - save current image to IndexedDB
-   * @param {string} imageFile - image to save in IndexedDB
-   * @param {number} [id=this.currentMonth] - index of month
-   */
-  saveToIDB(imageFile: string, id: number = this.currentMonth): void {
-    const indexedDB =
-      window.indexedDB ||
-      window.mozIndexedDB ||
-      window.webkitIndexedDB ||
-      window.msIndexedDB ||
-      window.shimIndexedDB;
-
-    const request = indexedDB.open('Photo Calendar Project', 1);
-
-    request.onsuccess = () => {
-      const db = request.result;
-      const transaction = db.transaction('current_project_images', 'readwrite');
-      const store = transaction.objectStore('current_project_images');
-
-      store.put({
-        id: id,
-        image: imageFile,
-      });
-
-      transaction.oncomplete = function () {
-        db.close();
-      };
-    };
   }
 
   abstract createSVGMockup(): void;
