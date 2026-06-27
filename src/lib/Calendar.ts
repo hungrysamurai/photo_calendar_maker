@@ -17,6 +17,7 @@ import {
   PDFPagesRangeToDownload,
 } from '../types';
 
+import { BasicControlsManager, MultiPageControlsManager } from './entities/ControlsManager';
 import loadingOverlay from './entities/LoadingOverlay';
 import MockupsCache from './entities/MockupsCache/MockupsCache';
 import WorkerPool from './entities/WorkerPool/WorkerPool';
@@ -38,36 +39,15 @@ export abstract class Calendar {
     Calendar._currentCalendar = calendar;
   }
 
-  static cleanUp(controlsContainer: HTMLDivElement): void {
-    Calendar.current.parentContainer.innerHTML = '';
-
-    // Clean controls to default if new type
-    if (Calendar.isNewType) {
-      [...controlsContainer.children].forEach((el) => {
-        if (!this.basicControls.includes(el as HTMLElement)) {
-          el.remove();
-        }
-      });
-    }
-  }
-
-  static isNewType: boolean = true;
-
   workerPool: WorkerPool<CacheWorkerWork, Blob>;
   cache: MockupsCache;
+
+  controlsManager: BasicControlsManager | MultiPageControlsManager;
 
   /**
    * Dimensions of document (px)
    */
   static outputDimensions: OutputDimensions = A_outputFormats;
-
-  static currentPDFDownloadBtn: HTMLButtonElement;
-  static jpgDownloadBtn: HTMLButtonElement;
-  static cropBtn: HTMLButtonElement;
-  static uploadImgInput: HTMLInputElement;
-  static uploadImgBtn: HTMLLabelElement;
-
-  static basicControls: HTMLElement[] = [];
 
   static cropperOuter: HTMLDivElement;
   static cropper: Cropper | undefined;
@@ -133,17 +113,8 @@ export abstract class Calendar {
       // First initialization
       loadingOverlay.mount(parentContainer, controlsContainer);
 
-      Calendar.initBasicControls(controlsContainer);
-      Calendar.initBasicControlsEvents();
       Calendar.initCropperControls(cropControlsContainer);
     } else {
-      // Check new type vs old type
-      Calendar.isNewType = type !== Calendar.current.type;
-
-      // Clean  mockup container
-      Calendar.cleanUp(controlsContainer);
-
-      // Reset worker pool & cache of previous instance
       Calendar.current.workerPool.dispose();
       Calendar.current.cache.reset();
     }
@@ -155,121 +126,53 @@ export abstract class Calendar {
     Calendar.current = this;
   }
 
-  /**
-   * @property {Function} initBasicControls - creates controls buttons in DOM
-   */
-  static initBasicControls(controlsContainer: HTMLDivElement): void {
-    controlsContainer.innerHTML = '';
-
-    this.currentPDFDownloadBtn = createHTMLElement({
-      elementName: 'button',
-      parentToAppend: controlsContainer,
-      id: 'pdf-download-current',
-      content: icons.pdfSingle,
-    });
-
-    this.basicControls.push(this.currentPDFDownloadBtn);
-
-    this.jpgDownloadBtn = createHTMLElement({
-      elementName: 'button',
-      parentToAppend: controlsContainer,
-      id: 'jpg-download',
-      content: icons.jpg,
-    });
-
-    this.basicControls.push(this.jpgDownloadBtn);
-
-    this.cropBtn = createHTMLElement({
-      elementName: 'button',
-      id: 'crop-btn',
-      content: icons.crop,
-      parentToAppend: controlsContainer,
-    });
-
-    this.basicControls.push(this.cropBtn);
-
-    this.uploadImgInput = createHTMLElement({
-      elementName: 'input',
-      id: 'upload-input',
-      parentToAppend: controlsContainer,
-      attributes: {
-        type: 'file',
-        accept: 'image/jpeg, image/png, image/jpg',
-        hidden: new Boolean(true).toString(),
-        onclick: 'this.value=null;',
-      },
-    });
-
-    this.basicControls.push(this.uploadImgInput);
-
-    this.uploadImgBtn = createHTMLElement({
-      elementName: 'label',
-      id: 'upload-btn',
-      content: icons.upload,
-      className: 'upload-btn',
-      parentToAppend: controlsContainer,
-      attributes: {
-        for: 'upload-input',
-      },
-    });
-
-    this.basicControls.push(this.uploadImgBtn);
-  }
-
-  /**
-   * @property {Function} initBasicControlsEvents - sets events on buttons
-   */
-  static initBasicControlsEvents(): void {
-    this.currentPDFDownloadBtn.addEventListener('click', () => {
-      if (this.cropper) {
-        this.removeCropper();
-      }
-
-      this.downloadPDF(PDFPagesRangeToDownload.Current);
-    });
-
-    this.jpgDownloadBtn.addEventListener('click', () => {
-      if (this.cropper) {
-        this.removeCropper();
-      }
-
-      this.downloadCurrentJPG();
-    });
-
-    this.cropBtn.addEventListener('click', () => {
-      if (this.cropper) return;
-
-      const currentImageElement = this.getCurrentMockup('image');
-
-      if (currentImageElement) {
-        loadingOverlay.show();
-
-        this.imageToCrop = currentImageElement as SVGImageElement;
-        this.initCropper();
-        this.current.cropControlsContainer.classList.remove('hide');
-      }
-    });
-
-    this.uploadImgInput.addEventListener('input', (e) => {
-      if (this.cropper) {
-        this.removeCropper();
-      }
-
-      this.uploadImg(e);
-    });
-  }
-
   initCacheEvents() {
     this.cache.addEventListener('workStart', () => {
-      Calendar.jpgDownloadBtn.disabled = true;
-      Calendar.currentPDFDownloadBtn.disabled = true;
+      this.controlsManager.setControlsState(false);
     });
 
     this.cache.addEventListener('workDone', () => {
-      Calendar.jpgDownloadBtn.disabled = false;
-      Calendar.currentPDFDownloadBtn.disabled = false;
+      this.controlsManager.setControlsState(true);
     });
   }
+
+  onDownloadCurrentPdf = () => {
+    if (Calendar.cropper) {
+      Calendar.removeCropper();
+    }
+
+    this.downloadPDF(PDFPagesRangeToDownload.Current);
+  };
+
+  onDownloadJpg = () => {
+    if (Calendar.cropper) {
+      Calendar.removeCropper();
+    }
+    console.log(this);
+
+    this.downloadCurrentJPG();
+  };
+
+  onCrop = () => {
+    if (Calendar.cropper) return;
+
+    const currentImageElement = Calendar.getCurrentMockup('image');
+
+    if (currentImageElement) {
+      loadingOverlay.show();
+
+      Calendar.imageToCrop = currentImageElement as SVGImageElement;
+      Calendar.initCropper();
+      Calendar.current.cropControlsContainer.classList.remove('hide');
+    }
+  };
+
+  onUploadImage = (e: InputEvent) => {
+    if (Calendar.cropper) {
+      Calendar.removeCropper();
+    }
+    this.uploadImg(e);
+  };
 
   // Upload/download section
 
@@ -278,7 +181,7 @@ export abstract class Calendar {
    * @property {Function} uploadImg - Upload single image
    * @param {e} e - Event object that fires when upload single image button pressed
    */
-  static async uploadImg(e: Event) {
+  async uploadImg(e: Event) {
     if (e.target instanceof HTMLInputElement && e.target.files) {
       const imageFile = e.target.files[0];
       const reader = new FileReader();
@@ -287,16 +190,16 @@ export abstract class Calendar {
 
       reader.readAsDataURL(imageFile);
       reader.onload = async () => {
-        const imageGroup = this.getCurrentMockup('#image-group');
+        const imageGroup = Calendar.getCurrentMockup('#image-group');
         imageGroup.innerHTML = '';
 
         const imageEl = createSVGElement({
           elementName: 'image',
           attributes: {
-            height: this.current.mockupOptions.imagePlaceholderHeight.toString(),
-            width: this.current.mockupOptions.imagePlaceholderWidth.toString(),
-            x: this.current.mockupOptions.imagePlaceholderX.toString(),
-            y: this.current.mockupOptions.imagePlaceholderY.toString(),
+            height: this.mockupOptions.imagePlaceholderHeight.toString(),
+            width: this.mockupOptions.imagePlaceholderWidth.toString(),
+            x: this.mockupOptions.imagePlaceholderX.toString(),
+            y: this.mockupOptions.imagePlaceholderY.toString(),
           },
           parentToAppend: imageGroup,
         });
@@ -304,22 +207,22 @@ export abstract class Calendar {
         // Image optimization
         const reduced = await this.reduceImageSize(
           reader.result as string,
-          this.current.mockupOptions.imagePlaceholderWidth * this.current.imageReduceSizeRate,
-          this.current.mockupOptions.imagePlaceholderHeight * this.current.imageReduceSizeRate,
+          this.mockupOptions.imagePlaceholderWidth * this.imageReduceSizeRate,
+          this.mockupOptions.imagePlaceholderHeight * this.imageReduceSizeRate,
         );
 
         const resultImage = reduced ? reduced : reader.result;
         imageEl.setAttributeNS('http://www.w3.org/1999/xlink', 'href', resultImage as string);
 
         // Save image to IDB
-        saveImageIDB(resultImage as string, this.current.currentMonth);
+        saveImageIDB(resultImage as string, this.currentMonth);
 
         // Cache mockup after change
-        this.current.cache.cacheMockup(
-          this.getCurrentMockup('svg'),
-          this.current.currentMonth,
-          Calendar.outputDimensions[this.current.format].width,
-          Calendar.outputDimensions[this.current.format].height,
+        this.cache.cacheMockup(
+          Calendar.getCurrentMockup('svg'),
+          this.currentMonth,
+          Calendar.outputDimensions[this.format].width,
+          Calendar.outputDimensions[this.format].height,
         );
 
         loadingOverlay.hide();
@@ -334,7 +237,7 @@ export abstract class Calendar {
    * @param {number} maxWidth - max width of image is equal to width of svg-placeholder times imageReduceSizeRate
    * @param {number} maxHeight - max height of image is equal to height of svg-placeholder times imageReduceSizeRate
    */
-  static async reduceImageSize(
+  async reduceImageSize(
     base64Str: string,
     maxWidth: number,
     maxHeight: number,
@@ -375,8 +278,8 @@ export abstract class Calendar {
    * @async
    * @property {Function} downloadCurrentJPG - Download current (visible) svg mockup
    */
-  static async downloadCurrentJPG(): Promise<void> {
-    const url = URL.createObjectURL(this.current.cache.cachedMockups[this.current.currentMonth]);
+  async downloadCurrentJPG(): Promise<void> {
+    const url = URL.createObjectURL(this.cache.cachedMockups[this.currentMonth]);
     const fileName = this.getFileName();
 
     this.downloadElement(url, fileName);
@@ -387,30 +290,30 @@ export abstract class Calendar {
    * @property {Function} downloadPDF - download as PDF
    * @param {string} range - single-page/all pages
    */
-  static async downloadPDF(range: PDFPagesRangeToDownload): Promise<void> {
+  async downloadPDF(range: PDFPagesRangeToDownload): Promise<void> {
     loadingOverlay.show();
     const { PDFDocument } = await import('pdf-lib');
     const pdf = await PDFDocument.create();
 
     const pagesToDownload =
       range === PDFPagesRangeToDownload.All
-        ? this.current.cache.cachedMockups
-        : [this.current.cache.cachedMockups[this.current.currentMonth]];
+        ? this.cache.cachedMockups
+        : [this.cache.cachedMockups[this.currentMonth]];
 
     for (const blob of pagesToDownload) {
       const arrayBuffer = await blob.arrayBuffer();
 
       const image = await pdf.embedJpg(arrayBuffer);
       const page = pdf.addPage([
-        this.outputDimensions[this.current.format].width,
-        this.outputDimensions[this.current.format].height,
+        Calendar.outputDimensions[this.format].width,
+        Calendar.outputDimensions[this.format].height,
       ]);
 
       page.drawImage(image, {
         x: 0,
         y: 0,
-        width: this.outputDimensions[this.current.format].width,
-        height: this.outputDimensions[this.current.format].height,
+        width: Calendar.outputDimensions[this.format].width,
+        height: Calendar.outputDimensions[this.format].height,
       });
     }
 
@@ -432,7 +335,7 @@ export abstract class Calendar {
    * @param {string} elementURL - URL of blob or canvas to download
    * @param {string} fileName
    */
-  private static downloadElement(elementURL: string, fileName: string): void {
+  downloadElement(elementURL: string, fileName: string): void {
     const a = document.createElement('a');
     a.download = fileName;
     a.href = elementURL;
@@ -444,16 +347,16 @@ export abstract class Calendar {
    * @property {Function} getFileName - Generates name of file
    * @param {boolean} span
    */
-  static getFileName(span?: boolean): string {
-    if (span || this.current.type === CalendarType.SinglePage) {
-      const firstMonth = this.current.firstMonth;
-      const firstMonthYear = this.current.startYear;
+  getFileName(span?: boolean): string {
+    if (span || this.type === CalendarType.SinglePage) {
+      const firstMonth = this.firstMonth;
+      const firstMonthYear = this.startYear;
 
       const date1 = new Date(Number(firstMonthYear), Number(firstMonth));
       const firstMonthName = date1.toLocaleString('default', { month: 'long' });
 
-      const lastMonth = this.current.lastMonth;
-      const lastMonthYear = this.current.endYear;
+      const lastMonth = this.lastMonth;
+      const lastMonthYear = this.endYear;
 
       const date2 = new Date(+lastMonthYear, +lastMonth);
       const lastMonthName = date2.toLocaleString('default', {

@@ -2,7 +2,6 @@ import { Calendar } from './Calendar';
 /**
  * Object with SVG icons
  */
-import { icons } from '../assets/icons';
 
 import { A_FormatMultiPageMockupOptions } from '../assets/A_FormatOptions/A_FormatOptions';
 import { CalendarLanguage, CalendarType, FormatName, PDFPagesRangeToDownload } from '../types';
@@ -13,6 +12,7 @@ import getMonthFirstDay from './utils/getMonthFirstDay';
 import getWeekDays from './utils/getWeekDays';
 import saveImageIDB from './utils/IDB/saveImageIDB';
 
+import { MultiPageControlsManager } from './entities/ControlsManager';
 import loadingOverlay from './entities/LoadingOverlay';
 /**
  * Class that generates Multi Page Calendar (each month on separate SVG)
@@ -51,158 +51,80 @@ export class MultiPageCalendar extends Calendar {
       format,
     );
 
+    this.controlsManager = new MultiPageControlsManager(this.controlsContainer, {
+      onDownloadCurrentPdf: this.onDownloadCurrentPdf,
+      onDownloadJpg: this.onDownloadJpg,
+      onCrop: this.onCrop,
+      onUploadImage: this.onUploadImage,
+      onDownloadAllPdf: this.onDownloadAllPdf,
+      onPrevMonth: this.onPrevMonth,
+      onNextMonth: this.onNextMonth,
+      onUploadMultipleImages: this.onUploadMultipleImages,
+    });
+
+    this.controlsManager.init();
+
     this.weekDaysNamesList = getWeekDays('long', this.lang);
 
     this.mockupOptions = new A_FormatMultiPageMockupOptions(format)[format];
 
-    if (Calendar.isNewType) {
-      this.createMultiPageControls(this.controlsContainer);
-    } else {
-      this.bindExistingMultiPageControls();
-    }
-
     this.initCacheEventsForMultiPage();
+
     this.createSVGMockup();
-  }
-
-  /**
-   * @property {Function} createMultiPageControls - Creates controls of multi page calendar in DOM
-   */
-  createMultiPageControls(controlsContainer: HTMLDivElement): void {
-    this.allPDFDownloadBtn = createHTMLElement({
-      elementName: 'button',
-      id: 'pdf-download-all',
-      content: icons.pdfMulti,
-      insertTo: {
-        element: controlsContainer,
-        position: 'afterbegin',
-      },
-    });
-
-    this.prevBtn = createHTMLElement({
-      elementName: 'button',
-      id: 'prev-month',
-      content: icons.prev,
-      insertTo: {
-        element: controlsContainer,
-        position: 'afterbegin',
-      },
-    });
-
-    this.multipleImagesInput = createHTMLElement({
-      elementName: 'input',
-      id: 'upload-multiple-input',
-      attributes: {
-        type: 'file',
-        multiple: 'multiple',
-        hidden: new Boolean(true).toString(),
-        accept: 'image/jpeg, image/png, image/jpg',
-        onclick: 'this.value=null;',
-      },
-      insertTo: {
-        element: controlsContainer,
-        position: 'beforeend',
-      },
-    });
-
-    this.uploadMultipleImgsBtn = createHTMLElement({
-      elementName: 'label',
-      id: 'upload-multiple',
-      content: icons.uploadMulti,
-      attributes: {
-        for: 'upload-multiple-input',
-      },
-      insertTo: {
-        element: controlsContainer,
-        position: 'beforeend',
-      },
-    });
-
-    this.nextBtn = createHTMLElement({
-      elementName: 'button',
-      id: 'next-month',
-      content: icons.next,
-      insertTo: {
-        element: controlsContainer,
-        position: 'beforeend',
-      },
-    });
-
-    this.initMultiPageControlsEvents();
-  }
-
-  /**
-   * @property {Function} bindExistingMultiPageControls - Reattach multi-page controls when calendar type unchanged
-   */
-  bindExistingMultiPageControls(): void {
-    this.allPDFDownloadBtn = this.rebindControl('pdf-download-all') as HTMLButtonElement;
-    this.prevBtn = this.rebindControl('prev-month') as HTMLButtonElement;
-    this.nextBtn = this.rebindControl('next-month') as HTMLButtonElement;
-    this.multipleImagesInput = this.rebindControl('upload-multiple-input') as HTMLInputElement;
-    this.uploadMultipleImgsBtn = this.rebindControl('upload-multiple') as HTMLLabelElement;
-    this.initMultiPageControlsEvents();
   }
 
   initCacheEventsForMultiPage() {
     this.cache.addEventListener('workStart', () => {
-      this.allPDFDownloadBtn.disabled = true;
-      this.multipleImagesInput.disabled = true;
+      (this.controlsManager as MultiPageControlsManager).setMultiPageState(false);
     });
 
     this.cache.addEventListener('workDone', () => {
-      this.allPDFDownloadBtn.disabled = false;
-      this.multipleImagesInput.disabled = false;
+      (this.controlsManager as MultiPageControlsManager).setMultiPageState(true);
     });
   }
 
-  /**
-   * @property {Function} initMultiPageControlsEvents - Adds events listener to controls buttons
-   * @returns {void}
-   */
-  initMultiPageControlsEvents(): void {
-    this.nextBtn.addEventListener('click', () => {
-      if (Calendar.cropper) {
-        Calendar.removeCropper();
-      }
+  onDownloadAllPdf = () => {
+    if (Calendar.cropper) {
+      Calendar.removeCropper();
+    }
 
-      this.currentMonth++;
+    this.downloadPDF(PDFPagesRangeToDownload.All);
+  };
 
-      if (this.currentMonth > 11) {
-        this.currentMonth = 0;
-      }
+  onPrevMonth = () => {
+    if (Calendar.cropper) {
+      Calendar.removeCropper();
+    }
 
-      this.setVisibleMonth();
-    });
+    this.currentMonth--;
+    if (this.currentMonth < 0) {
+      this.currentMonth = 11;
+    }
 
-    this.prevBtn.addEventListener('click', () => {
-      if (Calendar.cropper) {
-        Calendar.removeCropper();
-      }
+    this.setVisibleMonth();
+  };
 
-      this.currentMonth--;
-      if (this.currentMonth < 0) {
-        this.currentMonth = 11;
-      }
+  onNextMonth = () => {
+    if (Calendar.cropper) {
+      Calendar.removeCropper();
+    }
 
-      this.setVisibleMonth();
-    });
+    this.currentMonth++;
 
-    this.multipleImagesInput.addEventListener('change', (e) => {
-      if (Calendar.cropper) {
-        Calendar.removeCropper();
-      }
+    if (this.currentMonth > 11) {
+      this.currentMonth = 0;
+    }
 
-      this.uploadMultipleImages(e);
-    });
+    this.setVisibleMonth();
+  };
 
-    this.allPDFDownloadBtn.addEventListener('click', () => {
-      if (Calendar.cropper) {
-        Calendar.removeCropper();
-      }
+  onUploadMultipleImages = (e: Event) => {
+    if (Calendar.cropper) {
+      Calendar.removeCropper();
+    }
 
-      Calendar.downloadPDF(PDFPagesRangeToDownload.All);
-    });
-  }
+    this.uploadMultipleImages(e);
+  };
 
   /**
    * @property {Function} createSVGMockup - creates SVG mockup in DOM
@@ -434,7 +356,7 @@ export class MultiPageCalendar extends Calendar {
           });
 
           // Image optimization
-          const reduced = await Calendar.reduceImageSize(
+          const reduced = await this.reduceImageSize(
             reader.result as string,
             this.mockupOptions.imagePlaceholderWidth * this.imageReduceSizeRate,
             this.mockupOptions.imagePlaceholderHeight * this.imageReduceSizeRate,
@@ -465,18 +387,5 @@ export class MultiPageCalendar extends Calendar {
         }
       }
     }
-  }
-
-  /**
-   * Replace control in DOM with its clone to drop listeners from previous calendar instance.
-   */
-  private rebindControl(id: string): HTMLElement {
-    const element = this.controlsContainer.querySelector(`#${id}`);
-    if (!element) {
-      throw new Error(`Multi-page control #${id} not found in controls container`);
-    }
-    const newEl = element.cloneNode(true) as HTMLElement;
-    element.replaceWith(newEl);
-    return newEl;
   }
 }

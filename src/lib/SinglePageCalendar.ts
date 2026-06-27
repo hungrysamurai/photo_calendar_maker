@@ -6,6 +6,7 @@ import { createSVGElement } from './utils/DOM/createElement/createSVGElement';
 import { CalendarLanguage, CalendarType, FormatName } from '../types';
 
 import { A_FormatSinglePageMockupOptions } from '../assets/A_FormatOptions/A_FormatOptions';
+import { BasicControlsManager } from './entities/ControlsManager';
 import loadingOverlay from './entities/LoadingOverlay';
 import getDaysInMonth from './utils/getDaysInMonth';
 import getMonthFirstDay from './utils/getMonthFirstDay';
@@ -40,6 +41,15 @@ export class SinglePageCalendar extends Calendar {
       currentFont,
       format,
     );
+
+    this.controlsManager = new BasicControlsManager(this.controlsContainer, {
+      onDownloadCurrentPdf: this.onDownloadCurrentPdf,
+      onDownloadJpg: this.onDownloadJpg,
+      onCrop: this.onCrop,
+      onUploadImage: this.onUploadImage,
+    });
+
+    this.controlsManager.init();
 
     this.mockupOptions = new A_FormatSinglePageMockupOptions(format)[format];
 
