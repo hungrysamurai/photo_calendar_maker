@@ -18,22 +18,12 @@ import loadingOverlay from './entities/LoadingOverlay';
  * Class that generates Multi Page Calendar (each month on separate SVG)
  */
 export class MultiPageCalendar extends Calendar {
-  static _currentCalendar: MultiPageCalendar;
-
-  static get current(): MultiPageCalendar {
-    return MultiPageCalendar._currentCalendar;
-  }
-
-  static set current(calendar: MultiPageCalendar) {
-    MultiPageCalendar._currentCalendar = calendar;
-  }
-
   // Multi-page controls
-  static prevBtn: HTMLButtonElement;
-  static nextBtn: HTMLButtonElement;
-  static allPDFDownloadBtn: HTMLButtonElement;
-  static multipleImagesInput: HTMLInputElement;
-  static uploadMultipleImgsBtn: HTMLLabelElement;
+  prevBtn: HTMLButtonElement;
+  nextBtn: HTMLButtonElement;
+  allPDFDownloadBtn: HTMLButtonElement;
+  multipleImagesInput: HTMLInputElement;
+  uploadMultipleImgsBtn: HTMLLabelElement;
 
   mockupOptions: MultiPageMockupOutputOptions;
 
@@ -61,14 +51,14 @@ export class MultiPageCalendar extends Calendar {
       format,
     );
 
-    MultiPageCalendar.current = this;
     this.weekDaysNamesList = getWeekDays('long', this.lang);
 
     this.mockupOptions = new A_FormatMultiPageMockupOptions(format)[format];
 
     if (Calendar.isNewType) {
-      MultiPageCalendar.createMultiPageControls(this.controlsContainer);
-      MultiPageCalendar.initMultiPageControlsEvents();
+      this.createMultiPageControls(this.controlsContainer);
+    } else {
+      this.bindExistingMultiPageControls();
     }
 
     this.initCacheEventsForMultiPage();
@@ -78,7 +68,7 @@ export class MultiPageCalendar extends Calendar {
   /**
    * @property {Function} createMultiPageControls - Creates controls of multi page calendar in DOM
    */
-  static createMultiPageControls(controlsContainer: HTMLDivElement): void {
+  createMultiPageControls(controlsContainer: HTMLDivElement): void {
     this.allPDFDownloadBtn = createHTMLElement({
       elementName: 'button',
       id: 'pdf-download-all',
@@ -137,22 +127,48 @@ export class MultiPageCalendar extends Calendar {
         position: 'beforeend',
       },
     });
+
+    this.initMultiPageControlsEvents();
+  }
+
+  /**
+   * @property {Function} bindExistingMultiPageControls - Reattach multi-page controls when calendar type unchanged
+   */
+  bindExistingMultiPageControls(): void {
+    this.allPDFDownloadBtn = this.rebindControl('pdf-download-all') as HTMLButtonElement;
+    this.prevBtn = this.rebindControl('prev-month') as HTMLButtonElement;
+    this.nextBtn = this.rebindControl('next-month') as HTMLButtonElement;
+    this.multipleImagesInput = this.rebindControl('upload-multiple-input') as HTMLInputElement;
+    this.uploadMultipleImgsBtn = this.rebindControl('upload-multiple') as HTMLLabelElement;
+    this.initMultiPageControlsEvents();
+  }
+
+  initCacheEventsForMultiPage() {
+    this.cache.addEventListener('workStart', () => {
+      this.allPDFDownloadBtn.disabled = true;
+      this.multipleImagesInput.disabled = true;
+    });
+
+    this.cache.addEventListener('workDone', () => {
+      this.allPDFDownloadBtn.disabled = false;
+      this.multipleImagesInput.disabled = false;
+    });
   }
 
   /**
    * @property {Function} initMultiPageControlsEvents - Adds events listener to controls buttons
    * @returns {void}
    */
-  static initMultiPageControlsEvents(): void {
+  initMultiPageControlsEvents(): void {
     this.nextBtn.addEventListener('click', () => {
       if (Calendar.cropper) {
         Calendar.removeCropper();
       }
 
-      this.current.currentMonth++;
+      this.currentMonth++;
 
-      if (this.current.currentMonth > 11) {
-        this.current.currentMonth = 0;
+      if (this.currentMonth > 11) {
+        this.currentMonth = 0;
       }
 
       this.setVisibleMonth();
@@ -163,9 +179,9 @@ export class MultiPageCalendar extends Calendar {
         Calendar.removeCropper();
       }
 
-      this.current.currentMonth--;
-      if (this.current.currentMonth < 0) {
-        this.current.currentMonth = 11;
+      this.currentMonth--;
+      if (this.currentMonth < 0) {
+        this.currentMonth = 11;
       }
 
       this.setVisibleMonth();
@@ -188,18 +204,6 @@ export class MultiPageCalendar extends Calendar {
     });
   }
 
-  initCacheEventsForMultiPage() {
-    this.cache.addEventListener('workStart', () => {
-      MultiPageCalendar.allPDFDownloadBtn.disabled = true;
-      MultiPageCalendar.multipleImagesInput.disabled = true;
-    });
-
-    this.cache.addEventListener('workDone', () => {
-      MultiPageCalendar.allPDFDownloadBtn.disabled = false;
-      MultiPageCalendar.multipleImagesInput.disabled = false;
-    });
-  }
-
   /**
    * @property {Function} createSVGMockup - creates SVG mockup in DOM
    */
@@ -218,7 +222,7 @@ export class MultiPageCalendar extends Calendar {
       parentToAppend: this.calendarWrapper,
     });
 
-    MultiPageCalendar.setVisibleMonth();
+    this.setVisibleMonth();
 
     // Create months templates
     for (let i = 0; i < 12; i++) {
@@ -391,8 +395,8 @@ export class MultiPageCalendar extends Calendar {
   /**
    * @property {Function} setVisibleMonth - show current month mockup in DOM by translate calendarInner container by X axis
    */
-  static setVisibleMonth(): void {
-    this.current.calendarInner.style.transform = `translateX(calc(-8.333333% * ${this.current.currentMonth}))`;
+  setVisibleMonth(): void {
+    this.calendarInner.style.transform = `translateX(calc(-8.333333% * ${this.currentMonth}))`;
   }
 
   /**
@@ -400,7 +404,7 @@ export class MultiPageCalendar extends Calendar {
    * @param {e} e - Event Object object with files
    * @returns {void}
    */
-  static async uploadMultipleImages(e: Event): Promise<void> {
+  async uploadMultipleImages(e: Event): Promise<void> {
     if (e.target instanceof HTMLInputElement && e.target.files) {
       const files = [...e.target.files];
       let loadedFilesCounter = 0;
@@ -412,7 +416,7 @@ export class MultiPageCalendar extends Calendar {
 
         reader.readAsDataURL(files[i]);
         reader.onload = async () => {
-          const imageGroup = this.current.calendarInner.querySelector(
+          const imageGroup = this.calendarInner.querySelector(
             `#month-${i}-container #image-group`,
           ) as SVGGElement;
 
@@ -422,18 +426,18 @@ export class MultiPageCalendar extends Calendar {
             elementName: 'image',
             parentToAppend: imageGroup,
             attributes: {
-              height: this.current.mockupOptions.imagePlaceholderHeight.toString(),
-              width: this.current.mockupOptions.imagePlaceholderWidth.toString(),
-              x: this.current.mockupOptions.imagePlaceholderX.toString(),
-              y: this.current.mockupOptions.imagePlaceholderY.toString(),
+              height: this.mockupOptions.imagePlaceholderHeight.toString(),
+              width: this.mockupOptions.imagePlaceholderWidth.toString(),
+              x: this.mockupOptions.imagePlaceholderX.toString(),
+              y: this.mockupOptions.imagePlaceholderY.toString(),
             },
           });
 
           // Image optimization
           const reduced = await Calendar.reduceImageSize(
             reader.result as string,
-            this.current.mockupOptions.imagePlaceholderWidth * this.current.imageReduceSizeRate,
-            this.current.mockupOptions.imagePlaceholderHeight * this.current.imageReduceSizeRate,
+            this.mockupOptions.imagePlaceholderWidth * this.imageReduceSizeRate,
+            this.mockupOptions.imagePlaceholderHeight * this.imageReduceSizeRate,
           );
 
           const resultImage = reduced ? reduced : reader.result;
@@ -442,11 +446,11 @@ export class MultiPageCalendar extends Calendar {
 
           imageEl.setAttributeNS('http://www.w3.org/1999/xlink', 'href', resultImage as string);
 
-          this.current.cache.cacheMockup(
+          this.cache.cacheMockup(
             Calendar.getMockupByIndex(i),
             i,
-            Calendar.outputDimensions[this.current.format].width,
-            Calendar.outputDimensions[this.current.format].height,
+            Calendar.outputDimensions[this.format].width,
+            Calendar.outputDimensions[this.format].height,
           );
 
           loadedFilesCounter++;
@@ -461,5 +465,18 @@ export class MultiPageCalendar extends Calendar {
         }
       }
     }
+  }
+
+  /**
+   * Replace control in DOM with its clone to drop listeners from previous calendar instance.
+   */
+  private rebindControl(id: string): HTMLElement {
+    const element = this.controlsContainer.querySelector(`#${id}`);
+    if (!element) {
+      throw new Error(`Multi-page control #${id} not found in controls container`);
+    }
+    const newEl = element.cloneNode(true) as HTMLElement;
+    element.replaceWith(newEl);
+    return newEl;
   }
 }
