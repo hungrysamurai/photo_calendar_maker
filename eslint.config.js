@@ -13,7 +13,7 @@ export default tseslint.config(
     },
   },
   {
-    ignores: ['build', 'node_modules', 'eslint.config.js', '___temp', 'public'],
+    ignores: ['build', 'node_modules', 'eslint.config.js', '___temp', 'public', 'vite.config.js'],
   },
   js.configs.recommended,
   ...tseslint.configs.recommended,
