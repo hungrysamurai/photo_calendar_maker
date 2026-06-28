@@ -1,3 +1,5 @@
+import CachingWorker from './cachingWorker?worker&url';
+
 /**
  * Describes a task to be executed by a Web Worker.
  * @template TIn - The type of data to be passed to the worker.
@@ -25,7 +27,7 @@ type WorkUnit<TIn, TOut> = [
  * @template TOut - The type of data output from each worker.
  *
  */
-export default class WorkerPool<TIn, TOut> {
+export class WorkerPool<TIn, TOut> {
   /** The pool of currently idle workers. */
   private idleWorkers: Worker[] = [];
 
@@ -119,6 +121,7 @@ export default class WorkerPool<TIn, TOut> {
     } else {
       this.idleWorkers.push(worker);
     }
+    console.log(this.workQueue.length);
 
     if (error) {
       reject(error);
@@ -131,12 +134,18 @@ export default class WorkerPool<TIn, TOut> {
    * Terminates all workers.
    * Use this when the pool is no longer needed to free resources.
    */
-  public dispose() {
-    for (const worker of [...this.idleWorkers, ...this.workerMap.keys()]) {
-      worker.terminate();
-    }
-    this.idleWorkers = [];
-    this.workerMap.clear();
+  public clarQueue() {
     this.workQueue = [];
   }
+}
+
+let sharedWorkerPool: WorkerPool<CacheWorkerWork, Blob> | null = null;
+
+export default function getSharedWorkerPool(): WorkerPool<CacheWorkerWork, Blob> {
+  console.log(sharedWorkerPool);
+
+  if (!sharedWorkerPool) {
+    sharedWorkerPool = new WorkerPool(CachingWorker);
+  }
+  return sharedWorkerPool;
 }

@@ -20,8 +20,7 @@ import {
 import { BasicControlsManager, MultiPageControlsManager } from './entities/ControlsManager';
 import loadingOverlay from './entities/LoadingOverlay';
 import MockupsCache from './entities/MockupsCache/MockupsCache';
-import WorkerPool from './entities/WorkerPool/WorkerPool';
-import CachingWorker from './entities/WorkerPool/cachingWorker?worker&url';
+
 import { createSVGElement } from './utils/DOM/createElement/createSVGElement';
 import saveImageIDB from './utils/IDB/saveImageIDB';
 
@@ -39,7 +38,6 @@ export abstract class Calendar {
     Calendar._currentCalendar = calendar;
   }
 
-  workerPool: WorkerPool<CacheWorkerWork, Blob>;
   cache: MockupsCache;
 
   controlsManager: BasicControlsManager | MultiPageControlsManager;
@@ -89,8 +87,7 @@ export abstract class Calendar {
     public currentFont: FontArray,
     public format: FormatName,
   ) {
-    this.workerPool = new WorkerPool(CachingWorker);
-    this.cache = new MockupsCache(this.workerPool);
+    this.cache = new MockupsCache();
 
     // Add subfamilies to fonts object
     for (let i = 0; i < currentFont.length; i++) {
@@ -115,7 +112,6 @@ export abstract class Calendar {
 
       Calendar.initCropperControls(cropControlsContainer);
     } else {
-      Calendar.current.workerPool.dispose();
       Calendar.current.cache.reset();
     }
 
