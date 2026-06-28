@@ -1,11 +1,10 @@
+import { BasicControlsManager, MultiPageControlsManager } from './entities/ControlsManager';
 import ImageCropper from './entities/ImageCropper';
-
-import { getMonthsList } from './utils/getMonthsList';
+import loadingOverlay from './entities/LoadingOverlay';
+import MockupsCache from './entities/MockupsCache/MockupsCache';
+import UploadManager from './entities/UploadManager';
 
 import { A_outputFormats } from '../assets/A_FormatOptions/A_OutputDimensions';
-/**
- * Object with SVG icons
- */
 
 import {
   CalendarLanguage,
@@ -15,21 +14,20 @@ import {
   PDFPagesRangeToDownload,
 } from '../types';
 
-import { BasicControlsManager, MultiPageControlsManager } from './entities/ControlsManager';
-import loadingOverlay from './entities/LoadingOverlay';
-import MockupsCache from './entities/MockupsCache/MockupsCache';
-
 import { createSVGElement } from './utils/DOM/createElement/createSVGElement';
+import { getMonthsList } from './utils/getMonthsList';
 import saveImageIDB from './utils/IDB/saveImageIDB';
 
 export abstract class Calendar {
   cache: MockupsCache;
   controlsManager: BasicControlsManager | MultiPageControlsManager;
   imageCropper: ImageCropper;
+  uploadManager: UploadManager;
+
   /**
    * Dimensions of document (px)
    */
-  static outputDimensions: OutputDimensions = A_outputFormats;
+  outputDimensions: OutputDimensions = A_outputFormats;
 
   mockupOptions: SinglePageMockupOutputOptions | MultiPageMockupOutputOptions;
 
@@ -40,9 +38,6 @@ export abstract class Calendar {
   monthsNamesList: ReturnType<typeof getMonthsList>;
   monthCounter: number;
   firstMonth: number;
-
-  // Rate to reduce uploading images size
-  imageReduceSizeRate: number = 11.8;
 
   startYear: number;
   lastMonth: number;
@@ -66,16 +61,16 @@ export abstract class Calendar {
   ) {
     this.cache = new MockupsCache();
     this.imageCropper = new ImageCropper(cropControlsContainer, {
-      onBeforeStart: () => this.showLoader,
-      onCropperReady: () => this.hideLoader,
+      onBeforeStart: this.showLoader,
+      onCropperReady: this.hideLoader,
       onAfterRemove: () => this.cropControlsContainer.classList.add('hide'),
       saveImage: (resultUrl) => saveImageIDB(resultUrl, this.currentMonth),
       updateCache: (svgMockup) => {
         this.cache.cacheMockup(
           svgMockup,
           this.currentMonth,
-          Calendar.outputDimensions[this.format].width,
-          Calendar.outputDimensions[this.format].height,
+          this.outputDimensions[this.format].width,
+          this.outputDimensions[this.format].height,
         );
       },
     });
@@ -140,7 +135,7 @@ export abstract class Calendar {
       this.imageCropper.removeCropper();
     }
 
-    this.uploadImg(e);
+    this.uploadManager.uploadSingleImage(e);
   };
 
   // Show/hide loader
@@ -151,106 +146,6 @@ export abstract class Calendar {
 
   hideLoader(): void {
     loadingOverlay.hide();
-  }
-
-  // Upload/download section
-
-  /**
-   * @async
-   * @property {Function} uploadImg - Upload single image
-   * @param {e} e - Event object that fires when upload single image button pressed
-   */
-  async uploadImg(e: Event) {
-    if (e.target instanceof HTMLInputElement && e.target.files) {
-      const imageFile = e.target.files[0];
-      const reader = new FileReader();
-
-      this.showLoader();
-
-      reader.readAsDataURL(imageFile);
-      reader.onload = async () => {
-        const imageGroup = this.getCurrentMockup('#image-group');
-        imageGroup.innerHTML = '';
-
-        const imageEl = createSVGElement({
-          elementName: 'image',
-          attributes: {
-            height: this.mockupOptions.imagePlaceholderHeight.toString(),
-            width: this.mockupOptions.imagePlaceholderWidth.toString(),
-            x: this.mockupOptions.imagePlaceholderX.toString(),
-            y: this.mockupOptions.imagePlaceholderY.toString(),
-          },
-          parentToAppend: imageGroup,
-        });
-
-        // Image optimization
-        const reduced = await this.reduceImageSize(
-          reader.result as string,
-          this.mockupOptions.imagePlaceholderWidth * this.imageReduceSizeRate,
-          this.mockupOptions.imagePlaceholderHeight * this.imageReduceSizeRate,
-        );
-
-        const resultImage = reduced ? reduced : reader.result;
-        imageEl.setAttributeNS('http://www.w3.org/1999/xlink', 'href', resultImage as string);
-
-        // Save image to IDB
-        saveImageIDB(resultImage as string, this.currentMonth);
-
-        // Cache mockup after change
-        this.cache.cacheMockup(
-          this.getCurrentMockup('svg'),
-          this.currentMonth,
-          Calendar.outputDimensions[this.format].width,
-          Calendar.outputDimensions[this.format].height,
-        );
-
-        this.hideLoader();
-      };
-    }
-  }
-
-  /**
-   * @async
-   * @property {Function} reduceImageSize - Reduce image file size & resolution
-   * @param {string} base64Str - Base64 string - image file
-   * @param {number} maxWidth - max width of image is equal to width of svg-placeholder times imageReduceSizeRate
-   * @param {number} maxHeight - max height of image is equal to height of svg-placeholder times imageReduceSizeRate
-   */
-  async reduceImageSize(
-    base64Str: string,
-    maxWidth: number,
-    maxHeight: number,
-  ): Promise<void | string> {
-    return new Promise((resolve) => {
-      const img = new Image();
-      img.src = base64Str;
-      img.onload = () => {
-        let width = img.width;
-        let height = img.height;
-        if (width <= maxWidth && height <= maxHeight) {
-          // If resolution of image is less than actual placeholder size
-          resolve();
-        }
-        const canvas = document.createElement('canvas');
-        if (width > height) {
-          if (width > maxWidth) {
-            height *= maxWidth / width;
-            width = maxWidth;
-          }
-        } else {
-          if (height > maxHeight) {
-            width *= maxHeight / height;
-            height = maxHeight;
-          }
-        }
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext('2d') as CanvasRenderingContext2D;
-        ctx.drawImage(img, 0, 0, width, height);
-        // Return reduced image
-        resolve(canvas.toDataURL('image/png'));
-      };
-    });
   }
 
   /**
@@ -284,15 +179,15 @@ export abstract class Calendar {
 
       const image = await pdf.embedJpg(arrayBuffer);
       const page = pdf.addPage([
-        Calendar.outputDimensions[this.format].width,
-        Calendar.outputDimensions[this.format].height,
+        this.outputDimensions[this.format].width,
+        this.outputDimensions[this.format].height,
       ]);
 
       page.drawImage(image, {
         x: 0,
         y: 0,
-        width: Calendar.outputDimensions[this.format].width,
-        height: Calendar.outputDimensions[this.format].height,
+        width: this.outputDimensions[this.format].width,
+        height: this.outputDimensions[this.format].height,
       });
     }
 

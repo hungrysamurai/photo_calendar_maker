@@ -13,7 +13,7 @@ import getWeekDays from './utils/getWeekDays';
 import saveImageIDB from './utils/IDB/saveImageIDB';
 
 import { MultiPageControlsManager } from './entities/ControlsManager';
-import loadingOverlay from './entities/LoadingOverlay';
+import UploadManager from './entities/UploadManager';
 /**
  * Class that generates Multi Page Calendar (each month on separate SVG)
  */
@@ -61,6 +61,21 @@ export class MultiPageCalendar extends Calendar {
 
     this.mockupOptions = new A_FormatMultiPageMockupOptions(format)[format];
 
+    this.uploadManager = new UploadManager({
+      cache: this.cache,
+      format: this.format,
+      mockupOptions: this.mockupOptions,
+      outputDimensions: this.outputDimensions,
+      getCurrentMonth: () => this.currentMonth,
+      getCurrentMockup: this.getCurrentMockup.bind(this),
+      getMockupByIndex: this.getMockupByIndex.bind(this),
+      getImageGroupByIndex: (index) =>
+        this.calendarInner.querySelector(`#month-${index}-container #image-group`) as SVGGElement,
+      saveImage: (resultUrl, id) => saveImageIDB(resultUrl, id),
+      showLoader: this.showLoader.bind(this),
+      hideLoader: this.hideLoader.bind(this),
+    });
+
     this.createSVGMockup();
   }
 
@@ -103,14 +118,14 @@ export class MultiPageCalendar extends Calendar {
       this.imageCropper.removeCropper();
     }
 
-    this.uploadMultipleImages(e);
+    this.uploadManager.uploadMultipleImages(e);
   };
 
   /**
    * @property {Function} createSVGMockup - creates SVG mockup in DOM
    */
   async createSVGMockup(): Promise<void> {
-    loadingOverlay.show();
+    this.showLoader();
 
     this.calendarWrapper = createHTMLElement({
       elementName: 'div',
@@ -145,8 +160,8 @@ export class MultiPageCalendar extends Calendar {
         id: `mockup-${i}`,
         attributes: {
           viewBox: `0 0 ${this.mockupOptions.mockupWidth} ${this.mockupOptions.mockupHeight}`,
-          width: Calendar.outputDimensions[this.format].width.toString(),
-          height: Calendar.outputDimensions[this.format].height.toString(),
+          width: this.outputDimensions[this.format].width.toString(),
+          height: this.outputDimensions[this.format].height.toString(),
         },
       });
 
@@ -286,12 +301,12 @@ export class MultiPageCalendar extends Calendar {
       this.cache.cacheMockup(
         monthMockup,
         i,
-        Calendar.outputDimensions[this.format].width,
-        Calendar.outputDimensions[this.format].height,
+        this.outputDimensions[this.format].width,
+        this.outputDimensions[this.format].height,
       );
     }
 
-    loadingOverlay.hide();
+    this.hideLoader();
   }
 
   /**
@@ -299,73 +314,5 @@ export class MultiPageCalendar extends Calendar {
    */
   setVisibleMonth(): void {
     this.calendarInner.style.transform = `translateX(calc(-8.333333% * ${this.currentMonth}))`;
-  }
-
-  /**
-   * @property {Function} uploadMultipleImages - upload multiple images in calendar
-   * @param {e} e - Event Object object with files
-   * @returns {void}
-   */
-  async uploadMultipleImages(e: Event): Promise<void> {
-    if (e.target instanceof HTMLInputElement && e.target.files) {
-      const files = [...e.target.files];
-      let loadedFilesCounter = 0;
-
-      for (let i = 0; i < files.length; i++) {
-        const reader = new FileReader();
-
-        loadingOverlay.show();
-
-        reader.readAsDataURL(files[i]);
-        reader.onload = async () => {
-          const imageGroup = this.calendarInner.querySelector(
-            `#month-${i}-container #image-group`,
-          ) as SVGGElement;
-
-          imageGroup.innerHTML = '';
-
-          const imageEl = createSVGElement({
-            elementName: 'image',
-            parentToAppend: imageGroup,
-            attributes: {
-              height: this.mockupOptions.imagePlaceholderHeight.toString(),
-              width: this.mockupOptions.imagePlaceholderWidth.toString(),
-              x: this.mockupOptions.imagePlaceholderX.toString(),
-              y: this.mockupOptions.imagePlaceholderY.toString(),
-            },
-          });
-
-          // Image optimization
-          const reduced = await this.reduceImageSize(
-            reader.result as string,
-            this.mockupOptions.imagePlaceholderWidth * this.imageReduceSizeRate,
-            this.mockupOptions.imagePlaceholderHeight * this.imageReduceSizeRate,
-          );
-
-          const resultImage = reduced ? reduced : reader.result;
-
-          saveImageIDB(resultImage as string, i);
-
-          imageEl.setAttributeNS('http://www.w3.org/1999/xlink', 'href', resultImage as string);
-
-          this.cache.cacheMockup(
-            this.getMockupByIndex(i),
-            i,
-            Calendar.outputDimensions[this.format].width,
-            Calendar.outputDimensions[this.format].height,
-          );
-
-          loadedFilesCounter++;
-
-          if (loadedFilesCounter === files.length || loadedFilesCounter === 11) {
-            loadingOverlay.hide();
-          }
-        };
-
-        if (i === 11) {
-          break;
-        }
-      }
-    }
   }
 }

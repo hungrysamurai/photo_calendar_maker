@@ -7,10 +7,11 @@ import { CalendarLanguage, CalendarType, FormatName } from '../types';
 
 import { A_FormatSinglePageMockupOptions } from '../assets/A_FormatOptions/A_FormatOptions';
 import { BasicControlsManager } from './entities/ControlsManager';
-import loadingOverlay from './entities/LoadingOverlay';
+import UploadManager from './entities/UploadManager';
 import getDaysInMonth from './utils/getDaysInMonth';
 import getMonthFirstDay from './utils/getMonthFirstDay';
 import getWeekDays from './utils/getWeekDays';
+import saveImageIDB from './utils/IDB/saveImageIDB';
 
 /**
  * Class that generates Single Page Calendar (all months on one page)
@@ -53,6 +54,19 @@ export class SinglePageCalendar extends Calendar {
 
     this.mockupOptions = new A_FormatSinglePageMockupOptions(format)[format];
 
+    this.uploadManager = new UploadManager({
+      cache: this.cache,
+      format: this.format,
+      mockupOptions: this.mockupOptions,
+      outputDimensions: this.outputDimensions,
+      getCurrentMonth: () => this.currentMonth,
+      getCurrentMockup: this.getCurrentMockup.bind(this),
+      getMockupByIndex: this.getMockupByIndex.bind(this),
+      saveImage: (resultUrl, id) => saveImageIDB(resultUrl, id),
+      showLoader: this.showLoader.bind(this),
+      hideLoader: this.hideLoader.bind(this),
+    });
+
     this.weekDaysNamesList = getWeekDays('short', this.lang);
 
     this.createSVGMockup();
@@ -63,7 +77,7 @@ export class SinglePageCalendar extends Calendar {
    * @property {Function} createSVGMockup - creates SVG mockup in DOM
    */
   async createSVGMockup(): Promise<void> {
-    loadingOverlay.show();
+    this.showLoader();
 
     this.calendarWrapper = createHTMLElement({
       elementName: 'div',
@@ -79,11 +93,11 @@ export class SinglePageCalendar extends Calendar {
 
     const mockup = createSVGElement({
       elementName: 'svg',
-      id: 'mockup',
+      id: 'mockup-0',
       attributes: {
         viewBox: `0 0 ${this.mockupOptions.mockupWidth} ${this.mockupOptions.mockupHeight}`,
-        width: Calendar.outputDimensions[this.format].width.toString(),
-        height: Calendar.outputDimensions[this.format].height.toString(),
+        width: this.outputDimensions[this.format].width.toString(),
+        height: this.outputDimensions[this.format].height.toString(),
       },
     });
 
@@ -264,10 +278,10 @@ export class SinglePageCalendar extends Calendar {
     this.cache.cacheMockup(
       this.getCurrentMockup('svg'),
       0,
-      Calendar.outputDimensions[this.format].width,
-      Calendar.outputDimensions[this.format].height,
+      this.outputDimensions[this.format].width,
+      this.outputDimensions[this.format].height,
     );
 
-    loadingOverlay.hide();
+    this.hideLoader();
   }
 }
