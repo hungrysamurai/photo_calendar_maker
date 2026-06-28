@@ -72,16 +72,16 @@ export class MultiPageCalendar extends Calendar {
   }
 
   onDownloadAllPdf = () => {
-    if (Calendar.cropper) {
-      Calendar.removeCropper();
+    if (this.imageCropper.isActive) {
+      this.imageCropper.removeCropper();
     }
 
     this.downloadPDF(PDFPagesRangeToDownload.All);
   };
 
   onPrevMonth = () => {
-    if (Calendar.cropper) {
-      Calendar.removeCropper();
+    if (this.imageCropper.isActive) {
+      this.imageCropper.removeCropper();
     }
 
     this.currentMonth--;
@@ -93,10 +93,9 @@ export class MultiPageCalendar extends Calendar {
   };
 
   onNextMonth = () => {
-    if (Calendar.cropper) {
-      Calendar.removeCropper();
+    if (this.imageCropper.isActive) {
+      this.imageCropper.removeCropper();
     }
-
     this.currentMonth++;
 
     if (this.currentMonth > 11) {
@@ -107,8 +106,8 @@ export class MultiPageCalendar extends Calendar {
   };
 
   onUploadMultipleImages = (e: Event) => {
-    if (Calendar.cropper) {
-      Calendar.removeCropper();
+    if (this.imageCropper.isActive) {
+      this.imageCropper.removeCropper();
     }
 
     this.uploadMultipleImages(e);

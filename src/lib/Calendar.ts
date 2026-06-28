@@ -1,13 +1,11 @@
-import Cropper from 'cropperjs';
+import ImageCropper from './entities/ImageCropper';
 
-import { createHTMLElement } from './utils/DOM/createElement/createHTMLElement';
 import { getMonthsList } from './utils/getMonthsList';
 
 import { A_outputFormats } from '../assets/A_FormatOptions/A_OutputDimensions';
 /**
  * Object with SVG icons
  */
-import { icons } from '../assets/icons';
 
 import {
   CalendarLanguage,
@@ -40,18 +38,11 @@ export abstract class Calendar {
 
   cache: MockupsCache;
   controlsManager: BasicControlsManager | MultiPageControlsManager;
-
+  imageCropper: ImageCropper;
   /**
    * Dimensions of document (px)
    */
   static outputDimensions: OutputDimensions = A_outputFormats;
-
-  static cropperOuter: HTMLDivElement;
-  static cropper: Cropper | undefined;
-  static imageToCrop: SVGImageElement;
-  static tempCropImageElement: HTMLImageElement;
-  static applyCropBtn: HTMLButtonElement;
-  static cancelCropBtn: HTMLButtonElement;
 
   mockupOptions: SinglePageMockupOutputOptions | MultiPageMockupOutputOptions;
 
@@ -87,6 +78,20 @@ export abstract class Calendar {
     public format: FormatName,
   ) {
     this.cache = new MockupsCache();
+    this.imageCropper = new ImageCropper(cropControlsContainer, {
+      onBeforeStart: () => loadingOverlay.show(),
+      onCropperReady: () => loadingOverlay.hide(),
+      onAfterRemove: () => this.cropControlsContainer.classList.add('hide'),
+      saveImage: (resultUrl) => saveImageIDB(resultUrl, this.currentMonth),
+      updateCache: (svgMockup) => {
+        this.cache.cacheMockup(
+          svgMockup,
+          this.currentMonth,
+          Calendar.outputDimensions[this.format].width,
+          Calendar.outputDimensions[this.format].height,
+        );
+      },
+    });
 
     // Add subfamilies to fonts object
     for (let i = 0; i < currentFont.length; i++) {
@@ -108,8 +113,6 @@ export abstract class Calendar {
     if (!Calendar.current) {
       // First initialization
       loadingOverlay.mount(parentContainer, controlsContainer);
-
-      Calendar.initCropperControls(cropControlsContainer);
     } else {
       Calendar.current.cache.reset();
     }
@@ -131,39 +134,37 @@ export abstract class Calendar {
     });
   }
 
+  // Behaviorial callbacks
+
   onDownloadCurrentPdf = () => {
-    if (Calendar.cropper) {
-      Calendar.removeCropper();
+    if (this.imageCropper.isActive) {
+      this.imageCropper.removeCropper();
     }
 
     this.downloadPDF(PDFPagesRangeToDownload.Current);
   };
 
   onDownloadJpg = () => {
-    if (Calendar.cropper) {
-      Calendar.removeCropper();
+    if (this.imageCropper.isActive) {
+      this.imageCropper.removeCropper();
     }
 
     this.downloadCurrentJPG();
   };
 
   onCrop = () => {
-    if (Calendar.cropper) return;
+    if (this.imageCropper.isActive) return;
 
     const currentImageElement = Calendar.getCurrentMockup('image');
 
     if (currentImageElement) {
-      loadingOverlay.show();
-
-      Calendar.imageToCrop = currentImageElement as SVGImageElement;
-      Calendar.initCropper();
-      Calendar.current.cropControlsContainer.classList.remove('hide');
+      this.imageCropper.start(currentImageElement as SVGImageElement);
     }
   };
 
   onUploadImage = (e: InputEvent) => {
-    if (Calendar.cropper) {
-      Calendar.removeCropper();
+    if (this.imageCropper.isActive) {
+      this.imageCropper.removeCropper();
     }
     this.uploadImg(e);
   };
@@ -369,188 +370,6 @@ export abstract class Calendar {
     const monthName = date.toLocaleString('default', { month: 'long' });
 
     return `${monthName}_${year}`;
-  }
-
-  // Crop functionality section
-
-  /**
-   * @property {Function} initCropper - create Cropper object, initCropper on current svg mockup image element
-   */
-  static initCropper(): void {
-    const imageFile = this.imageToCrop.getAttribute('href') as string;
-
-    fetch(imageFile)
-      .then((res) => res.blob())
-      .then((imageFile) => {
-        // Position cropper element on top of placeholder
-        this.updateCropperPosition();
-
-        this.tempCropImageElement = createHTMLElement({
-          elementName: 'img',
-          className: 'image-element',
-          parentToAppend: this.cropperOuter,
-          attributes: {
-            src: URL.createObjectURL(imageFile),
-          },
-        });
-
-        this.imageToCrop.style.visibility = 'hidden';
-
-        this.cropper = new Cropper(this.tempCropImageElement, {
-          viewMode: 0,
-          dragMode: 'none',
-          modal: false,
-          background: false,
-          autoCropArea: 1,
-          ready: () => {
-            if (this.cropper) {
-              this.cropper.initialZoomRatio =
-                this.cropper.getCanvasData().width / this.cropper.getCanvasData().naturalWidth;
-            }
-
-            window.onresize = () => {
-              this.updateCropperPosition();
-            };
-            loadingOverlay.hide();
-          },
-
-          zoom: (e) => {
-            if (this.cropper) {
-              this.cropper.crop();
-              this.cropper.setAspectRatio(0);
-
-              this.cropper.setCropBoxData({
-                width: this.cropper.getContainerData().width,
-                height: this.cropper.getContainerData().height,
-              });
-
-              if (e.detail.ratio < e.detail.oldRatio) {
-                if (
-                  this.cropper.getCanvasData().width - 10 <
-                  this.cropper.initialCanvasData.width
-                ) {
-                  this.cropper.reset();
-                }
-              }
-
-              this.cropper.zoomRatio =
-                this.cropper.getCanvasData().width / this.cropper.getCanvasData().naturalWidth;
-
-              if (this.cropper.zoomRatio.toFixed(5) > this.cropper.initialZoomRatio.toFixed(5)) {
-                this.cropper.setDragMode('move');
-                this.cropper.options.viewMode = 3;
-              } else {
-                this.cropper.setDragMode('none');
-                this.cropper.options.viewMode = 0;
-              }
-            }
-          },
-        });
-      });
-  }
-
-  /**
-   * @property {Function} updateCropperPosition - Properly position Cropper element on top of image
-   * @param {HTMLElement} currentImageElement
-   */
-  static updateCropperPosition(): void {
-    if (this.cropperOuter) {
-      const { left, top, width, height } = this.imageToCrop.getBoundingClientRect();
-
-      this.cropperOuter.style.position = 'absolute';
-      this.cropperOuter.style.left = `${left}px`;
-      this.cropperOuter.style.top = `${top}px`;
-      this.cropperOuter.style.width = `${width}px`;
-      this.cropperOuter.style.height = `${height}px`;
-    }
-  }
-
-  /**
-   * @property {Fucntion} applyCrop - apply crop and save cropped image
-   */
-  static applyCrop(): void {
-    if (this.cropper) {
-      const canvas = this.cropper.getCroppedCanvas({
-        minWidth: 256,
-        minHeight: 256,
-        maxWidth: 4096,
-        maxHeight: 4096,
-        fillColor: 'white',
-      });
-
-      const ctx = canvas.getContext('2d', {
-        willReadFrequently: true,
-      }) as CanvasRenderingContext2D;
-      ctx.drawImage(canvas, 0, 0);
-
-      const resultURL = canvas.toDataURL('image/jpeg');
-
-      this.imageToCrop.setAttributeNS('http://www.w3.org/1999/xlink', 'href', resultURL);
-      // Save cropped image to IDB
-      saveImageIDB(resultURL, this.current.currentMonth);
-      // Get rid of cropper
-      this.removeCropper();
-
-      // Update cache
-      this.current.cache.cacheMockup(
-        this.getCurrentMockup('svg'),
-        this.current.currentMonth,
-        this.outputDimensions[this.current.format].width,
-        this.outputDimensions[this.current.format].height,
-      );
-    }
-  }
-
-  /**
-   * @property {Fucntion} removeCropper - deactivate and destroy Cropper and its DOM elements
-   */
-  static removeCropper(): void {
-    if (this.cropper) {
-      const currentImageElement = Calendar.getCurrentMockup('image');
-
-      currentImageElement.style.visibility = 'visible';
-      this.cropper.destroy();
-      this.cropper = undefined;
-      this.cropperOuter.innerHTML = '';
-
-      URL.revokeObjectURL(this.tempCropImageElement.src);
-      this.tempCropImageElement.remove();
-
-      this.current.cropControlsContainer.classList.add('hide');
-    }
-  }
-
-  /**
-   * @property {Function} initCropperControls - Create Cropper buttons in DOM
-   */
-  static initCropperControls(cropControlsContainer: HTMLDivElement): void {
-    this.cropperOuter = createHTMLElement({
-      elementName: 'div',
-      className: 'cropper-outer-container',
-      parentToAppend: document.body,
-    });
-
-    this.applyCropBtn = createHTMLElement({
-      elementName: 'button',
-      id: 'apply-crop',
-      content: icons.done,
-      parentToAppend: cropControlsContainer,
-    });
-
-    this.cancelCropBtn = createHTMLElement({
-      elementName: 'button',
-      id: 'cancel-crop',
-      content: icons.cancel,
-      parentToAppend: cropControlsContainer,
-    });
-
-    this.applyCropBtn.addEventListener('click', () => {
-      this.applyCrop();
-    });
-
-    this.cancelCropBtn.addEventListener('click', () => {
-      this.removeCropper();
-    });
   }
 
   /**

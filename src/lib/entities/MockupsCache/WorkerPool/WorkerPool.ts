@@ -141,8 +141,6 @@ export class WorkerPool<TIn, TOut> {
 let sharedWorkerPool: WorkerPool<CacheWorkerWork, Blob> | null = null;
 
 export default function getSharedWorkerPool(): WorkerPool<CacheWorkerWork, Blob> {
-  console.log(sharedWorkerPool);
-
   if (!sharedWorkerPool) {
     sharedWorkerPool = new WorkerPool(CachingWorker);
   }
