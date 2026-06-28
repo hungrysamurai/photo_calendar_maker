@@ -18,13 +18,6 @@ import loadingOverlay from './entities/LoadingOverlay';
  * Class that generates Multi Page Calendar (each month on separate SVG)
  */
 export class MultiPageCalendar extends Calendar {
-  // Multi-page controls
-  prevBtn: HTMLButtonElement;
-  nextBtn: HTMLButtonElement;
-  allPDFDownloadBtn: HTMLButtonElement;
-  multipleImagesInput: HTMLInputElement;
-  uploadMultipleImgsBtn: HTMLLabelElement;
-
   mockupOptions: MultiPageMockupOutputOptions;
 
   constructor(
@@ -356,7 +349,7 @@ export class MultiPageCalendar extends Calendar {
           imageEl.setAttributeNS('http://www.w3.org/1999/xlink', 'href', resultImage as string);
 
           this.cache.cacheMockup(
-            Calendar.getMockupByIndex(i),
+            this.getMockupByIndex(i),
             i,
             Calendar.outputDimensions[this.format].width,
             Calendar.outputDimensions[this.format].height,

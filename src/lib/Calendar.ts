@@ -22,20 +22,7 @@ import MockupsCache from './entities/MockupsCache/MockupsCache';
 import { createSVGElement } from './utils/DOM/createElement/createSVGElement';
 import saveImageIDB from './utils/IDB/saveImageIDB';
 
-/**
- * Class that includes basic logic of calendar grid creation, methods to init basic DOM elements, upload/download documents (single), caching mockups, Cropper functionality, image compression, saving to IndexedDB (single) and loader
- */
 export abstract class Calendar {
-  static _currentCalendar: Calendar;
-
-  static get current(): Calendar {
-    return Calendar._currentCalendar;
-  }
-
-  static set current(calendar: Calendar) {
-    Calendar._currentCalendar = calendar;
-  }
-
   cache: MockupsCache;
   controlsManager: BasicControlsManager | MultiPageControlsManager;
   imageCropper: ImageCropper;
@@ -79,8 +66,8 @@ export abstract class Calendar {
   ) {
     this.cache = new MockupsCache();
     this.imageCropper = new ImageCropper(cropControlsContainer, {
-      onBeforeStart: () => loadingOverlay.show(),
-      onCropperReady: () => loadingOverlay.hide(),
+      onBeforeStart: () => this.showLoader,
+      onCropperReady: () => this.hideLoader,
       onAfterRemove: () => this.cropControlsContainer.classList.add('hide'),
       saveImage: (resultUrl) => saveImageIDB(resultUrl, this.currentMonth),
       updateCache: (svgMockup) => {
@@ -92,6 +79,7 @@ export abstract class Calendar {
         );
       },
     });
+    loadingOverlay.mount(parentContainer, controlsContainer);
 
     // Add subfamilies to fonts object
     for (let i = 0; i < currentFont.length; i++) {
@@ -110,28 +98,13 @@ export abstract class Calendar {
     this.firstMonth = this.firstMonthIndex;
     this.startYear = this.year;
 
-    if (!Calendar.current) {
-      // First initialization
-      loadingOverlay.mount(parentContainer, controlsContainer);
-    } else {
-      Calendar.current.cache.reset();
-    }
-
     // Subscribe on cache events
     this.subscribeOnCacheEvents();
-
-    // Reassign current to newly created instance
-    Calendar.current = this;
   }
 
   subscribeOnCacheEvents() {
-    this.cache.addEventListener('workStart', () => {
-      loadingOverlay.show();
-    });
-
-    this.cache.addEventListener('workDone', () => {
-      loadingOverlay.hide();
-    });
+    this.cache.addEventListener('workStart', this.showLoader);
+    this.cache.addEventListener('workDone', this.hideLoader);
   }
 
   // Behaviorial callbacks
@@ -155,7 +128,7 @@ export abstract class Calendar {
   onCrop = () => {
     if (this.imageCropper.isActive) return;
 
-    const currentImageElement = Calendar.getCurrentMockup('image');
+    const currentImageElement = this.getCurrentMockup('image');
 
     if (currentImageElement) {
       this.imageCropper.start(currentImageElement as SVGImageElement);
@@ -166,8 +139,19 @@ export abstract class Calendar {
     if (this.imageCropper.isActive) {
       this.imageCropper.removeCropper();
     }
+
     this.uploadImg(e);
   };
+
+  // Show/hide loader
+
+  showLoader(): void {
+    loadingOverlay.show();
+  }
+
+  hideLoader(): void {
+    loadingOverlay.hide();
+  }
 
   // Upload/download section
 
@@ -181,11 +165,11 @@ export abstract class Calendar {
       const imageFile = e.target.files[0];
       const reader = new FileReader();
 
-      loadingOverlay.show();
+      this.showLoader();
 
       reader.readAsDataURL(imageFile);
       reader.onload = async () => {
-        const imageGroup = Calendar.getCurrentMockup('#image-group');
+        const imageGroup = this.getCurrentMockup('#image-group');
         imageGroup.innerHTML = '';
 
         const imageEl = createSVGElement({
@@ -214,13 +198,13 @@ export abstract class Calendar {
 
         // Cache mockup after change
         this.cache.cacheMockup(
-          Calendar.getCurrentMockup('svg'),
+          this.getCurrentMockup('svg'),
           this.currentMonth,
           Calendar.outputDimensions[this.format].width,
           Calendar.outputDimensions[this.format].height,
         );
 
-        loadingOverlay.hide();
+        this.hideLoader();
       };
     }
   }
@@ -286,7 +270,7 @@ export abstract class Calendar {
    * @param {string} range - single-page/all pages
    */
   async downloadPDF(range: PDFPagesRangeToDownload): Promise<void> {
-    loadingOverlay.show();
+    this.showLoader();
     const { PDFDocument } = await import('pdf-lib');
     const pdf = await PDFDocument.create();
 
@@ -321,7 +305,7 @@ export abstract class Calendar {
 
     this.downloadElement(blobURL, fileName);
 
-    loadingOverlay.hide();
+    this.hideLoader();
     URL.revokeObjectURL(blobURL);
   }
 
@@ -361,7 +345,7 @@ export abstract class Calendar {
       return `${firstMonthName}_${firstMonthYear}-${lastMonthName}_${lastMonthYear}`;
     }
 
-    const currentMonthContainer = Calendar.getCurrentMockup();
+    const currentMonthContainer = this.getCurrentMockup();
 
     const year = currentMonthContainer.dataset.year;
     const month = currentMonthContainer.dataset.month;
@@ -376,22 +360,22 @@ export abstract class Calendar {
    * @property {Function} getCurrentMockup - Get current mockup to manipulate
    * @param {string} [element=""] element - selector string to pick specific element e.g. 'image' or 'svg'
    */
-  static getCurrentMockup(element: string = ''): SVGElement | SVGImageElement {
-    if (this.current.type === CalendarType.MultiPage) {
-      return this.current.calendarInner.querySelector(
-        `#month-${this.current.currentMonth}-container ${element}`,
+  getCurrentMockup(element: string = ''): SVGElement | SVGImageElement {
+    if (this.type === CalendarType.MultiPage) {
+      return this.calendarInner.querySelector(
+        `#month-${this.currentMonth}-container ${element}`,
       ) as SVGElement;
     }
 
-    return this.current.calendarInner.querySelector(`#mockup-container ${element}`) as SVGElement;
+    return this.calendarInner.querySelector(`#mockup-container ${element}`) as SVGElement;
   }
 
   /**
    * @property {Function} getMockupByIndex - Get mockup to manipulate by index of month
    * @param {number} index
    */
-  static getMockupByIndex(index: number): SVGElement {
-    return this.current.calendarInner.querySelector(`#mockup-${index}`) as SVGElement;
+  getMockupByIndex(index: number): SVGElement {
+    return this.calendarInner.querySelector(`#mockup-${index}`) as SVGElement;
   }
 
   // Calendar grid generate section
@@ -589,6 +573,14 @@ export abstract class Calendar {
     });
 
     return dayGroup;
+  }
+
+  dispose(): void {
+    this.cache.reset();
+
+    // Unsubscribe from old cache events
+    this.cache.removeEventListener('workStart', this.showLoader);
+    this.cache.removeEventListener('workDone', this.hideLoader);
   }
 
   abstract createSVGMockup(): void;

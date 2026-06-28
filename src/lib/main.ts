@@ -14,6 +14,7 @@ import { CalendarType } from '../types';
 import initIDB from './utils/IDB/initIDB';
 import resetProjectIDB from './utils/IDB/resetProjectIDB';
 
+import { Calendar } from './Calendar';
 import {
   calendarContainer,
   controlsContainer,
@@ -31,6 +32,7 @@ import {
 } from './DOMElements';
 
 let loadedFonts: LoadedFontsObject;
+let activeCalendar: Calendar | null = null;
 
 /**
  * @property {Function} newProject - generate new calendar from inputs
@@ -71,10 +73,14 @@ const newCalendar: InitProjectFn = async function (
   { startYear, firstMonthIndex, lang, font, format, type },
   savedImages,
 ) {
+  if (activeCalendar) {
+    activeCalendar.dispose();
+  }
+
   const currentFont: FontArray = loadedFonts[font];
 
   if (type === CalendarType.MultiPage) {
-    new MultiPageCalendar(
+    activeCalendar = new MultiPageCalendar(
       firstMonthIndex,
       startYear,
       calendarContainer,
@@ -87,7 +93,7 @@ const newCalendar: InitProjectFn = async function (
       savedImages,
     );
   } else {
-    new SinglePageCalendar(
+    activeCalendar = new SinglePageCalendar(
       firstMonthIndex,
       startYear,
       calendarContainer,

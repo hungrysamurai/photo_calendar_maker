@@ -102,7 +102,7 @@ export class BasicControlsManager extends ControlsManager {
     });
 
     this.uploadImgInput.addEventListener('input', (event) => {
-      this.callbacks.onUploadImage(event);
+      this.callbacks.onUploadImage(event as InputEvent);
     });
   }
 }

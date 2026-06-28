@@ -262,7 +262,7 @@ export class SinglePageCalendar extends Calendar {
     }
 
     this.cache.cacheMockup(
-      Calendar.getCurrentMockup('svg'),
+      this.getCurrentMockup('svg'),
       0,
       Calendar.outputDimensions[this.format].width,
       Calendar.outputDimensions[this.format].height,
