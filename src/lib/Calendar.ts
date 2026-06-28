@@ -39,7 +39,6 @@ export abstract class Calendar {
   }
 
   cache: MockupsCache;
-
   controlsManager: BasicControlsManager | MultiPageControlsManager;
 
   /**
@@ -116,19 +115,19 @@ export abstract class Calendar {
     }
 
     // Subscribe on cache events
-    this.initCacheEvents();
+    this.subscribeOnCacheEvents();
 
     // Reassign current to newly created instance
     Calendar.current = this;
   }
 
-  initCacheEvents() {
+  subscribeOnCacheEvents() {
     this.cache.addEventListener('workStart', () => {
-      this.controlsManager.setControlsState(false);
+      loadingOverlay.show();
     });
 
     this.cache.addEventListener('workDone', () => {
-      this.controlsManager.setControlsState(true);
+      loadingOverlay.hide();
     });
   }
 
@@ -144,7 +143,6 @@ export abstract class Calendar {
     if (Calendar.cropper) {
       Calendar.removeCropper();
     }
-    console.log(this);
 
     this.downloadCurrentJPG();
   };

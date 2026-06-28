@@ -121,7 +121,6 @@ export class WorkerPool<TIn, TOut> {
     } else {
       this.idleWorkers.push(worker);
     }
-    console.log(this.workQueue.length);
 
     if (error) {
       reject(error);

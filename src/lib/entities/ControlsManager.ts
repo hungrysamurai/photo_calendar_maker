@@ -105,14 +105,6 @@ export class BasicControlsManager extends ControlsManager {
       this.callbacks.onUploadImage(event);
     });
   }
-
-  setControlsState(enabled: boolean): void {
-    this.currentPDFDownloadBtn.disabled = !enabled;
-    this.jpgDownloadBtn.disabled = !enabled;
-    this.cropBtn.disabled = !enabled;
-    this.uploadImgInput.disabled = !enabled;
-    this.uploadImgBtn.classList.toggle('disabled', !enabled);
-  }
 }
 
 export class MultiPageControlsManager extends BasicControlsManager {
@@ -209,10 +201,5 @@ export class MultiPageControlsManager extends BasicControlsManager {
     this.multipleImagesInput.addEventListener('change', (event) => {
       this.callbacks.onUploadMultipleImages(event);
     });
-  }
-
-  setMultiPageState(enabled: boolean): void {
-    this.allPDFDownloadBtn.disabled = !enabled;
-    this.multipleImagesInput.disabled = !enabled;
   }
 }

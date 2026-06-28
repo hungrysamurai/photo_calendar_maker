@@ -68,19 +68,7 @@ export class MultiPageCalendar extends Calendar {
 
     this.mockupOptions = new A_FormatMultiPageMockupOptions(format)[format];
 
-    this.initCacheEventsForMultiPage();
-
     this.createSVGMockup();
-  }
-
-  initCacheEventsForMultiPage() {
-    this.cache.addEventListener('workStart', () => {
-      (this.controlsManager as MultiPageControlsManager).setMultiPageState(false);
-    });
-
-    this.cache.addEventListener('workDone', () => {
-      (this.controlsManager as MultiPageControlsManager).setMultiPageState(true);
-    });
   }
 
   onDownloadAllPdf = () => {
