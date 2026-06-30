@@ -38,7 +38,6 @@ export abstract class Calendar {
 
   currentMonth: number = 0;
   monthsNamesList: ReturnType<typeof getMonthsList>;
-  monthCounter: number;
 
   firstMonth: number;
   startYear: number;
@@ -84,15 +83,10 @@ export abstract class Calendar {
         currentFont[i];
     }
     this.monthsNamesList = getMonthsList(this.lang);
-    /**
-     * Counter of months
-     */
-    this.monthCounter = this.firstMonthIndex;
-
     this.firstMonth = this.firstMonthIndex;
     this.startYear = this.year;
     this.lastMonth = (this.firstMonth + 11) % 12;
-    console.log(this.lastMonth);
+    this.endYear = this.firstMonth === 0 ? this.startYear : this.startYear + 1;
 
     // Subscribe on cache events
     this.subscribeOnCacheEvents();

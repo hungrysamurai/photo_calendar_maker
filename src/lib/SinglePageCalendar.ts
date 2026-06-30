@@ -162,6 +162,8 @@ export class SinglePageCalendar extends Calendar {
     let x = this.mockupOptions.calendarGridLeftIndent;
     let y = this.mockupOptions.calendarGridTopIndent;
 
+    let monthCounter = this.firstMonthIndex;
+
     // Global loop
     for (let i = 0; i < 12; i++) {
       // if new row...
@@ -180,7 +182,7 @@ export class SinglePageCalendar extends Calendar {
           y: y.toString(),
           width: this.mockupOptions.monthCellWidth.toString(),
           height: this.mockupOptions.monthCellHeight.toString(),
-          ['data-month']: this.monthCounter.toString(),
+          ['data-month']: monthCounter.toString(),
           ['data-year']: this.year.toString(),
         },
       });
@@ -193,7 +195,7 @@ export class SinglePageCalendar extends Calendar {
         id: 'month-title',
         parentToAppend: monthContainer,
         content: this.getOutline(
-          this.monthsNamesList[this.monthCounter],
+          this.monthsNamesList[monthCounter],
           this.mockupOptions.monthTitleX,
           this.mockupOptions.monthTitleY,
           this.mockupOptions.monthTitleFontSize,
@@ -248,22 +250,18 @@ export class SinglePageCalendar extends Calendar {
         });
       });
 
-      if (i === 11) {
-        this.endYear = this.year;
-      }
+      monthCounter++;
 
-      this.monthCounter++;
-
-      if (this.monthCounter > 11) {
-        this.monthCounter = 0;
+      if (monthCounter > 11) {
+        monthCounter = 0;
         this.year++;
       }
 
       this.createMonthGrid(
         currentMonthGrid,
-        getMonthFirstDay(this.monthCounter - 1, this.year) - 1,
-        getDaysInMonth(this.monthCounter, this.year),
-        getDaysInMonth(this.monthCounter - 1, this.year) - 1,
+        getMonthFirstDay(monthCounter - 1, this.year) - 1,
+        getDaysInMonth(monthCounter, this.year),
+        getDaysInMonth(monthCounter - 1, this.year) - 1,
         this.mockupOptions.calendarGridX,
         this.mockupOptions.calendarGridY,
         this.mockupOptions.daysFontSize,

@@ -33,7 +33,7 @@ export default class DownloadManager {
       const date1 = new Date(Number(firstMonthYear), Number(firstMonth));
       const firstMonthName = date1.toLocaleString('default', { month: 'long' });
 
-      const lastMonth = this.lastMonth;
+      const lastMonth = this.options.calendarEndYear;
       const lastMonthYear = this.options.calendarEndYear;
 
       const date2 = new Date(+lastMonthYear, +lastMonth);

@@ -141,6 +141,8 @@ export class MultiPageCalendar extends Calendar {
 
     this.setVisibleMonth();
 
+    let monthCounter = this.firstMonthIndex;
+
     // Create months templates
     for (let i = 0; i < 12; i++) {
       const monthContainer = createHTMLElement({
@@ -149,7 +151,7 @@ export class MultiPageCalendar extends Calendar {
         id: `month-${i}-container`,
         parentToAppend: this.calendarInner,
         attributes: {
-          ['data-month']: this.monthCounter.toString(),
+          ['data-month']: monthCounter.toString(),
           ['data-year']: this.year.toString(),
         },
       });
@@ -187,7 +189,7 @@ export class MultiPageCalendar extends Calendar {
         id: `#month-title-${i}`,
         parentToAppend: monthTextGroup,
         content: this.getOutline(
-          this.monthsNamesList[this.monthCounter],
+          this.monthsNamesList[monthCounter],
           this.mockupOptions.monthTitleX,
           this.mockupOptions.monthTitleY,
           this.mockupOptions.monthTitleFontSize,
@@ -275,22 +277,18 @@ export class MultiPageCalendar extends Calendar {
         });
       }
 
-      if (i === 11) {
-        this.endYear = this.year;
-      }
+      monthCounter++;
 
-      this.monthCounter++;
-
-      if (this.monthCounter > 11) {
-        this.monthCounter = 0;
+      if (monthCounter > 11) {
+        monthCounter = 0;
         this.year++;
       }
 
       this.createMonthGrid(
         monthTextGroup,
-        getMonthFirstDay(this.monthCounter - 1, this.year) - 1,
-        getDaysInMonth(this.monthCounter, this.year),
-        getDaysInMonth(this.monthCounter - 1, this.year),
+        getMonthFirstDay(monthCounter - 1, this.year) - 1,
+        getDaysInMonth(monthCounter, this.year),
+        getDaysInMonth(monthCounter - 1, this.year),
         this.mockupOptions.calendarGridX,
         this.mockupOptions.calendarGridY,
         this.mockupOptions.daysFontSize,
