@@ -276,7 +276,6 @@ export class MultiPageCalendar extends Calendar {
       }
 
       if (i === 11) {
-        this.lastMonth = this.monthCounter;
         this.endYear = this.year;
       }
 

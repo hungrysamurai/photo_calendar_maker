@@ -14,6 +14,7 @@ import {
   PDFPagesRangeToDownload,
 } from '../types';
 
+import DownloadManager from './entities/DownloadManager';
 import { createSVGElement } from './utils/DOM/createElement/createSVGElement';
 import { getMonthsList } from './utils/getMonthsList';
 import saveImageIDB from './utils/IDB/saveImageIDB';
@@ -23,6 +24,7 @@ export abstract class Calendar {
   controlsManager: BasicControlsManager | MultiPageControlsManager;
   imageCropper: ImageCropper;
   uploadManager: UploadManager;
+  downloadManager: DownloadManager;
 
   /**
    * Dimensions of document (px)
@@ -37,8 +39,8 @@ export abstract class Calendar {
   currentMonth: number = 0;
   monthsNamesList: ReturnType<typeof getMonthsList>;
   monthCounter: number;
-  firstMonth: number;
 
+  firstMonth: number;
   startYear: number;
   lastMonth: number;
   endYear: number;
@@ -87,11 +89,10 @@ export abstract class Calendar {
      */
     this.monthCounter = this.firstMonthIndex;
 
-    /**
-     * Capture initial first month & year
-     */
     this.firstMonth = this.firstMonthIndex;
     this.startYear = this.year;
+    this.lastMonth = (this.firstMonth + 11) % 12;
+    console.log(this.lastMonth);
 
     // Subscribe on cache events
     this.subscribeOnCacheEvents();
@@ -149,10 +150,10 @@ export abstract class Calendar {
   }
 
   /**
-   * @async
+   *
    * @property {Function} downloadCurrentJPG - Download current (visible) svg mockup
    */
-  async downloadCurrentJPG(): Promise<void> {
+  downloadCurrentJPG(): void {
     const url = URL.createObjectURL(this.cache.cachedMockups[this.currentMonth]);
     const fileName = this.getFileName();
 

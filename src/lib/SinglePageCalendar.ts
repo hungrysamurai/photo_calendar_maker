@@ -249,7 +249,6 @@ export class SinglePageCalendar extends Calendar {
       });
 
       if (i === 11) {
-        this.lastMonth = this.monthCounter;
         this.endYear = this.year;
       }
 
