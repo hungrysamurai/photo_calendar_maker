@@ -13,6 +13,7 @@ import getWeekDays from './utils/getWeekDays';
 import saveImageIDB from './utils/IDB/saveImageIDB';
 
 import { MultiPageControlsManager } from './entities/ControlsManager';
+import DownloadManager from './entities/DownloadManager';
 import UploadManager from './entities/UploadManager';
 /**
  * Class that generates Multi Page Calendar (each month on separate SVG)
@@ -76,6 +77,21 @@ export class MultiPageCalendar extends Calendar {
       hideLoader: this.hideLoader.bind(this),
     });
 
+    this.downloadManager = new DownloadManager({
+      cache: this.cache,
+      calendarType: this.type,
+      calendarFirstMonth: this.firstMonth,
+      calendarStartYear: this.startYear,
+      calendarLastMonth: this.lastMonth,
+      calendarEndYear: this.endYear,
+      format: this.format,
+      outputDimensions: this.outputDimensions,
+      getCurrentMonth: () => this.currentMonth,
+      getCurrentMockup: this.getCurrentMockup.bind(this),
+      showLoader: this.showLoader.bind(this),
+      hideLoader: this.hideLoader.bind(this),
+    });
+
     this.createSVGMockup();
   }
 
@@ -84,7 +100,7 @@ export class MultiPageCalendar extends Calendar {
       this.imageCropper.removeCropper();
     }
 
-    this.downloadPDF(PDFPagesRangeToDownload.All);
+    this.downloadManager.downloadPDF(PDFPagesRangeToDownload.All);
   };
 
   onPrevMonth = () => {

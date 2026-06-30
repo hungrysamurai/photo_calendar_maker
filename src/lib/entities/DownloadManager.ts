@@ -1,4 +1,4 @@
-import { CalendarType } from '../../types';
+import { CalendarType, FormatName, PDFPagesRangeToDownload } from '../../types';
 import MockupsCache from './MockupsCache/MockupsCache';
 
 export type DownloadManagerOptions = {
@@ -8,6 +8,9 @@ export type DownloadManagerOptions = {
   calendarStartYear: number;
   calendarLastMonth: number;
   calendarEndYear: number;
+  format: FormatName;
+  outputDimensions: OutputDimensions;
+  getCurrentMonth: () => number;
   getCurrentMockup: (element?: string) => SVGElement | SVGImageElement;
   showLoader: () => void;
   hideLoader: () => void;
@@ -16,14 +19,56 @@ export type DownloadManagerOptions = {
 export default class DownloadManager {
   constructor(private options: DownloadManagerOptions) {}
 
-  public downloadCurrentJPG(monthIndex: number): void {
+  public downloadCurrentJPG(): void {
+    const monthIndex = this.options.getCurrentMonth();
     const url = URL.createObjectURL(this.options.cache.cachedMockups[monthIndex]);
     const fileName = this.getFileName();
 
     this.downloadElement(url, fileName);
   }
 
-  public async downloadPDF() {}
+  public async downloadPDF(range: PDFPagesRangeToDownload): Promise<void> {
+    this.options.showLoader();
+
+    const { PDFDocument } = await import('pdf-lib');
+    const pdf = await PDFDocument.create();
+
+    const monthIndex = this.options.getCurrentMonth();
+
+    const pagesToDownload =
+      range === PDFPagesRangeToDownload.All
+        ? this.options.cache.cachedMockups
+        : [this.options.cache.cachedMockups[monthIndex]];
+
+    for (const blob of pagesToDownload) {
+      const arrayBuffer = await blob.arrayBuffer();
+
+      const image = await pdf.embedJpg(arrayBuffer);
+      const page = pdf.addPage([
+        this.options.outputDimensions[this.options.format].width,
+        this.options.outputDimensions[this.options.format].height,
+      ]);
+
+      page.drawImage(image, {
+        x: 0,
+        y: 0,
+        width: this.options.outputDimensions[this.options.format].width,
+        height: this.options.outputDimensions[this.options.format].height,
+      });
+    }
+
+    const arrayBuffer = (await pdf.save()) as Uint8Array<ArrayBuffer>;
+
+    const blob = new Blob([arrayBuffer], { type: 'application/pdf' });
+    const blobURL = URL.createObjectURL(blob);
+
+    const fileName = this.getFileName(range === PDFPagesRangeToDownload.All);
+
+    this.downloadElement(blobURL, fileName);
+
+    this.options.hideLoader();
+    URL.revokeObjectURL(blobURL);
+  }
 
   private getFileName(span?: boolean): string {
     if (span || this.options.calendarType === CalendarType.SinglePage) {
@@ -33,7 +78,7 @@ export default class DownloadManager {
       const date1 = new Date(Number(firstMonthYear), Number(firstMonth));
       const firstMonthName = date1.toLocaleString('default', { month: 'long' });
 
-      const lastMonth = this.options.calendarEndYear;
+      const lastMonth = this.options.calendarLastMonth;
       const lastMonthYear = this.options.calendarEndYear;
 
       const date2 = new Date(+lastMonthYear, +lastMonth);

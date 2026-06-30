@@ -7,6 +7,7 @@ import { CalendarLanguage, CalendarType, FormatName } from '../types';
 
 import { A_FormatSinglePageMockupOptions } from '../assets/A_FormatOptions/A_FormatOptions';
 import { BasicControlsManager } from './entities/ControlsManager';
+import DownloadManager from './entities/DownloadManager';
 import UploadManager from './entities/UploadManager';
 import getDaysInMonth from './utils/getDaysInMonth';
 import getMonthFirstDay from './utils/getMonthFirstDay';
@@ -63,8 +64,23 @@ export class SinglePageCalendar extends Calendar {
       getCurrentMockup: this.getCurrentMockup.bind(this),
       getMockupByIndex: this.getMockupByIndex.bind(this),
       saveImage: (resultUrl, id) => saveImageIDB(resultUrl, id),
-      showLoader: this.showLoader.bind(this),
-      hideLoader: this.hideLoader.bind(this),
+      showLoader: this.showLoader,
+      hideLoader: this.hideLoader,
+    });
+
+    this.downloadManager = new DownloadManager({
+      cache: this.cache,
+      calendarType: this.type,
+      calendarFirstMonth: this.firstMonth,
+      calendarStartYear: this.startYear,
+      calendarLastMonth: this.lastMonth,
+      calendarEndYear: this.endYear,
+      format: this.format,
+      outputDimensions: this.outputDimensions,
+      getCurrentMonth: () => this.currentMonth,
+      getCurrentMockup: this.getCurrentMockup.bind(this),
+      showLoader: this.showLoader,
+      hideLoader: this.hideLoader,
     });
 
     this.weekDaysNamesList = getWeekDays('short', this.lang);

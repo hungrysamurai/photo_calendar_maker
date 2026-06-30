@@ -104,7 +104,7 @@ export abstract class Calendar {
       this.imageCropper.removeCropper();
     }
 
-    this.downloadPDF(PDFPagesRangeToDownload.Current);
+    this.downloadManager.downloadPDF(PDFPagesRangeToDownload.Current);
   };
 
   onDownloadJpg = () => {
@@ -112,7 +112,7 @@ export abstract class Calendar {
       this.imageCropper.removeCropper();
     }
 
-    this.downloadCurrentJPG();
+    this.downloadManager.downloadCurrentJPG();
   };
 
   onCrop = () => {
@@ -135,116 +135,15 @@ export abstract class Calendar {
 
   // Show/hide loader
 
-  showLoader(): void {
+  showLoader = (): void => {
     loadingOverlay.show();
-  }
+  };
 
-  hideLoader(): void {
-    loadingOverlay.hide();
-  }
-
-  /**
-   *
-   * @property {Function} downloadCurrentJPG - Download current (visible) svg mockup
-   */
-  downloadCurrentJPG(): void {
-    const url = URL.createObjectURL(this.cache.cachedMockups[this.currentMonth]);
-    const fileName = this.getFileName();
-
-    this.downloadElement(url, fileName);
-  }
-
-  /**
-   * @async
-   * @property {Function} downloadPDF - download as PDF
-   * @param {string} range - single-page/all pages
-   */
-  async downloadPDF(range: PDFPagesRangeToDownload): Promise<void> {
-    this.showLoader();
-    const { PDFDocument } = await import('pdf-lib');
-    const pdf = await PDFDocument.create();
-
-    const pagesToDownload =
-      range === PDFPagesRangeToDownload.All
-        ? this.cache.cachedMockups
-        : [this.cache.cachedMockups[this.currentMonth]];
-
-    for (const blob of pagesToDownload) {
-      const arrayBuffer = await blob.arrayBuffer();
-
-      const image = await pdf.embedJpg(arrayBuffer);
-      const page = pdf.addPage([
-        this.outputDimensions[this.format].width,
-        this.outputDimensions[this.format].height,
-      ]);
-
-      page.drawImage(image, {
-        x: 0,
-        y: 0,
-        width: this.outputDimensions[this.format].width,
-        height: this.outputDimensions[this.format].height,
-      });
+  hideLoader = (): void => {
+    if (this.cache.state === 'idle') {
+      loadingOverlay.hide();
     }
-
-    const arrayBuffer = (await pdf.save()) as Uint8Array<ArrayBuffer>;
-
-    const blob = new Blob([arrayBuffer], { type: 'application/pdf' });
-    const blobURL = URL.createObjectURL(blob);
-
-    const fileName = this.getFileName(range === PDFPagesRangeToDownload.All);
-
-    this.downloadElement(blobURL, fileName);
-
-    this.hideLoader();
-    URL.revokeObjectURL(blobURL);
-  }
-
-  /**
-   * @property {Fucntion} downloadElement - create link element, download object, destroy link element
-   * @param {string} elementURL - URL of blob or canvas to download
-   * @param {string} fileName
-   */
-  downloadElement(elementURL: string, fileName: string): void {
-    const a = document.createElement('a');
-    a.download = fileName;
-    a.href = elementURL;
-    a.click();
-    a.remove();
-  }
-
-  /**
-   * @property {Function} getFileName - Generates name of file
-   * @param {boolean} span
-   */
-  getFileName(span?: boolean): string {
-    if (span || this.type === CalendarType.SinglePage) {
-      const firstMonth = this.firstMonth;
-      const firstMonthYear = this.startYear;
-
-      const date1 = new Date(Number(firstMonthYear), Number(firstMonth));
-      const firstMonthName = date1.toLocaleString('default', { month: 'long' });
-
-      const lastMonth = this.lastMonth;
-      const lastMonthYear = this.endYear;
-
-      const date2 = new Date(+lastMonthYear, +lastMonth);
-      const lastMonthName = date2.toLocaleString('default', {
-        month: 'long',
-      });
-
-      return `${firstMonthName}_${firstMonthYear}-${lastMonthName}_${lastMonthYear}`;
-    }
-
-    const currentMonthContainer = this.getCurrentMockup();
-
-    const year = currentMonthContainer.dataset.year;
-    const month = currentMonthContainer.dataset.month;
-
-    const date = new Date(Number(year), Number(month));
-    const monthName = date.toLocaleString('default', { month: 'long' });
-
-    return `${monthName}_${year}`;
-  }
+  };
 
   /**
    * @property {Function} getCurrentMockup - Get current mockup to manipulate
