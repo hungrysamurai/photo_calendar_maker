@@ -35,12 +35,18 @@ export default class MockupsCache extends EventTarget {
     return this.mockupsCache;
   }
 
+  setRetrievedMockup(i: number, mockup: Blob) {
+    this.mockupsCache[i] = mockup;
+  }
+
   /**
    * Dispatches a custom event reflecting the current cache state.
    *
    * @param {MockupCacheEventType} eventType - The type of state event ("workStart" | "workDone").
    */
   private dispatchOnStateChange(eventType: MockupCacheEventType) {
+    console.log(eventType);
+
     this.dispatchEvent(new CustomEvent(eventType));
   }
 
@@ -59,15 +65,15 @@ export default class MockupsCache extends EventTarget {
       this.state = 'work';
       this.dispatchOnStateChange('workStart');
     }
-
+    let blob: Blob;
     try {
-      await this.cacheWithWorkers(mockupToCache, index, width, heigth);
+      blob = await this.cacheWithWorkers(mockupToCache, index, width, heigth);
       this.cachingsInProgress--;
     } catch (err) {
       console.log(err);
 
       const canvas = await this.SVGToCanvas(mockupToCache, width, heigth);
-      const blob = await this.canvasToBlob(canvas);
+      blob = await this.canvasToBlob(canvas);
       this.mockupsCache[index] = blob;
 
       this.cachingsInProgress--;
@@ -76,6 +82,8 @@ export default class MockupsCache extends EventTarget {
       this.state = 'idle';
       this.dispatchOnStateChange('workDone');
     }
+
+    return blob;
   }
 
   /**
@@ -109,10 +117,14 @@ export default class MockupsCache extends EventTarget {
       resizeWidth: width,
     });
 
-    this.mockupsCache[index] = await this.cachingWorkersPool.addWork({
+    const blob = await this.cachingWorkersPool.addWork({
       data: { bmp },
       transfer: [bmp],
     });
+
+    this.mockupsCache[index] = blob;
+
+    return blob;
   }
 
   /**

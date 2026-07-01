@@ -62,6 +62,11 @@ declare global {
     image: string;
   };
 
+  type CachedMockupObject = {
+    id: number;
+    mockup: Blob;
+  };
+
   type FontArray = Font[];
 
   type SourceFontData = {
@@ -187,6 +192,7 @@ declare global {
 
   type InitProjectFn = (
     { startYear, firstMonthIndex, lang, font, format, type }: CalendarData,
-    svedImages?: ImageObject[],
+    savedImages?: ImageObject[],
+    savedCachedMockups?: CachedMockupObject[],
   ) => Promise<void>;
 }

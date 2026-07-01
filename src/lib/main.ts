@@ -72,10 +72,12 @@ function newProject() {
 const newCalendar: InitProjectFn = async function (
   { startYear, firstMonthIndex, lang, font, format, type },
   savedImages,
+  savedCachedMockups,
 ) {
   if (activeCalendar) {
     activeCalendar.dispose();
   }
+  console.log(savedCachedMockups);
 
   const currentFont: FontArray = loadedFonts[font];
 
@@ -91,6 +93,7 @@ const newCalendar: InitProjectFn = async function (
       currentFont,
       format,
       savedImages,
+      savedCachedMockups,
     );
   } else {
     activeCalendar = new SinglePageCalendar(
@@ -104,6 +107,7 @@ const newCalendar: InitProjectFn = async function (
       currentFont,
       format,
       savedImages,
+      savedCachedMockups,
     );
   }
 };

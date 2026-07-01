@@ -39,6 +39,15 @@ export default function initIDB(initProject: InitProjectFn): void {
     imagesStore.createIndex('images', ['images'], {
       unique: false,
     });
+
+    const cachedMockupsStore = db.createObjectStore('current_project_cached_mockups', {
+      keyPath: 'id',
+      autoIncrement: true,
+    });
+
+    cachedMockupsStore.createIndex('cachedMockups', ['cachedMockups'], {
+      unique: false,
+    });
   };
 
   request.onsuccess = function () {
@@ -50,12 +59,15 @@ export default function initIDB(initProject: InitProjectFn): void {
 
     const dataStore = transaction.objectStore('current_project_data');
     const imagesStore = transaction.objectStore('current_project_images');
+    const cachedMockupsStore = transaction.objectStore('current_project_cached_mockups');
     // Get data object
     const dataQuery = dataStore.get(0);
     const imagesQuery = imagesStore.getAll();
+    const cachedMockupsQuery = cachedMockupsStore.getAll();
 
     let projectData: CalendarData;
     let imagesData: ImageObject[];
+    let cachedMockupsData: CachedMockupObject[];
 
     dataQuery.onsuccess = function () {
       // If data...
@@ -69,9 +81,14 @@ export default function initIDB(initProject: InitProjectFn): void {
       imagesData = imagesQuery.result;
     };
 
+    // If saved mockups...
+    cachedMockupsQuery.onsuccess = function () {
+      cachedMockupsData = cachedMockupsQuery.result;
+    };
+
     transaction.oncomplete = async function () {
       if (projectData) {
-        await initProject(projectData, imagesData);
+        await initProject(projectData, imagesData, cachedMockupsData);
       }
       db.close();
     };

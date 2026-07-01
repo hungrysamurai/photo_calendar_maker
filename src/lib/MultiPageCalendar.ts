@@ -15,6 +15,7 @@ import saveImageIDB from './utils/IDB/saveImageIDB';
 import { MultiPageControlsManager } from './entities/ControlsManager';
 import DownloadManager from './entities/DownloadManager';
 import UploadManager from './entities/UploadManager';
+import saveCachedMockupIDB from './utils/IDB/saveCachedMockupIDB';
 /**
  * Class that generates Multi Page Calendar (each month on separate SVG)
  */
@@ -32,6 +33,7 @@ export class MultiPageCalendar extends Calendar {
     public currentFont: FontArray,
     public format: FormatName,
     public imagesFromIDB: ImageObject[] = [],
+    public savedCachedMockups: CachedMockupObject[] = [],
   ) {
     super(
       firstMonthIndex,
@@ -142,6 +144,8 @@ export class MultiPageCalendar extends Calendar {
    */
   async createSVGMockup(): Promise<void> {
     this.showLoader();
+
+    const temp = [];
 
     this.calendarWrapper = createHTMLElement({
       elementName: 'div',
@@ -311,13 +315,25 @@ export class MultiPageCalendar extends Calendar {
         this.mockupOptions.dayCellStyles,
       );
 
-      this.cache.cacheMockup(
-        monthMockup,
-        i,
-        this.outputDimensions[this.format].width,
-        this.outputDimensions[this.format].height,
-      );
+      const mockupInIDB = this.savedCachedMockups.find((el) => el.id === i);
+
+      if (mockupInIDB) {
+        this.cache.setRetrievedMockup(i, mockupInIDB.mockup);
+      } else {
+        temp.push(
+          this.cache.cacheMockup(
+            monthMockup,
+            i,
+            this.outputDimensions[this.format].width,
+            this.outputDimensions[this.format].height,
+          ),
+        );
+      }
     }
+
+    (await Promise.all(temp)).forEach((p, i) => {
+      saveCachedMockupIDB(p, i);
+    });
 
     this.hideLoader();
   }
