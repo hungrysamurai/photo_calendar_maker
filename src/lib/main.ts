@@ -30,9 +30,11 @@ import {
   newProjectContainer,
   yearInput,
 } from './DOMElements';
+import DataStore from './entities/DataStore/DataStore';
 
 let loadedFonts: LoadedFontsObject;
 let activeCalendar: Calendar | null = null;
+let dataStore: DataStore | null;
 
 /**
  * @property {Function} newProject - generate new calendar from inputs
@@ -77,7 +79,6 @@ const newCalendar: InitProjectFn = async function (
   if (activeCalendar) {
     activeCalendar.dispose();
   }
-  console.log(savedCachedMockups);
 
   const currentFont: FontArray = loadedFonts[font];
 
@@ -141,6 +142,16 @@ window.addEventListener(
 
     // Generate new calendar from inputs
     getButton.addEventListener('click', newProject);
+
+    // Init dataStore, load fonts from assets
+    dataStore = new DataStore();
+
+    await dataStore.loadFonts();
+    await dataStore.initIDB();
+
+    if (dataStore.calendarProjectData) {
+      console.log(dataStore);
+    }
 
     // Init IndexedDB
     initIDB(newCalendar);
