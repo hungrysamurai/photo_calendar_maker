@@ -1,4 +1,5 @@
 import { Font } from 'opentype.js';
+import DataStore from './lib/entities/DataStore/DataStore';
 
 export enum CalendarLanguage {
   RU = 'ru',
@@ -39,6 +40,16 @@ declare global {
     webkitIndexedDB: IDBFactory;
     msIndexedDB: IDBFactory;
     shimIndexedDB: IDBFactory;
+  }
+
+  interface CalendarConstructorParams {
+    DOMElements: {
+      parentContainer(parentContainer: any, controlsContainer: HTMLDivElement): unknown;
+      calendarContainer: HTMLDivElement;
+      controlsContainer: HTMLDivElement;
+      cropControlsContainer: HTMLDivElement;
+    };
+    dataStore: DataStore;
   }
 
   interface Cropper {

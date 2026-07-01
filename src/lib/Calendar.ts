@@ -6,13 +6,7 @@ import UploadManager from './entities/UploadManager';
 
 import { A_outputFormats } from '../assets/A_FormatOptions/A_OutputDimensions';
 
-import {
-  CalendarLanguage,
-  CalendarType,
-  FontSubfamily,
-  FormatName,
-  PDFPagesRangeToDownload,
-} from '../types';
+import { CalendarType, FontSubfamily, PDFPagesRangeToDownload } from '../types';
 
 import DownloadManager from './entities/DownloadManager';
 import { createSVGElement } from './utils/DOM/createElement/createSVGElement';
@@ -49,19 +43,17 @@ export abstract class Calendar {
 
   weekDaysNamesList: string[];
 
-  constructor(
-    public firstMonthIndex: number,
-    public year: number,
-    public parentContainer: HTMLDivElement,
-    public controlsContainer: HTMLDivElement,
-    public cropControlsContainer: HTMLDivElement,
-    public lang: CalendarLanguage,
-    public type: CalendarType,
-    public currentFont: FontArray,
-    public format: FormatName,
-  ) {
+  parentContainer: HTMLDivElement;
+  controlsContainer: HTMLDivElement;
+  cropControlsContainer: HTMLDivElement;
+
+  constructor({ DOMElements, dataStore }: CalendarConstructorParams) {
+    this.parentContainer = DOMElements.calendarContainer;
+    this.controlsContainer = DOMElements.controlsContainer;
+    this.cropControlsContainer = DOMElements.cropControlsContainer;
+
     this.cache = new MockupsCache();
-    this.imageCropper = new ImageCropper(cropControlsContainer, {
+    this.imageCropper = new ImageCropper(DOMElements.cropControlsContainer, {
       onBeforeStart: this.showLoader,
       onCropperReady: this.hideLoader,
       onAfterRemove: () => this.cropControlsContainer.classList.add('hide'),
@@ -75,7 +67,7 @@ export abstract class Calendar {
         );
       },
     });
-    loadingOverlay.mount(parentContainer, controlsContainer);
+    loadingOverlay.mount(this.parentContainer, DOMElements.controlsContainer);
 
     // Add subfamilies to fonts object
     for (let i = 0; i < currentFont.length; i++) {

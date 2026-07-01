@@ -8,10 +8,7 @@ import { createFormatsOptions } from './utils/DOM/initializers/createFormatsOpti
 import { createMonthsOptions } from './utils/DOM/initializers/createMonthsOptions';
 import { createYearsOptions } from './utils/DOM/initializers/createYearsOptions';
 
-import { loadFonts } from './utils/DOM/initializers/loadFonts';
-
 import { CalendarType } from '../types';
-import initIDB from './utils/IDB/initIDB';
 import resetProjectIDB from './utils/IDB/resetProjectIDB';
 
 import { Calendar } from './Calendar';
@@ -62,64 +59,29 @@ function newProject() {
   newProjectContainer.style.top = '0px';
 }
 
-/**
- * @async
- * @property {Function} newCalendar - Init new calendar in DOM
- * @param {Object} newCalendarData - object with data for calendar
- * @param {number} [newCalendarData.startYear]
- * @param {number} [newCalendarData.firstMonthIndex]
- * @param {string} [newCalendarData.lang]
- * @param {string} [newCalendarData.type] - single-page/multi-page
- */
-const newCalendar: InitProjectFn = async function (
-  { startYear, firstMonthIndex, lang, font, format, type },
-  savedImages,
-  savedCachedMockups,
-) {
+function newCalendar() {
   if (activeCalendar) {
     activeCalendar.dispose();
   }
-
-  const currentFont: FontArray = loadedFonts[font];
-
-  if (type === CalendarType.MultiPage) {
-    activeCalendar = new MultiPageCalendar(
-      firstMonthIndex,
-      startYear,
-      calendarContainer,
-      controlsContainer,
-      cropControlsContainer,
-      lang,
-      type,
-      currentFont,
-      format,
-      savedImages,
-      savedCachedMockups,
-    );
-  } else {
-    activeCalendar = new SinglePageCalendar(
-      firstMonthIndex,
-      startYear,
-      calendarContainer,
-      controlsContainer,
-      cropControlsContainer,
-      lang,
-      type,
-      currentFont,
-      format,
-      savedImages,
-      savedCachedMockups,
-    );
+  if (dataStore && dataStore.calendarProjectData) {
+    if (dataStore.calendarProjectData.type === CalendarType.MultiPage) {
+      activeCalendar = new MultiPageCalendar({
+        DOMElements: { calendarContainer, controlsContainer, cropControlsContainer },
+        dataStore,
+      });
+    } else {
+      activeCalendar = new SinglePageCalendar({
+        DOMElements: { calendarContainer, controlsContainer, cropControlsContainer },
+        dataStore,
+      });
+    }
   }
-};
+}
 
 // Init
 window.addEventListener(
   'DOMContentLoaded',
   async () => {
-    // Load fonts data
-    loadedFonts = await loadFonts();
-
     // Fill inputs with dynamic options
     yearInput.innerHTML = createYearsOptions(10);
     fontInput.innerHTML = createFontsOptions();
@@ -150,11 +112,8 @@ window.addEventListener(
     await dataStore.initIDB();
 
     if (dataStore.calendarProjectData) {
-      console.log(dataStore);
+      newCalendar();
     }
-
-    // Init IndexedDB
-    initIDB(newCalendar);
   },
   { once: true },
 );

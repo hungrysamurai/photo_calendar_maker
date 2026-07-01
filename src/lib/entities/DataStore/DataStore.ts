@@ -19,8 +19,7 @@ export default class DataStore {
 
       const fonts = await Promise.all(
         [fontBoldBuffer, fontMeiumBuffer].map(async (res) => {
-          const buffer = res.arrayBuffer();
-          return opentype.parse(await buffer);
+          return opentype.parse(await res.arrayBuffer());
         }),
       );
 
@@ -40,44 +39,46 @@ export default class DataStore {
     return indexedDB.open('Photo Calendar Project', 1);
   }
 
+  private createIDBSchema(db: IDBDatabase) {
+    // Set data object
+    const dataStore = db.createObjectStore('current_project_data', {
+      keyPath: 'id',
+    });
+
+    dataStore.createIndex('firstMonthIndex', ['firstMonthIndex'], {
+      unique: false,
+    });
+    dataStore.createIndex('startYear', ['startYear'], { unique: false });
+    dataStore.createIndex('lang', ['lang'], { unique: false });
+    dataStore.createIndex('type', ['type'], { unique: false });
+    dataStore.createIndex('font', ['font'], { unique: false });
+    dataStore.createIndex('format', ['format'], { unique: false });
+
+    // Set images object
+    const imagesStore = db.createObjectStore('current_project_images', {
+      keyPath: 'id',
+      autoIncrement: true,
+    });
+
+    imagesStore.createIndex('images', ['images'], {
+      unique: false,
+    });
+
+    const cachedMockupsStore = db.createObjectStore('current_project_cached_mockups', {
+      keyPath: 'id',
+      autoIncrement: true,
+    });
+
+    cachedMockupsStore.createIndex('cachedMockups', ['cachedMockups'], {
+      unique: false,
+    });
+  }
+
   private openDB(): Promise<IDBDatabase> {
     const request = this.getIDB();
 
     request.onupgradeneeded = () => {
-      const db = request.result;
-
-      // Set data object
-      const dataStore = db.createObjectStore('current_project_data', {
-        keyPath: 'id',
-      });
-
-      dataStore.createIndex('firstMonthIndex', ['firstMonthIndex'], {
-        unique: false,
-      });
-      dataStore.createIndex('startYear', ['startYear'], { unique: false });
-      dataStore.createIndex('lang', ['lang'], { unique: false });
-      dataStore.createIndex('type', ['type'], { unique: false });
-      dataStore.createIndex('font', ['font'], { unique: false });
-      dataStore.createIndex('format', ['format'], { unique: false });
-
-      // Set images object
-      const imagesStore = db.createObjectStore('current_project_images', {
-        keyPath: 'id',
-        autoIncrement: true,
-      });
-
-      imagesStore.createIndex('images', ['images'], {
-        unique: false,
-      });
-
-      const cachedMockupsStore = db.createObjectStore('current_project_cached_mockups', {
-        keyPath: 'id',
-        autoIncrement: true,
-      });
-
-      cachedMockupsStore.createIndex('cachedMockups', ['cachedMockups'], {
-        unique: false,
-      });
+      this.createIDBSchema(request.result);
     };
 
     return new Promise((resolve, reject) => {
@@ -108,9 +109,13 @@ export default class DataStore {
       const tx = db.transaction(db.objectStoreNames, 'readonly');
 
       const [data, images, cachedMockups] = await Promise.all([
-        this.promisifyRequest(tx.objectStore('current_project_data').get(0)),
-        this.promisifyRequest(tx.objectStore('current_project_images').getAll()),
-        this.promisifyRequest(tx.objectStore('current_project_cached_mockups').getAll()),
+        this.promisifyRequest<CalendarData | undefined>(
+          tx.objectStore('current_project_data').get(0),
+        ),
+        this.promisifyRequest<ImageObject[]>(tx.objectStore('current_project_images').getAll()),
+        this.promisifyRequest<CachedMockupObject[]>(
+          tx.objectStore('current_project_cached_mockups').getAll(),
+        ),
       ]);
 
       if (data) {
