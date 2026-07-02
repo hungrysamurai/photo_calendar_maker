@@ -1,6 +1,3 @@
-import { MultiPageCalendar } from './MultiPageCalendar';
-import { SinglePageCalendar } from './SinglePageCalendar';
-
 import { collectDataFromInputs } from './utils/DOM/collectDataFromInputs';
 
 import { createFontsOptions } from './utils/DOM/initializers/createFontsOptions';
@@ -8,9 +5,7 @@ import { createFormatsOptions } from './utils/DOM/initializers/createFormatsOpti
 import { createMonthsOptions } from './utils/DOM/initializers/createMonthsOptions';
 import { createYearsOptions } from './utils/DOM/initializers/createYearsOptions';
 
-import { CalendarType } from '../types';
-import resetProjectIDB from './utils/IDB/resetProjectIDB';
-
+import fontsData from '../assets/sourceFontsData';
 import { Calendar } from './Calendar';
 import {
   calendarContainer,
@@ -29,14 +24,10 @@ import {
 } from './DOMElements';
 import DataStore from './entities/DataStore/DataStore';
 
-let loadedFonts: LoadedFontsObject;
 let activeCalendar: Calendar | null = null;
 let dataStore: DataStore | null;
 
-/**
- * @property {Function} newProject - generate new calendar from inputs
- */
-function newProject() {
+async function newProject() {
   const newCalendarData: CalendarData = collectDataFromInputs(
     yearInput,
     monthInput,
@@ -49,13 +40,13 @@ function newProject() {
   // Purge all current content
   calendarContainer.innerHTML = '';
 
-  // Generate new calendar
-  newCalendar(newCalendarData);
-
   // Set new calendar in IDB
-  resetProjectIDB(newCalendarData);
+  // resetProjectIDB(newCalendarData);
+  await dataStore?.reset(newCalendarData);
 
-  // Hide new calendar inputs
+  // Generate new calendar
+  newCalendar();
+
   newProjectContainer.style.top = '0px';
 }
 
@@ -63,19 +54,29 @@ function newCalendar() {
   if (activeCalendar) {
     activeCalendar.dispose();
   }
-  if (dataStore && dataStore.calendarProjectData) {
-    if (dataStore.calendarProjectData.type === CalendarType.MultiPage) {
-      activeCalendar = new MultiPageCalendar({
-        DOMElements: { calendarContainer, controlsContainer, cropControlsContainer },
-        dataStore,
-      });
-    } else {
-      activeCalendar = new SinglePageCalendar({
-        DOMElements: { calendarContainer, controlsContainer, cropControlsContainer },
-        dataStore,
-      });
-    }
-  }
+
+  activeCalendar = new Calendar(
+    {
+      calendarContainer,
+      controlsContainer,
+      cropControlsContainer,
+    },
+    dataStore as DataStore,
+  );
+
+  // if (dataStore && dataStore.calendarProjectData) {
+  //   if (dataStore.calendarProjectData.type === CalendarType.MultiPage) {
+  //     activeCalendar = new MultiPageCalendar({
+  //       DOMElements: { calendarContainer, controlsContainer, cropControlsContainer },
+  //       dataStore,
+  //     });
+  //   } else {
+  //     activeCalendar = new SinglePageCalendar({
+  //       DOMElements: { calendarContainer, controlsContainer, cropControlsContainer },
+  //       dataStore,
+  //     });
+  //   }
+  // }
 }
 
 // Init
@@ -108,8 +109,8 @@ window.addEventListener(
     // Init dataStore, load fonts from assets
     dataStore = new DataStore();
 
-    await dataStore.loadFonts();
-    await dataStore.initIDB();
+    await dataStore.fontsController.loadFonts(fontsData);
+    await dataStore.retrieveDataFromIDB();
 
     if (dataStore.calendarProjectData) {
       newCalendar();

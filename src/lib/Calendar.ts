@@ -6,14 +6,17 @@ import UploadManager from './entities/UploadManager';
 
 import { A_outputFormats } from '../assets/A_FormatOptions/A_OutputDimensions';
 
-import { CalendarType, FontSubfamily, PDFPagesRangeToDownload } from '../types';
+import { CalendarType, PDFPagesRangeToDownload } from '../types';
 
+import DataStore from './entities/DataStore/DataStore';
 import DownloadManager from './entities/DownloadManager';
 import { createSVGElement } from './utils/DOM/createElement/createSVGElement';
 import { getMonthsList } from './utils/getMonthsList';
-import saveImageIDB from './utils/IDB/saveImageIDB';
+// import saveImageIDB from './utils/IDB/saveImageIDB';
 
-export abstract class Calendar {
+export class Calendar {
+  private dataStore;
+
   cache: MockupsCache;
   controlsManager: BasicControlsManager | MultiPageControlsManager;
   imageCropper: ImageCropper;
@@ -28,7 +31,7 @@ export abstract class Calendar {
   mockupOptions: SinglePageMockupOutputOptions | MultiPageMockupOutputOptions;
 
   // Set fonts object
-  fonts: FontData = {};
+  font: FontData = {};
 
   currentMonth: number = 0;
   monthsNamesList: ReturnType<typeof getMonthsList>;
@@ -47,47 +50,68 @@ export abstract class Calendar {
   controlsContainer: HTMLDivElement;
   cropControlsContainer: HTMLDivElement;
 
-  constructor({ DOMElements, dataStore }: CalendarConstructorParams) {
+  constructor(DOMElements: ProvidedDOMElements, dataStore: DataStore) {
+    this.dataStore = dataStore;
+
+    const { lang, firstMonthIndex, startYear } = this.dataStore.calendarProjectData;
+    this.font = this.dataStore.currentFont;
+
     this.parentContainer = DOMElements.calendarContainer;
     this.controlsContainer = DOMElements.controlsContainer;
     this.cropControlsContainer = DOMElements.cropControlsContainer;
 
-    this.cache = new MockupsCache();
     this.imageCropper = new ImageCropper(DOMElements.cropControlsContainer, {
       onBeforeStart: this.showLoader,
       onCropperReady: this.hideLoader,
       onAfterRemove: () => this.cropControlsContainer.classList.add('hide'),
-      saveImage: (resultUrl) => saveImageIDB(resultUrl, this.currentMonth),
-      updateCache: (svgMockup) => {
-        this.cache.cacheMockup(
-          svgMockup,
-          this.currentMonth,
-          this.outputDimensions[this.format].width,
-          this.outputDimensions[this.format].height,
-        );
-      },
+      saveImage: (resultUrl) => {},
+      updateCache: (svgMockup) => {},
     });
-    loadingOverlay.mount(this.parentContainer, DOMElements.controlsContainer);
 
-    // Add subfamilies to fonts object
-    for (let i = 0; i < currentFont.length; i++) {
-      this.fonts[currentFont[i]?.names?.fontSubfamily.en.toLowerCase() as FontSubfamily] =
-        currentFont[i];
-    }
-    this.monthsNamesList = getMonthsList(this.lang);
-    this.firstMonth = this.firstMonthIndex;
-    this.startYear = this.year;
+    loadingOverlay.mount(this.parentContainer, this.controlsContainer);
+
+    this.monthsNamesList = getMonthsList(lang);
+    this.firstMonth = firstMonthIndex;
+    this.startYear = startYear;
     this.lastMonth = (this.firstMonth + 11) % 12;
     this.endYear = this.firstMonth === 0 ? this.startYear : this.startYear + 1;
 
-    // Subscribe on cache events
-    this.subscribeOnCacheEvents();
+    console.log(this);
+
+    // this.cache = new MockupsCache();
+    // this.imageCropper = new ImageCropper(DOMElements.cropControlsContainer, {
+    //   onBeforeStart: this.showLoader,
+    //   onCropperReady: this.hideLoader,
+    //   onAfterRemove: () => this.cropControlsContainer.classList.add('hide'),
+    //   saveImage: (resultUrl) => saveImageIDB(resultUrl, this.currentMonth),
+    //   updateCache: (svgMockup) => {
+    //     this.cache.cacheMockup(
+    //       svgMockup,
+    //       this.currentMonth,
+    //       this.outputDimensions[this.format].width,
+    //       this.outputDimensions[this.format].height,
+    //     );
+    //   },
+    // });
+    // loadingOverlay.mount(this.parentContainer, DOMElements.controlsContainer);
+    // // Add subfamilies to fonts object
+    // for (let i = 0; i < currentFont.length; i++) {
+    //   this.fonts[currentFont[i]?.names?.fontSubfamily.en.toLowerCase() as FontSubfamily] =
+    //     currentFont[i];
+    // }
+    // this.monthsNamesList = getMonthsList(this.lang);
+    // this.firstMonth = this.firstMonthIndex;
+    // this.startYear = this.year;
+    // this.lastMonth = (this.firstMonth + 11) % 12;
+    // this.endYear = this.firstMonth === 0 ? this.startYear : this.startYear + 1;
+    // // Subscribe on cache events
+    // this.subscribeOnCacheEvents();
   }
 
-  subscribeOnCacheEvents() {
-    this.cache.addEventListener('workStart', this.showLoader);
-    this.cache.addEventListener('workDone', this.hideLoader);
-  }
+  // subscribeOnCacheEvents() {
+  //   this.cache.addEventListener('workStart', this.showLoader);
+  //   this.cache.addEventListener('workDone', this.hideLoader);
+  // }
 
   // Behaviorial callbacks
 
@@ -357,12 +381,10 @@ export abstract class Calendar {
   }
 
   dispose(): void {
-    this.cache.reset();
-
-    // Unsubscribe from old cache events
-    this.cache.removeEventListener('workStart', this.showLoader);
-    this.cache.removeEventListener('workDone', this.hideLoader);
+    // this.cache.reset();
+    // this.cache.removeEventListener('workStart', this.showLoader);
+    // this.cache.removeEventListener('workDone', this.hideLoader);
   }
 
-  abstract createSVGMockup(): void;
+  // abstract createSVGMockup(): void;
 }

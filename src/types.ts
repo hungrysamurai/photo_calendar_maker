@@ -1,5 +1,4 @@
 import { Font } from 'opentype.js';
-import DataStore from './lib/entities/DataStore/DataStore';
 
 export enum CalendarLanguage {
   RU = 'ru',
@@ -42,15 +41,11 @@ declare global {
     shimIndexedDB: IDBFactory;
   }
 
-  interface CalendarConstructorParams {
-    DOMElements: {
-      parentContainer(parentContainer: any, controlsContainer: HTMLDivElement): unknown;
-      calendarContainer: HTMLDivElement;
-      controlsContainer: HTMLDivElement;
-      cropControlsContainer: HTMLDivElement;
-    };
-    dataStore: DataStore;
-  }
+  type ProvidedDOMElements = {
+    calendarContainer: HTMLDivElement;
+    controlsContainer: HTMLDivElement;
+    cropControlsContainer: HTMLDivElement;
+  };
 
   interface Cropper {
     initialZoomRatio: number;
