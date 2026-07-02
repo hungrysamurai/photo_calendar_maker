@@ -63,20 +63,6 @@ function newCalendar() {
     },
     dataStore as DataStore,
   );
-
-  // if (dataStore && dataStore.calendarProjectData) {
-  //   if (dataStore.calendarProjectData.type === CalendarType.MultiPage) {
-  //     activeCalendar = new MultiPageCalendar({
-  //       DOMElements: { calendarContainer, controlsContainer, cropControlsContainer },
-  //       dataStore,
-  //     });
-  //   } else {
-  //     activeCalendar = new SinglePageCalendar({
-  //       DOMElements: { calendarContainer, controlsContainer, cropControlsContainer },
-  //       dataStore,
-  //     });
-  //   }
-  // }
 }
 
 // Init
