@@ -8,20 +8,28 @@ import { A_outputFormats } from '../assets/A_FormatOptions/A_OutputDimensions';
 
 import { CalendarType, PDFPagesRangeToDownload } from '../types';
 
+import {
+  A_FormatMultiPageMockupOptions,
+  A_FormatSinglePageMockupOptions,
+} from '../assets/A_FormatOptions/A_FormatOptions';
 import DataStore from './entities/DataStore/DataStore';
 import DownloadManager from './entities/DownloadManager';
+import ViewController from './entities/ViewController';
 import { createSVGElement } from './utils/DOM/createElement/createSVGElement';
 import { getMonthsList } from './utils/getMonthsList';
+import getWeekDays from './utils/getWeekDays';
 // import saveImageIDB from './utils/IDB/saveImageIDB';
 
 export class Calendar {
   private dataStore;
 
+  private imageCropper: ImageCropper;
+  private controlsManager: BasicControlsManager | MultiPageControlsManager;
+  private uploadManager: UploadManager;
+  private downloadManager: DownloadManager;
+  private viewController: ViewController;
+
   cache: MockupsCache;
-  controlsManager: BasicControlsManager | MultiPageControlsManager;
-  imageCropper: ImageCropper;
-  uploadManager: UploadManager;
-  downloadManager: DownloadManager;
 
   /**
    * Dimensions of document (px)
@@ -53,7 +61,7 @@ export class Calendar {
   constructor(DOMElements: ProvidedDOMElements, dataStore: DataStore) {
     this.dataStore = dataStore;
 
-    const { lang, firstMonthIndex, startYear } = this.dataStore.calendarProjectData;
+    const { lang, firstMonthIndex, startYear, type, format } = this.dataStore.calendarProjectData;
     this.font = this.dataStore.currentFont;
 
     this.parentContainer = DOMElements.calendarContainer;
@@ -71,10 +79,103 @@ export class Calendar {
     loadingOverlay.mount(this.parentContainer, this.controlsContainer);
 
     this.monthsNamesList = getMonthsList(lang);
+
     this.firstMonth = firstMonthIndex;
     this.startYear = startYear;
     this.lastMonth = (this.firstMonth + 11) % 12;
     this.endYear = this.firstMonth === 0 ? this.startYear : this.startYear + 1;
+
+    if (type === CalendarType.SinglePage) {
+      this.controlsManager = new BasicControlsManager(this.controlsContainer, {
+        onDownloadCurrentPdf: this.onDownloadCurrentPdf,
+        onDownloadJpg: this.onDownloadJpg,
+        onCrop: this.onCrop,
+        onUploadImage: this.onUploadImage,
+      });
+
+      this.controlsManager.init();
+
+      this.mockupOptions = new A_FormatSinglePageMockupOptions(format)[format];
+
+      this.uploadManager = new UploadManager({
+        cache: this.cache,
+        format: format,
+        mockupOptions: this.mockupOptions,
+        outputDimensions: this.outputDimensions,
+        getCurrentMonth: () => this.currentMonth,
+        getCurrentMockup: this.getCurrentMockup.bind(this),
+        getMockupByIndex: this.getMockupByIndex.bind(this),
+        saveImage: (resultUrl, id) => saveImageIDB(resultUrl, id),
+        showLoader: this.showLoader,
+        hideLoader: this.hideLoader,
+      });
+
+      this.downloadManager = new DownloadManager({
+        cache: this.cache,
+        calendarType: type,
+        calendarFirstMonth: this.firstMonth,
+        calendarStartYear: this.startYear,
+        calendarLastMonth: this.lastMonth,
+        calendarEndYear: this.endYear,
+        format: format,
+        outputDimensions: this.outputDimensions,
+        getCurrentMonth: () => this.currentMonth,
+        getCurrentMockup: this.getCurrentMockup.bind(this),
+        showLoader: this.showLoader,
+        hideLoader: this.hideLoader,
+      });
+
+      this.weekDaysNamesList = getWeekDays('short', lang);
+    } else {
+      this.controlsManager = new MultiPageControlsManager(this.controlsContainer, {
+        onDownloadCurrentPdf: this.onDownloadCurrentPdf,
+        onDownloadJpg: this.onDownloadJpg,
+        onCrop: this.onCrop,
+        onUploadImage: this.onUploadImage,
+        onDownloadAllPdf: this.onDownloadAllPdf,
+        onPrevMonth: this.onPrevMonth,
+        onNextMonth: this.onNextMonth,
+        onUploadMultipleImages: this.onUploadMultipleImages,
+      });
+
+      this.controlsManager.init();
+
+      this.weekDaysNamesList = getWeekDays('long', lang);
+
+      this.mockupOptions = new A_FormatMultiPageMockupOptions(format)[format];
+
+      this.uploadManager = new UploadManager({
+        cache: this.cache,
+        format: this.format,
+        mockupOptions: this.mockupOptions,
+        outputDimensions: this.outputDimensions,
+        getCurrentMonth: () => this.currentMonth,
+        getCurrentMockup: this.getCurrentMockup.bind(this),
+        getMockupByIndex: this.getMockupByIndex.bind(this),
+        getImageGroupByIndex: (index) =>
+          this.calendarInner.querySelector(`#month-${index}-container #image-group`) as SVGGElement,
+        saveImage: (resultUrl, id) => saveImageIDB(resultUrl, id),
+        showLoader: this.showLoader.bind(this),
+        hideLoader: this.hideLoader.bind(this),
+      });
+
+      this.downloadManager = new DownloadManager({
+        cache: this.cache,
+        calendarType: type,
+        calendarFirstMonth: this.firstMonth,
+        calendarStartYear: this.startYear,
+        calendarLastMonth: this.lastMonth,
+        calendarEndYear: this.endYear,
+        format: format,
+        outputDimensions: this.outputDimensions,
+        getCurrentMonth: () => this.currentMonth,
+        getCurrentMockup: this.getCurrentMockup.bind(this),
+        showLoader: this.showLoader.bind(this),
+        hideLoader: this.hideLoader.bind(this),
+      });
+    }
+
+    this.viewController = new ViewController(this.parentContainer, type);
 
     console.log(this);
 
