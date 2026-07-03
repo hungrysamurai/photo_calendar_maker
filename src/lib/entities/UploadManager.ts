@@ -88,8 +88,8 @@ export default class UploadManager {
     const resultImage = reduced ?? fileDataUrl;
 
     imageEl.setAttributeNS('http://www.w3.org/1999/xlink', 'href', resultImage);
-    this.options.saveImage(resultImage, cacheIndex);
 
+    this.options.saveImage(resultImage, cacheIndex);
     await this.cacheMockup(cacheIndex);
   }
 

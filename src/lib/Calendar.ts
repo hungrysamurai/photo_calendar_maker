@@ -154,6 +154,12 @@ export class Calendar {
     this.downloadManager.downloadCurrentJPG();
   };
 
+  onDownloadAllPdf = () => {
+    this.removeCropperIfActive();
+
+    this.downloadManager.downloadPDF(PDFPagesRangeToDownload.All);
+  };
+
   onCrop = () => {
     if (this.imageCropper.isActive) return;
 
@@ -168,6 +174,12 @@ export class Calendar {
     this.removeCropperIfActive();
 
     this.uploadManager.uploadSingleImage(e);
+  };
+
+  onUploadMultipleImages = (e: Event) => {
+    this.removeCropperIfActive();
+
+    this.uploadManager.uploadMultipleImages(e);
   };
 
   // Show/hide loader
