@@ -1,12 +1,21 @@
 import { CalendarLanguage, CalendarType, FormatName } from '../../types';
+
 import { createHTMLElement } from '../utils/DOM/createElement/createHTMLElement';
 import { createSVGElement } from '../utils/DOM/createElement/createSVGElement';
+
 import getDaysInMonth from '../utils/getDaysInMonth';
 import getMonthFirstDay from '../utils/getMonthFirstDay';
 import getWeekDays from '../utils/getWeekDays';
 
+import {
+  MultiPageControlsCallbacks,
+  BasicControlsManager,
+  MultiPageControlsManager,
+} from './ControlsManager';
+
 export type ViewControllerOptions = {
   mainContainer: HTMLDivElement;
+  controlsContainer: HTMLDivElement;
   type: CalendarType;
   mockupOptions: SinglePageMockupOutputOptions | MultiPageMockupOutputOptions;
   outputDimensions: OutputDimensions;
@@ -16,6 +25,8 @@ export type ViewControllerOptions = {
   monthsNamesList: string[];
   font: FontData;
   lang: CalendarLanguage;
+  actionsHandlers: MultiPageControlsCallbacks;
+  cleanupHandlers: (() => void)[];
   showLoader: () => void;
   hideLoader: () => void;
 };
@@ -24,16 +35,35 @@ export default class ViewController {
   calendarWrapper: HTMLDivElement;
   calendarInner: HTMLDivElement;
 
+  controlsManager: BasicControlsManager | MultiPageControlsManager;
+
   weekDaysNamesList: string[];
 
   currentMonthInView: number = 0;
 
   constructor(private options: ViewControllerOptions) {
     if (options.type === CalendarType.SinglePage) {
+      this.controlsManager = new BasicControlsManager(
+        options.controlsContainer,
+        options.actionsHandlers,
+      );
+
+      this.controlsManager.init();
+
       this.weekDaysNamesList = getWeekDays('short', options.lang);
 
       this.createOnePageSVGMockup();
     } else {
+      this.controlsManager = new MultiPageControlsManager(
+        options.controlsContainer,
+        options.actionsHandlers,
+        {
+          onPrevMonth: this.showPrevMonth,
+          onNextMonth: this.showNextMonth,
+        },
+      );
+
+      this.controlsManager.init();
       this.weekDaysNamesList = getWeekDays('long', options.lang);
 
       this.createMultiPageSVGMockups();
@@ -428,12 +458,67 @@ export default class ViewController {
     this.options.hideLoader();
   }
 
+  showPrevMonth = () => {
+    this.options.cleanupHandlers.forEach((cb) => {
+      cb();
+    });
+
+    this.currentMonthInView--;
+    if (this.currentMonthInView < 0) {
+      this.currentMonthInView = 11;
+    }
+
+    this.setVisibleMonth();
+  };
+
+  showNextMonth = () => {
+    this.options.cleanupHandlers.forEach((cb) => {
+      cb();
+    });
+
+    this.currentMonthInView++;
+
+    if (this.currentMonthInView > 11) {
+      this.currentMonthInView = 0;
+    }
+
+    this.setVisibleMonth();
+  };
+
   /**
    * @property {Function} setVisibleMonth - show current month mockup in DOM by translate calendarInner container by X axis
    */
   setVisibleMonth(): void {
     this.calendarInner.style.transform = `translateX(calc(-8.333333% * ${this.currentMonthInView}))`;
   }
+
+  /**
+   * @property {Function} getCurrentMockup - Get current mockup to manipulate
+   * @param {string} [element=""] element - selector string to pick specific element e.g. 'image' or 'svg'
+   */
+  getCurrentMockup = (element: string = ''): SVGElement | SVGImageElement => {
+    if (this.options.type === CalendarType.MultiPage) {
+      return this.calendarInner.querySelector(
+        `#month-${this.currentMonthInView}-container ${element}`,
+      ) as SVGElement;
+    }
+
+    return this.calendarInner.querySelector(`#mockup-container ${element}`) as SVGElement;
+  };
+
+  /**
+   * @property {Function} getMockupByIndex - Get mockup to manipulate by index of month
+   * @param {number} index
+   */
+  getMockupByIndex = (index: number): SVGElement => {
+    return this.calendarInner.querySelector(`#mockup-${index}`) as SVGElement;
+  };
+
+  getImageGroupByIndex = (index: number): SVGGElement => {
+    return this.calendarInner.querySelector(
+      `#month-${index}-container #image-group`,
+    ) as SVGGElement;
+  };
 
   /**
    * @property {Function} getOutline - create outline (<path> element) from given string, and set it x-coords, y-coords, size and fill

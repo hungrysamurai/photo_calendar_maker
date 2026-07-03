@@ -11,16 +11,14 @@ import DownloadManager from './entities/DownloadManager';
 import ViewController from './entities/ViewController';
 
 import { getMonthsList } from './utils/getMonthsList';
-import getWeekDays from './utils/getWeekDays';
 
 export class Calendar {
   private dataStore;
 
   private imageCropper: ImageCropper;
-  private controlsManager: BasicControlsManager | MultiPageControlsManager;
+  private viewController: ViewController;
   private uploadManager: UploadManager;
   private downloadManager: DownloadManager;
-  private viewController: ViewController;
 
   cache: MockupsCache;
 
@@ -28,7 +26,6 @@ export class Calendar {
   outputDimensions: OutputDimensions;
   mockupOptions: SinglePageMockupOutputOptions | MultiPageMockupOutputOptions;
 
-  currentMonth: number = 0;
   monthsNamesList: ReturnType<typeof getMonthsList>;
 
   firstMonth: number;
@@ -72,90 +69,18 @@ export class Calendar {
       updateCache: (svgMockup) => {},
     });
 
-    if (type === CalendarType.SinglePage) {
-      this.controlsManager = new BasicControlsManager(this.controlsContainer, {
-        onDownloadCurrentPdf: this.onDownloadCurrentPdf,
-        onDownloadJpg: this.onDownloadJpg,
-        onCrop: this.onCrop,
-        onUploadImage: this.onUploadImage,
-      });
-
-      this.controlsManager.init();
-
-      this.uploadManager = new UploadManager({
-        cache: this.cache,
-        format: format,
-        mockupOptions: this.mockupOptions,
-        outputDimensions: this.outputDimensions,
-        getCurrentMonth: () => this.currentMonth,
-        getCurrentMockup: this.getCurrentMockup.bind(this),
-        getMockupByIndex: this.getMockupByIndex.bind(this),
-        saveImage: (resultUrl, id) => saveImageIDB(resultUrl, id),
-        showLoader: this.showLoader,
-        hideLoader: this.hideLoader,
-      });
-
-      this.downloadManager = new DownloadManager({
-        cache: this.cache,
-        calendarType: type,
-        calendarFirstMonth: this.firstMonth,
-        calendarStartYear: this.startYear,
-        calendarLastMonth: this.lastMonth,
-        calendarEndYear: this.endYear,
-        format: format,
-        outputDimensions: this.outputDimensions,
-        getCurrentMonth: () => this.currentMonth,
-        getCurrentMockup: this.getCurrentMockup.bind(this),
-        showLoader: this.showLoader,
-        hideLoader: this.hideLoader,
-      });
-    } else {
-      this.controlsManager = new MultiPageControlsManager(this.controlsContainer, {
+    this.viewController = new ViewController({
+      mainContainer: this.parentContainer,
+      controlsContainer: this.controlsContainer,
+      actionsHandlers: {
         onDownloadCurrentPdf: this.onDownloadCurrentPdf,
         onDownloadJpg: this.onDownloadJpg,
         onCrop: this.onCrop,
         onUploadImage: this.onUploadImage,
         onDownloadAllPdf: this.onDownloadAllPdf,
-        onPrevMonth: this.onPrevMonth,
-        onNextMonth: this.onNextMonth,
         onUploadMultipleImages: this.onUploadMultipleImages,
-      });
-
-      this.controlsManager.init();
-
-      this.uploadManager = new UploadManager({
-        cache: this.cache,
-        format: this.format,
-        mockupOptions: this.mockupOptions,
-        outputDimensions: this.outputDimensions,
-        getCurrentMonth: () => this.currentMonth,
-        getCurrentMockup: this.getCurrentMockup.bind(this),
-        getMockupByIndex: this.getMockupByIndex.bind(this),
-        getImageGroupByIndex: (index) =>
-          this.calendarInner.querySelector(`#month-${index}-container #image-group`) as SVGGElement,
-        saveImage: (resultUrl, id) => saveImageIDB(resultUrl, id),
-        showLoader: this.showLoader.bind(this),
-        hideLoader: this.hideLoader.bind(this),
-      });
-
-      this.downloadManager = new DownloadManager({
-        cache: this.cache,
-        calendarType: type,
-        calendarFirstMonth: this.firstMonth,
-        calendarStartYear: this.startYear,
-        calendarLastMonth: this.lastMonth,
-        calendarEndYear: this.endYear,
-        format: format,
-        outputDimensions: this.outputDimensions,
-        getCurrentMonth: () => this.currentMonth,
-        getCurrentMockup: this.getCurrentMockup.bind(this),
-        showLoader: this.showLoader.bind(this),
-        hideLoader: this.hideLoader.bind(this),
-      });
-    }
-
-    this.viewController = new ViewController({
-      mainContainer: this.parentContainer,
+      },
+      cleanupHandlers: [this.removeCropperIfActive],
       type,
       format,
       firstMonthIndex,
@@ -165,6 +90,35 @@ export class Calendar {
       monthsNamesList: this.monthsNamesList,
       font: this.font,
       lang,
+      showLoader: this.showLoader,
+      hideLoader: this.hideLoader,
+    });
+
+    this.uploadManager = new UploadManager({
+      cache: this.cache,
+      format: format,
+      mockupOptions: this.mockupOptions,
+      outputDimensions: this.outputDimensions,
+      getCurrentMonthInViewIndex: () => this.viewController.currentMonthInView,
+      getCurrentMockup: this.viewController.getCurrentMockup,
+      getMockupByIndex: this.viewController.getMockupByIndex,
+      getImageGroupByIndex: this.viewController.getImageGroupByIndex,
+      saveImage: (resultUrl, id) => {},
+      showLoader: this.showLoader,
+      hideLoader: this.hideLoader,
+    });
+
+    this.downloadManager = new DownloadManager({
+      cache: this.cache,
+      calendarType: type,
+      calendarFirstMonth: this.firstMonth,
+      calendarStartYear: this.startYear,
+      calendarLastMonth: this.lastMonth,
+      calendarEndYear: this.endYear,
+      format: format,
+      outputDimensions: this.outputDimensions,
+      getCurrentMonth: () => this.viewController.currentMonthInView,
+      getCurrentMockup: this.viewController.getCurrentMockup,
       showLoader: this.showLoader,
       hideLoader: this.hideLoader,
     });
@@ -182,18 +136,20 @@ export class Calendar {
 
   // Behaviorial callbacks
 
-  onDownloadCurrentPdf = () => {
+  removeCropperIfActive = () => {
     if (this.imageCropper.isActive) {
       this.imageCropper.removeCropper();
     }
+  };
+
+  onDownloadCurrentPdf = () => {
+    this.removeCropperIfActive();
 
     this.downloadManager.downloadPDF(PDFPagesRangeToDownload.Current);
   };
 
   onDownloadJpg = () => {
-    if (this.imageCropper.isActive) {
-      this.imageCropper.removeCropper();
-    }
+    this.removeCropperIfActive();
 
     this.downloadManager.downloadCurrentJPG();
   };
@@ -201,7 +157,7 @@ export class Calendar {
   onCrop = () => {
     if (this.imageCropper.isActive) return;
 
-    const currentImageElement = this.getCurrentMockup('image');
+    const currentImageElement = this.viewController.getCurrentMockup('image');
 
     if (currentImageElement) {
       this.imageCropper.start(currentImageElement as SVGImageElement);
@@ -209,9 +165,7 @@ export class Calendar {
   };
 
   onUploadImage = (e: InputEvent) => {
-    if (this.imageCropper.isActive) {
-      this.imageCropper.removeCropper();
-    }
+    this.removeCropperIfActive();
 
     this.uploadManager.uploadSingleImage(e);
   };
@@ -227,28 +181,6 @@ export class Calendar {
     loadingOverlay.hide();
     // }
   };
-
-  /**
-   * @property {Function} getCurrentMockup - Get current mockup to manipulate
-   * @param {string} [element=""] element - selector string to pick specific element e.g. 'image' or 'svg'
-   */
-  getCurrentMockup(element: string = ''): SVGElement | SVGImageElement {
-    if (this.type === CalendarType.MultiPage) {
-      return this.calendarInner.querySelector(
-        `#month-${this.currentMonth}-container ${element}`,
-      ) as SVGElement;
-    }
-
-    return this.calendarInner.querySelector(`#mockup-container ${element}`) as SVGElement;
-  }
-
-  /**
-   * @property {Function} getMockupByIndex - Get mockup to manipulate by index of month
-   * @param {number} index
-   */
-  getMockupByIndex(index: number): SVGElement {
-    return this.calendarInner.querySelector(`#mockup-${index}`) as SVGElement;
-  }
 
   dispose(): void {
     // this.cache.reset();

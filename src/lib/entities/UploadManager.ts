@@ -8,7 +8,7 @@ export type UploadManagerOptions = {
   format: FormatName;
   mockupOptions: SinglePageMockupOutputOptions | MultiPageMockupOutputOptions;
   outputDimensions: OutputDimensions;
-  getCurrentMonth: () => number;
+  getCurrentMonthInViewIndex: () => number;
   getCurrentMockup: (element?: string) => SVGElement | SVGImageElement;
   getMockupByIndex: (index: number) => SVGElement;
   getImageGroupByIndex?: (index: number) => SVGGElement;
@@ -26,7 +26,7 @@ export default class UploadManager {
     if (!(e.target instanceof HTMLInputElement) || !e.target.files?.length) return;
 
     const file = e.target.files[0];
-    const currentMonth = this.options.getCurrentMonth();
+    const currentMonth = this.options.getCurrentMonthInViewIndex();
     const imageGroup = this.options.getCurrentMockup('#image-group') as SVGGElement;
 
     if (!imageGroup) return;

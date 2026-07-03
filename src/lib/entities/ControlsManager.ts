@@ -8,10 +8,13 @@ export type ControlsCallbacks = {
   onUploadImage: (event: InputEvent) => void;
 };
 
-export type MultiPageControlsCallbacks = ControlsCallbacks & {
-  onDownloadAllPdf: () => void;
+export type MultipageViewControllsCallbacks = {
   onPrevMonth: () => void;
   onNextMonth: () => void;
+};
+
+export type MultiPageControlsCallbacks = ControlsCallbacks & {
+  onDownloadAllPdf: () => void;
   onUploadMultipleImages: (event: Event) => void;
 };
 
@@ -117,6 +120,7 @@ export class MultiPageControlsManager extends BasicControlsManager {
   constructor(
     controlsContainer: HTMLDivElement,
     protected callbacks: MultiPageControlsCallbacks,
+    protected viewCallbacks: MultipageViewControllsCallbacks,
   ) {
     super(controlsContainer, callbacks);
   }
@@ -187,11 +191,11 @@ export class MultiPageControlsManager extends BasicControlsManager {
     super.bindEvents();
 
     this.prevBtn.addEventListener('click', () => {
-      this.callbacks.onPrevMonth();
+      this.viewCallbacks.onPrevMonth();
     });
 
     this.nextBtn.addEventListener('click', () => {
-      this.callbacks.onNextMonth();
+      this.viewCallbacks.onNextMonth();
     });
 
     this.allPDFDownloadBtn.addEventListener('click', () => {
