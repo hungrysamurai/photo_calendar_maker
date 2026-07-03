@@ -9,7 +9,7 @@ import { CalendarType, PDFPagesRangeToDownload } from '../types';
 import DataStore from './entities/DataStore/DataStore';
 import DownloadManager from './entities/DownloadManager';
 import ViewController from './entities/ViewController';
-import { createSVGElement } from './utils/DOM/createElement/createSVGElement';
+
 import { getMonthsList } from './utils/getMonthsList';
 import getWeekDays from './utils/getWeekDays';
 
@@ -38,8 +38,6 @@ export class Calendar {
 
   calendarInner: HTMLDivElement;
   calendarWrapper: HTMLDivElement;
-
-  weekDaysNamesList: string[];
 
   parentContainer: HTMLDivElement;
   controlsContainer: HTMLDivElement;
@@ -111,8 +109,6 @@ export class Calendar {
         showLoader: this.showLoader,
         hideLoader: this.hideLoader,
       });
-
-      this.weekDaysNamesList = getWeekDays('short', lang);
     } else {
       this.controlsManager = new MultiPageControlsManager(this.controlsContainer, {
         onDownloadCurrentPdf: this.onDownloadCurrentPdf,
@@ -156,8 +152,6 @@ export class Calendar {
         showLoader: this.showLoader.bind(this),
         hideLoader: this.hideLoader.bind(this),
       });
-
-      this.weekDaysNamesList = getWeekDays('long', lang);
     }
 
     this.viewController = new ViewController({
@@ -169,7 +163,6 @@ export class Calendar {
       outputDimensions: this.outputDimensions,
       year: this.startYear,
       monthsNamesList: this.monthsNamesList,
-      weekDaysNamesList: this.weekDaysNamesList,
       font: this.font,
       lang,
       showLoader: this.showLoader,
@@ -178,32 +171,6 @@ export class Calendar {
 
     console.log(this);
 
-    // this.cache = new MockupsCache();
-    // this.imageCropper = new ImageCropper(DOMElements.cropControlsContainer, {
-    //   onBeforeStart: this.showLoader,
-    //   onCropperReady: this.hideLoader,
-    //   onAfterRemove: () => this.cropControlsContainer.classList.add('hide'),
-    //   saveImage: (resultUrl) => saveImageIDB(resultUrl, this.currentMonth),
-    //   updateCache: (svgMockup) => {
-    //     this.cache.cacheMockup(
-    //       svgMockup,
-    //       this.currentMonth,
-    //       this.outputDimensions[this.format].width,
-    //       this.outputDimensions[this.format].height,
-    //     );
-    //   },
-    // });
-    // loadingOverlay.mount(this.parentContainer, DOMElements.controlsContainer);
-    // // Add subfamilies to fonts object
-    // for (let i = 0; i < currentFont.length; i++) {
-    //   this.fonts[currentFont[i]?.names?.fontSubfamily.en.toLowerCase() as FontSubfamily] =
-    //     currentFont[i];
-    // }
-    // this.monthsNamesList = getMonthsList(this.lang);
-    // this.firstMonth = this.firstMonthIndex;
-    // this.startYear = this.year;
-    // this.lastMonth = (this.firstMonth + 11) % 12;
-    // this.endYear = this.firstMonth === 0 ? this.startYear : this.startYear + 1;
     // // Subscribe on cache events
     // this.subscribeOnCacheEvents();
   }

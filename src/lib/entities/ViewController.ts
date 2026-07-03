@@ -3,6 +3,7 @@ import { createHTMLElement } from '../utils/DOM/createElement/createHTMLElement'
 import { createSVGElement } from '../utils/DOM/createElement/createSVGElement';
 import getDaysInMonth from '../utils/getDaysInMonth';
 import getMonthFirstDay from '../utils/getMonthFirstDay';
+import getWeekDays from '../utils/getWeekDays';
 
 export type ViewControllerOptions = {
   mainContainer: HTMLDivElement;
@@ -13,7 +14,6 @@ export type ViewControllerOptions = {
   firstMonthIndex: number;
   year: number;
   monthsNamesList: string[];
-  weekDaysNamesList: string[];
   font: FontData;
   lang: CalendarLanguage;
   showLoader: () => void;
@@ -24,20 +24,28 @@ export default class ViewController {
   calendarWrapper: HTMLDivElement;
   calendarInner: HTMLDivElement;
 
+  weekDaysNamesList: string[];
+
+  currentMonthInView: number = 0;
+
   constructor(private options: ViewControllerOptions) {
-    this.createOnePageSVGMockup();
+    if (options.type === CalendarType.SinglePage) {
+      this.weekDaysNamesList = getWeekDays('short', options.lang);
+
+      this.createOnePageSVGMockup();
+    } else {
+      this.weekDaysNamesList = getWeekDays('long', options.lang);
+
+      this.createMultiPageSVGMockups();
+    }
   }
 
   private async createOnePageSVGMockup() {
     this.options.showLoader();
 
     const mockupOptions = this.options.mockupOptions as SinglePageMockupOutputOptions;
-    const format = this.options.format;
-    const outputDimensions = this.options.outputDimensions;
-    const firstMonthIndex = this.options.firstMonthIndex;
     let year = this.options.year;
-    const monthsNamesList = this.options.monthsNamesList;
-    const weekDaysNamesList = this.options.weekDaysNamesList;
+    const { format, outputDimensions, firstMonthIndex, monthsNamesList } = this.options;
 
     this.calendarWrapper = createHTMLElement({
       elementName: 'div',
@@ -187,7 +195,7 @@ export default class ViewController {
       });
 
       // Generate week days paths
-      weekDaysNamesList.map((weekDayName, i) => {
+      this.weekDaysNamesList.map((weekDayName, i) => {
         // исключение для 'Cр'
         const descenderException = i === 2 && this.options.lang === 'ru' ? true : false;
 
@@ -240,6 +248,191 @@ export default class ViewController {
     // );
 
     this.options.hideLoader();
+  }
+
+  private async createMultiPageSVGMockups() {
+    this.options.showLoader();
+
+    const mockupOptions = this.options.mockupOptions as MultiPageMockupOutputOptions;
+    let year = this.options.year;
+    const { format, outputDimensions, firstMonthIndex, monthsNamesList } = this.options;
+
+    this.calendarWrapper = createHTMLElement({
+      elementName: 'div',
+      className: 'calendar-wrapper',
+      parentToAppend: this.options.mainContainer,
+    });
+
+    this.calendarInner = createHTMLElement({
+      elementName: 'div',
+      className: 'calendar-inner',
+      parentToAppend: this.calendarWrapper,
+    });
+
+    this.setVisibleMonth();
+
+    let monthCounter = firstMonthIndex;
+
+    // Create months templates
+    for (let i = 0; i < 12; i++) {
+      const monthContainer = createHTMLElement({
+        elementName: 'div',
+        className: 'month-container',
+        id: `month-${i}-container`,
+        parentToAppend: this.calendarInner,
+        attributes: {
+          ['data-month']: monthCounter.toString(),
+          ['data-year']: year.toString(),
+        },
+      });
+
+      const monthMockup = createSVGElement({
+        elementName: 'svg',
+        parentToAppend: monthContainer,
+        id: `mockup-${i}`,
+        attributes: {
+          viewBox: `0 0 ${mockupOptions.mockupWidth} ${mockupOptions.mockupHeight}`,
+          width: outputDimensions[format].width.toString(),
+          height: outputDimensions[format].height.toString(),
+        },
+      });
+
+      createSVGElement({
+        elementName: 'rect',
+        id: `background-rect-${i}`,
+        parentToAppend: monthMockup,
+        attributes: {
+          width: mockupOptions.mockupWidth.toString(),
+          height: mockupOptions.mockupHeight.toString(),
+          style: `fill: ${mockupOptions.mockupBackgroundFill}`,
+        },
+      });
+
+      const monthTextGroup = createSVGElement({
+        elementName: 'g',
+        id: `days-grid-${i}`,
+        parentToAppend: monthMockup,
+      });
+
+      createSVGElement({
+        elementName: 'g',
+        id: `#month-title-${i}`,
+        parentToAppend: monthTextGroup,
+        content: this.getOutline(
+          monthsNamesList[monthCounter],
+          mockupOptions.monthTitleX,
+          mockupOptions.monthTitleY,
+          mockupOptions.monthTitleFontSize,
+        ),
+      });
+
+      createSVGElement({
+        elementName: 'g',
+        id: `#year-title-${i}`,
+        parentToAppend: monthTextGroup,
+        content: this.getOutline(
+          `${year}`,
+          mockupOptions.yearTitleX,
+          mockupOptions.yearTitleY,
+          mockupOptions.yearTitleFontSize,
+        ),
+      });
+
+      const daysTitles = createSVGElement({
+        elementName: 'g',
+        id: `days-titles-${i}`,
+        parentToAppend: monthTextGroup,
+      });
+
+      // Generate week days paths
+      this.weekDaysNamesList.map((weekDayName, i) => {
+        createSVGElement({
+          elementName: 'g',
+          parentToAppend: daysTitles,
+          children: [
+            this.getAndPlaceOutline(
+              weekDayName,
+              mockupOptions.weekDayX,
+              mockupOptions.weekDayY,
+              mockupOptions.weekDayFontSize,
+            ),
+          ],
+          attributes: {
+            transform: `translate(
+                ${mockupOptions.calendarGridX + mockupOptions.dayCellWidth * i} ${mockupOptions.weekDaysY})`,
+          },
+        });
+      });
+
+      const monthImageGroup = createSVGElement({
+        elementName: 'g',
+        id: 'image-group',
+        parentToAppend: monthMockup,
+      });
+
+      // Check if current month have a corresponding saved in IDB image
+      // const imageInIDB = this.imagesFromIDB.find((el) => el.id === i);
+
+      // if (imageInIDB) {
+      // ...fetch stored image and place it on mockup
+      // const imageObject = await fetch(imageInIDB.image);
+      // const imgURL = imageObject.url;
+
+      // createSVGElement({
+      //   elementName: 'image',
+      //   parentToAppend: monthImageGroup,
+      //   attributes: {
+      //     height: this.mockupOptions.imagePlaceholderHeight.toString(),
+      //     width: this.mockupOptions.imagePlaceholderWidth.toString(),
+      //     x: this.mockupOptions.imagePlaceholderX.toString(),
+      //     y: this.mockupOptions.imagePlaceholderY.toString(),
+      //   },
+      //   attributesNS: {
+      //     href: imgURL,
+      //   },
+      // });
+      // } else {
+      // if no saved image - just put placeholder
+      createSVGElement({
+        elementName: 'rect',
+        id: `image-placeholder-${i}`,
+        parentToAppend: monthImageGroup,
+        attributes: {
+          width: mockupOptions.imagePlaceholderWidth.toString(),
+          height: mockupOptions.imagePlaceholderHeight.toString(),
+          x: mockupOptions.imagePlaceholderX.toString(),
+          y: mockupOptions.imagePlaceholderY.toString(),
+          style: 'fill: #e8e8e8',
+        },
+      });
+      // }
+
+      monthCounter++;
+
+      if (monthCounter > 11) {
+        monthCounter = 0;
+        year++;
+      }
+
+      this.createMonthGrid(
+        monthTextGroup,
+        getMonthFirstDay(monthCounter - 1, year) - 1,
+        getDaysInMonth(monthCounter, year),
+        getDaysInMonth(monthCounter - 1, year),
+        mockupOptions.calendarGridX,
+        mockupOptions.calendarGridY,
+        mockupOptions.daysFontSize,
+        mockupOptions.dayCellStyles,
+      );
+    }
+    this.options.hideLoader();
+  }
+
+  /**
+   * @property {Function} setVisibleMonth - show current month mockup in DOM by translate calendarInner container by X axis
+   */
+  setVisibleMonth(): void {
+    this.calendarInner.style.transform = `translateX(calc(-8.333333% * ${this.currentMonthInView}))`;
   }
 
   /**
