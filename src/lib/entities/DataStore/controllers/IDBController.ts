@@ -59,13 +59,6 @@ export default class IDBController {
     });
   }
 
-  private promisifyRequest<T>(request: IDBRequest<T>): Promise<T> {
-    return new Promise((resolve, reject) => {
-      request.onsuccess = () => resolve(request.result);
-      request.onerror = () => reject(request.error);
-    });
-  }
-
   private transactionComplete(transaction: IDBTransaction): Promise<void> {
     return new Promise((resolve, reject) => {
       transaction.oncomplete = () => resolve();
@@ -119,5 +112,25 @@ export default class IDBController {
     } finally {
       db.close();
     }
+  }
+
+  async saveToIDB(objectStoreName, data) {
+    const db = await this.openDB();
+
+    try {
+      const tx = db.transaction(db.objectStoreNames, 'readwrite');
+
+      await this.promisifyRequest(tx.objectStore(objectStoreName).put(data));
+      await this.transactionComplete(tx);
+    } finally {
+      db.close();
+    }
+  }
+
+  private promisifyRequest<T>(request: IDBRequest<T>): Promise<T> {
+    return new Promise((resolve, reject) => {
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error);
+    });
   }
 }

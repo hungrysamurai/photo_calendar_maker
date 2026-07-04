@@ -1,5 +1,5 @@
 import { CalendarType, FormatName, PDFPagesRangeToDownload } from '../../types';
-import MockupsCache from './MockupsCache/MockupsCache';
+import MockupsCache from './DataStore/controllers/MockupsCacheController/MockupsCache';
 
 export type DownloadManagerOptions = {
   cache: MockupsCache;

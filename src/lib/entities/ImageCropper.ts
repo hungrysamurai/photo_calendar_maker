@@ -4,8 +4,9 @@ import { icons } from '../../assets/icons';
 import { createHTMLElement } from '../utils/DOM/createElement/createHTMLElement';
 
 export type ImageCropperCallbacks = {
-  saveImage: (resultUrl: string) => void;
-  updateCache: (svgMockup: SVGElement) => void;
+  saveImage: (data: DataToStoreAndCache) => Promise<void>;
+  getCurrentMonthInViewIndex: () => number;
+  getMockupByIndex: (index: number) => SVGElement;
   onBeforeStart: () => void;
   onCropperReady: () => void;
   onAfterRemove?: () => void;
@@ -144,7 +145,7 @@ export default class ImageCropper {
     this.cropperOuter.style.height = `${height}px`;
   }
 
-  applyCrop(): void {
+  async applyCrop(): Promise<void> {
     if (!this.cropper || !this.imageToCrop) return;
 
     const canvas = this.cropper.getCroppedCanvas({
@@ -164,13 +165,16 @@ export default class ImageCropper {
 
     this.imageToCrop.setAttributeNS('http://www.w3.org/1999/xlink', 'href', resultURL);
 
-    this.callbacks.saveImage(resultURL);
+    const currentMockupIndex = this.callbacks.getCurrentMonthInViewIndex();
+    const mockup = this.callbacks.getMockupByIndex(currentMockupIndex);
 
-    const svgMockup =
-      this.imageToCrop.ownerSVGElement ?? (this.imageToCrop.closest('svg') as SVGSVGElement);
-    if (svgMockup) {
-      this.callbacks.updateCache(svgMockup);
-    }
+    await this.callbacks.saveImage({
+      mockup,
+      image: {
+        id: currentMockupIndex,
+        image: resultURL,
+      },
+    });
 
     this.removeCropper();
   }
@@ -193,5 +197,10 @@ export default class ImageCropper {
     this.cropperOuter.innerHTML = '';
     this.cropControlsContainer.classList.add('hide');
     this.callbacks.onAfterRemove?.();
+  }
+
+  dispose() {
+    this.removeCropper();
+    this.cropperOuter.remove();
   }
 }

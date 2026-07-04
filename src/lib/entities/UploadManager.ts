@@ -1,7 +1,7 @@
 import { FormatName } from '../../types';
 import { createSVGElement } from '../utils/DOM/createElement/createSVGElement';
 import reduceImageSize from '../utils/reduceImage';
-import MockupsCache from './MockupsCache/MockupsCache';
+import MockupsCache from './DataStore/controllers/MockupsCacheController/MockupsCache';
 
 export type UploadManagerOptions = {
   cache: MockupsCache;
@@ -12,7 +12,7 @@ export type UploadManagerOptions = {
   getCurrentMockup: (element?: string) => SVGElement | SVGImageElement;
   getMockupByIndex: (index: number) => SVGElement;
   getImageGroupByIndex?: (index: number) => SVGGElement;
-  saveImage: (resultUrl: string, id: number) => void;
+  saveImage: (data: DataToStoreAndCache) => Promise<void>;
   showLoader: () => void;
   hideLoader: () => void;
 };
@@ -62,7 +62,7 @@ export default class UploadManager {
   private async processSingleFile(
     file: File,
     imageGroup: SVGGElement,
-    cacheIndex: number,
+    mockupIndex: number,
   ): Promise<void> {
     imageGroup.innerHTML = '';
 
@@ -89,19 +89,13 @@ export default class UploadManager {
 
     imageEl.setAttributeNS('http://www.w3.org/1999/xlink', 'href', resultImage);
 
-    this.options.saveImage(resultImage, cacheIndex);
-    await this.cacheMockup(cacheIndex);
-  }
-
-  private async cacheMockup(cacheIndex: number): Promise<void> {
-    const mockup = this.options.getMockupByIndex(cacheIndex);
-
-    await this.options.cache.cacheMockup(
-      mockup,
-      cacheIndex,
-      this.options.outputDimensions[this.options.format].width,
-      this.options.outputDimensions[this.options.format].height,
-    );
+    await this.options.saveImage({
+      mockup: this.options.getMockupByIndex(mockupIndex),
+      image: {
+        id: mockupIndex,
+        image: resultImage,
+      },
+    });
   }
 
   private async readFile(file: File): Promise<string> {

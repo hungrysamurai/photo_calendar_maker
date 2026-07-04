@@ -1,7 +1,7 @@
 import { BasicControlsManager, MultiPageControlsManager } from './entities/ControlsManager';
 import ImageCropper from './entities/ImageCropper';
 import loadingOverlay from './entities/LoadingOverlay';
-import MockupsCache from './entities/MockupsCache/MockupsCache';
+import MockupsCache from './entities/DataStore/controllers/MockupsCacheController/MockupsCache';
 import UploadManager from './entities/UploadManager';
 
 import { CalendarType, PDFPagesRangeToDownload } from '../types';
@@ -61,14 +61,6 @@ export class Calendar {
 
     loadingOverlay.mount(this.parentContainer, this.controlsContainer);
 
-    this.imageCropper = new ImageCropper(DOMElements.cropControlsContainer, {
-      onBeforeStart: this.showLoader,
-      onCropperReady: this.hideLoader,
-      onAfterRemove: () => this.cropControlsContainer.classList.add('hide'),
-      saveImage: (resultUrl) => {},
-      updateCache: (svgMockup) => {},
-    });
-
     this.viewController = new ViewController({
       mainContainer: this.parentContainer,
       controlsContainer: this.controlsContainer,
@@ -94,6 +86,15 @@ export class Calendar {
       hideLoader: this.hideLoader,
     });
 
+    this.imageCropper = new ImageCropper(DOMElements.cropControlsContainer, {
+      onBeforeStart: this.showLoader,
+      onCropperReady: this.hideLoader,
+      onAfterRemove: () => this.cropControlsContainer.classList.add('hide'),
+      saveImage: this.dataStore.saveDataToIDB,
+      getCurrentMonthInViewIndex: () => this.viewController.currentMonthInView,
+      getMockupByIndex: this.viewController.getMockupByIndex,
+    });
+
     this.uploadManager = new UploadManager({
       cache: this.cache,
       format: format,
@@ -103,7 +104,7 @@ export class Calendar {
       getCurrentMockup: this.viewController.getCurrentMockup,
       getMockupByIndex: this.viewController.getMockupByIndex,
       getImageGroupByIndex: this.viewController.getImageGroupByIndex,
-      saveImage: (resultUrl, id) => {},
+      saveImage: this.dataStore.saveDataToIDB,
       showLoader: this.showLoader,
       hideLoader: this.hideLoader,
     });
@@ -122,8 +123,6 @@ export class Calendar {
       showLoader: this.showLoader,
       hideLoader: this.hideLoader,
     });
-
-    console.log(this);
 
     // // Subscribe on cache events
     // this.subscribeOnCacheEvents();
@@ -195,6 +194,7 @@ export class Calendar {
   };
 
   dispose(): void {
+    this.imageCropper.dispose();
     // this.cache.reset();
     // this.cache.removeEventListener('workStart', this.showLoader);
     // this.cache.removeEventListener('workDone', this.hideLoader);

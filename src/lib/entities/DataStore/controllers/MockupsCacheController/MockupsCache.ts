@@ -2,7 +2,7 @@ import getSharedWorkerPool, { WorkerPool } from './WorkerPool/WorkerPool';
 /**
  * MockupsCache manages caching of SVG-based mockups as image blobs. Uses WorkerPool to offload caching tasks to workers when possible. Falls back to main thread rendering if workers fail.
  */
-export default class MockupsCache extends EventTarget {
+export default class MockupsCacheController extends EventTarget {
   private mockupsCache: Blob[] = [];
 
   // private cachingWorkersPool: WorkerPool<CacheWorkerWork, Blob>;

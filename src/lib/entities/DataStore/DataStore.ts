@@ -45,6 +45,10 @@ export default class DataStore {
     }
   }
 
+  async saveDataToIDB(data: DataToStoreAndCache) {
+    console.log(data);
+  }
+
   calendarProjectData: CalendarData;
   calendarImagesData: ImageObject[] = [];
   calendarCachedMockupsData: CachedMockupObject[] = [];

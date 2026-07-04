@@ -73,6 +73,11 @@ declare global {
     mockup: Blob;
   };
 
+  type DataToStoreAndCache = {
+    mockup: SVGElement;
+    image: ImageObject;
+  };
+
   type FontArray = Font[];
 
   type SourceFontData = {
