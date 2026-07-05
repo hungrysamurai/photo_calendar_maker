@@ -3,7 +3,7 @@ import getSharedWorkerPool, { WorkerPool } from './WorkerPool/WorkerPool';
  * MockupsCache manages caching of SVG-based mockups as image blobs. Uses WorkerPool to offload caching tasks to workers when possible. Falls back to main thread rendering if workers fail.
  */
 export default class MockupsCacheController extends EventTarget {
-  private mockupsCache: Blob[] = [];
+  // private mockupsCache: Blob[] = [];
 
   // private cachingWorkersPool: WorkerPool<CacheWorkerWork, Blob>;
   // private cachingWorkersPool = new WorkerPool<CacheWorkerWork, Blob>(CachingWorker);
@@ -74,7 +74,7 @@ export default class MockupsCacheController extends EventTarget {
 
       const canvas = await this.SVGToCanvas(mockupToCache, width, heigth);
       blob = await this.canvasToBlob(canvas);
-      this.mockupsCache[index] = blob;
+      // this.mockupsCache[index] = blob;
 
       this.cachingsInProgress--;
     }
@@ -122,7 +122,7 @@ export default class MockupsCacheController extends EventTarget {
       transfer: [bmp],
     });
 
-    this.mockupsCache[index] = blob;
+    // this.mockupsCache[index] = blob;
 
     return blob;
   }
@@ -191,7 +191,7 @@ export default class MockupsCacheController extends EventTarget {
   }
 
   public reset() {
-    this.mockupsCache = [];
+    // this.mockupsCache = [];
     this.cachingWorkersPool.clarQueue();
   }
 }

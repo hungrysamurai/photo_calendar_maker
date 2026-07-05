@@ -6,6 +6,7 @@ import { A_outputFormats } from '../../../assets/A_FormatOptions/A_OutputDimensi
 import { CalendarType } from '../../../types';
 import FontsController from './controllers/FontsController';
 import IDBController from './controllers/IDBController';
+import MockupsCacheController from './controllers/MockupsCacheController/MockupsCache';
 
 export default class DataStore {
   /**
@@ -45,6 +46,8 @@ export default class DataStore {
     }
   }
 
+  private cacheController: MockupsCacheController;
+
   async saveDataToIDB(data: DataToStoreAndCache) {
     console.log(data);
   }
@@ -56,6 +59,7 @@ export default class DataStore {
   constructor() {
     this.fontsController = new FontsController();
     this.IDBController = new IDBController();
+    this.cacheController = new MockupsCacheController();
   }
 
   public async reset(newCalendarData: CalendarData) {
