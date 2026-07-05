@@ -1,10 +1,9 @@
-import { BasicControlsManager, MultiPageControlsManager } from './entities/ControlsManager';
 import ImageCropper from './entities/ImageCropper';
 import loadingOverlay from './entities/LoadingOverlay';
 import MockupsCache from './entities/DataStore/controllers/MockupsCacheController/MockupsCache';
 import UploadManager from './entities/UploadManager';
 
-import { CalendarType, PDFPagesRangeToDownload } from '../types';
+import { PDFPagesRangeToDownload } from '../types';
 
 import DataStore from './entities/DataStore/DataStore';
 import DownloadManager from './entities/DownloadManager';

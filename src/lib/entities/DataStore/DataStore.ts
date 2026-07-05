@@ -48,13 +48,28 @@ export default class DataStore {
 
   private cacheController: MockupsCacheController;
 
-  async saveDataToIDB(data: DataToStoreAndCache) {
-    console.log(data);
-  }
+  saveDataToIDB = async (data: DataToStoreAndCache) => {
+    const { width: mockupWidth, height: mockupHeight } =
+      this.calendarOutputDimensions[this.calendarProjectData.format];
+
+    const mockupBlob = await this.cacheController.cacheMockup(
+      data.mockup,
+      mockupWidth,
+      mockupHeight,
+    );
+
+    const dataToStore: DataToStore = {
+      id: data.index,
+      image: data.image,
+      mockup: mockupBlob,
+    };
+
+    this.IDBController.saveToIDB(dataToStore);
+  };
 
   calendarProjectData: CalendarData;
-  calendarImagesData: ImageObject[] = [];
-  calendarCachedMockupsData: CachedMockupObject[] = [];
+  calendarImagesData: StoredImage[] = [];
+  calendarCachedMockupsData: CachedMockup[] = [];
 
   constructor() {
     this.fontsController = new FontsController();

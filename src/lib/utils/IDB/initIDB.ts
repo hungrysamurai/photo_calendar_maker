@@ -1,7 +1,7 @@
 /**
  * @property {Function} initIDB - if some data in IndexedDB - retrieve project. If not - set up IDB schema for project
  */
-export default function initIDB(initProject: InitProjectFn): void {
+export default function initIDB(initProject): void {
   // Open IDB
   const indexedDB =
     window.indexedDB ||

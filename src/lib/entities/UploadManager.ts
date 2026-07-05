@@ -90,11 +90,9 @@ export default class UploadManager {
     imageEl.setAttributeNS('http://www.w3.org/1999/xlink', 'href', resultImage);
 
     await this.options.saveImage({
+      index: mockupIndex,
       mockup: this.options.getMockupByIndex(mockupIndex),
-      image: {
-        id: mockupIndex,
-        image: resultImage,
-      },
+      image: resultImage,
     });
   }
 

@@ -169,11 +169,9 @@ export default class ImageCropper {
     const mockup = this.callbacks.getMockupByIndex(currentMockupIndex);
 
     await this.callbacks.saveImage({
+      index: currentMockupIndex,
+      image: resultURL,
       mockup,
-      image: {
-        id: currentMockupIndex,
-        image: resultURL,
-      },
     });
 
     this.removeCropper();

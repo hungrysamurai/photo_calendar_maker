@@ -63,19 +63,22 @@ declare global {
     type: CalendarType;
   };
 
-  type ImageObject = {
+  type StoredImage = {
     id: number;
     image: string;
   };
 
-  type CachedMockupObject = {
+  type CachedMockup = {
     id: number;
     mockup: Blob;
   };
 
+  type DataToStore = StoredImage & CachedMockup;
+
   type DataToStoreAndCache = {
+    index: number;
     mockup: SVGElement;
-    image: ImageObject;
+    image: string;
   };
 
   type FontArray = Font[];
@@ -200,10 +203,4 @@ declare global {
     mockupWidth: number;
     weekDayX: number;
   }
-
-  type InitProjectFn = (
-    { startYear, firstMonthIndex, lang, font, format, type }: CalendarData,
-    savedImages?: ImageObject[],
-    savedCachedMockups?: CachedMockupObject[],
-  ) => Promise<void>;
 }

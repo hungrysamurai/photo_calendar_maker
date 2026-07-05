@@ -31,13 +31,13 @@ export default class MockupsCacheController extends EventTarget {
   /**
    * Returns all cached mockups as an array of Blobs.
    */
-  public get cachedMockups() {
-    return this.mockupsCache;
-  }
+  // public get cachedMockups() {
+  //   return this.mockupsCache;
+  // }
 
-  setRetrievedMockup(i: number, mockup: Blob) {
-    this.mockupsCache[i] = mockup;
-  }
+  // setRetrievedMockup(i: number, mockup: Blob) {
+  //   this.mockupsCache[i] = mockup;
+  // }
 
   /**
    * Dispatches a custom event reflecting the current cache state.
@@ -59,7 +59,7 @@ export default class MockupsCacheController extends EventTarget {
    * @param {number} width - Target width of the output image.
    * @param {number} heigth - Target height of the output image.
    */
-  public async cacheMockup(mockupToCache: SVGElement, index = 0, width: number, heigth: number) {
+  public async cacheMockup(mockupToCache: SVGElement, width: number, heigth: number) {
     this.cachingsInProgress++;
     if (this.state === 'idle') {
       this.state = 'work';
@@ -67,7 +67,7 @@ export default class MockupsCacheController extends EventTarget {
     }
     let blob: Blob;
     try {
-      blob = await this.cacheWithWorkers(mockupToCache, index, width, heigth);
+      blob = await this.cacheWithWorkers(mockupToCache, width, heigth);
       this.cachingsInProgress--;
     } catch (err) {
       console.log(err);
@@ -95,12 +95,7 @@ export default class MockupsCacheController extends EventTarget {
    * @param {number} width - Width of the resulting image.
    * @param {number} heigth - Height of the resulting image.
    */
-  private async cacheWithWorkers(
-    mockupToCache: SVGElement,
-    index = 0,
-    width: number,
-    heigth: number,
-  ) {
+  private async cacheWithWorkers(mockupToCache: SVGElement, width: number, heigth: number) {
     const svgData = new XMLSerializer().serializeToString(mockupToCache);
 
     const svgBlob = new Blob([svgData], {
@@ -121,8 +116,6 @@ export default class MockupsCacheController extends EventTarget {
       data: { bmp },
       transfer: [bmp],
     });
-
-    // this.mockupsCache[index] = blob;
 
     return blob;
   }

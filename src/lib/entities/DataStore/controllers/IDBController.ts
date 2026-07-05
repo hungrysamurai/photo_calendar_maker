@@ -69,8 +69,8 @@ export default class IDBController {
 
   async initIDB(): Promise<void | {
     data: CalendarData;
-    images: ImageObject[];
-    cachedMockups: CachedMockupObject[];
+    images: StoredImage[];
+    cachedMockups: CachedMockup[];
   }> {
     const db = await this.openDB();
 
@@ -81,8 +81,8 @@ export default class IDBController {
         this.promisifyRequest<CalendarData | undefined>(
           tx.objectStore('current_project_data').get(0),
         ),
-        this.promisifyRequest<ImageObject[]>(tx.objectStore('current_project_images').getAll()),
-        this.promisifyRequest<CachedMockupObject[]>(
+        this.promisifyRequest<StoredImage[]>(tx.objectStore('current_project_images').getAll()),
+        this.promisifyRequest<CachedMockup[]>(
           tx.objectStore('current_project_cached_mockups').getAll(),
         ),
       ]);
@@ -114,13 +114,21 @@ export default class IDBController {
     }
   }
 
-  async saveToIDB(objectStoreName, data) {
+  async saveToIDB(data: DataToStore) {
     const db = await this.openDB();
+
+    const { id, mockup, image } = data;
 
     try {
       const tx = db.transaction(db.objectStoreNames, 'readwrite');
 
-      await this.promisifyRequest(tx.objectStore(objectStoreName).put(data));
+      await Promise.all([
+        await this.promisifyRequest(tx.objectStore('current_project_images').put({ image, id })),
+        await this.promisifyRequest(
+          tx.objectStore('current_project_cached_mockups').put({ mockup, id }),
+        ),
+      ]);
+
       await this.transactionComplete(tx);
     } finally {
       db.close();
