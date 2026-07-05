@@ -19,8 +19,6 @@ export class Calendar {
   private uploadManager: UploadManager;
   private downloadManager: DownloadManager;
 
-  cache: MockupsCache;
-
   font: FontData = {};
   outputDimensions: OutputDimensions;
   mockupOptions: SinglePageMockupOutputOptions | MultiPageMockupOutputOptions;
@@ -32,9 +30,6 @@ export class Calendar {
   lastMonth: number;
   endYear: number;
 
-  calendarInner: HTMLDivElement;
-  calendarWrapper: HTMLDivElement;
-
   parentContainer: HTMLDivElement;
   controlsContainer: HTMLDivElement;
   cropControlsContainer: HTMLDivElement;
@@ -43,6 +38,7 @@ export class Calendar {
     this.dataStore = dataStore;
 
     const { lang, firstMonthIndex, startYear, type, format } = this.dataStore.calendarProjectData;
+    const storedImages = this.dataStore.calendarImagesData;
     this.font = this.dataStore.currentFont;
     this.outputDimensions = this.dataStore.calendarOutputDimensions;
     this.mockupOptions = this.dataStore.currentMockupOptions;
@@ -81,6 +77,7 @@ export class Calendar {
       monthsNamesList: this.monthsNamesList,
       font: this.font,
       lang,
+      storedImages,
       showLoader: this.showLoader,
       hideLoader: this.hideLoader,
     });
@@ -95,7 +92,6 @@ export class Calendar {
     });
 
     this.uploadManager = new UploadManager({
-      cache: this.cache,
       format: format,
       mockupOptions: this.mockupOptions,
       outputDimensions: this.outputDimensions,
@@ -109,7 +105,6 @@ export class Calendar {
     });
 
     this.downloadManager = new DownloadManager({
-      cache: this.cache,
       calendarType: type,
       calendarFirstMonth: this.firstMonth,
       calendarStartYear: this.startYear,
@@ -123,16 +118,14 @@ export class Calendar {
       hideLoader: this.hideLoader,
     });
 
-    // // Subscribe on cache events
-    // this.subscribeOnCacheEvents();
+    // Subscribe on cache events
+    this.subscribeOnCacheEvents();
   }
 
-  // subscribeOnCacheEvents() {
-  //   this.cache.addEventListener('workStart', this.showLoader);
-  //   this.cache.addEventListener('workDone', this.hideLoader);
-  // }
-
-  // Behaviorial callbacks
+  subscribeOnCacheEvents() {
+    this.dataStore.cacheController.addEventListener('workStart', this.showLoader);
+    this.dataStore.cacheController.addEventListener('workDone', this.hideLoader);
+  }
 
   removeCropperIfActive = () => {
     if (this.imageCropper.isActive) {
@@ -187,15 +180,17 @@ export class Calendar {
   };
 
   hideLoader = (): void => {
-    // if (this.cache.state === 'idle') {
-    loadingOverlay.hide();
-    // }
+    console.log(this.dataStore.cacheController.state);
+
+    if (this.dataStore.cacheController.state === 'idle') {
+      loadingOverlay.hide();
+    }
   };
 
   dispose(): void {
     this.imageCropper.dispose();
     // this.cache.reset();
-    // this.cache.removeEventListener('workStart', this.showLoader);
-    // this.cache.removeEventListener('workDone', this.hideLoader);
+    this.dataStore.cacheController.removeEventListener('workStart', this.showLoader);
+    this.dataStore.cacheController.removeEventListener('workDone', this.hideLoader);
   }
 }

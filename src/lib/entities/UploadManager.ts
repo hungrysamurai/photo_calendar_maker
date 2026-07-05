@@ -1,10 +1,8 @@
 import { FormatName } from '../../types';
 import { createSVGElement } from '../utils/DOM/createElement/createSVGElement';
 import reduceImageSize from '../utils/reduceImage';
-import MockupsCache from './DataStore/controllers/MockupsCacheController/MockupsCache';
 
 export type UploadManagerOptions = {
-  cache: MockupsCache;
   format: FormatName;
   mockupOptions: SinglePageMockupOutputOptions | MultiPageMockupOutputOptions;
   outputDimensions: OutputDimensions;

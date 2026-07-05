@@ -25,6 +25,7 @@ export type ViewControllerOptions = {
   monthsNamesList: string[];
   font: FontData;
   lang: CalendarLanguage;
+  storedImages: StoredImage[];
   actionsHandlers: MultiPageControlsCallbacks;
   cleanupHandlers: (() => void)[];
   showLoader: () => void;
@@ -52,7 +53,7 @@ export default class ViewController {
 
       this.weekDaysNamesList = getWeekDays('short', options.lang);
 
-      this.createOnePageSVGMockup();
+      this.createOnePageSVGMockup(this.options.storedImages);
     } else {
       this.controlsManager = new MultiPageControlsManager(
         options.controlsContainer,
@@ -66,11 +67,11 @@ export default class ViewController {
       this.controlsManager.init();
       this.weekDaysNamesList = getWeekDays('long', options.lang);
 
-      this.createMultiPageSVGMockups();
+      this.createMultiPageSVGMockups(this.options.storedImages);
     }
   }
 
-  private async createOnePageSVGMockup() {
+  private async createOnePageSVGMockup(storedImages: StoredImage[]) {
     this.options.showLoader();
 
     const mockupOptions = this.options.mockupOptions as SinglePageMockupOutputOptions;
@@ -116,39 +117,39 @@ export default class ViewController {
       parentToAppend: mockup,
     });
 
-    // const imageInIDB: ImageObject | undefined = this.imagesFromIDB[0];
+    const imageInIDB: StoredImage | undefined = storedImages[0];
 
-    // if (imageInIDB) {
-    //   const imageObject = await fetch(imageInIDB.image);
-    //   const imgURL = imageObject.url;
+    if (imageInIDB) {
+      const imageObject = await fetch(imageInIDB.image);
+      const imgURL = imageObject.url;
 
-    // createSVGElement({
-    //   elementName: 'image',
-    //   parentToAppend: imageElementGroup,
-    //   attributes: {
-    //     height: this.mockupOptions.imagePlaceholderHeight.toString(),
-    //     width: this.mockupOptions.imagePlaceholderWidth.toString(),
-    //     x: this.mockupOptions.imagePlaceholderX.toString(),
-    //     y: this.mockupOptions.imagePlaceholderY.toString(),
-    //   },
-    //   attributesNS: {
-    //     href: imgURL,
-    //   },
-    // });
-    // } else {
-    createSVGElement({
-      elementName: 'rect',
-      id: 'image-placeholder',
-      parentToAppend: imageElementGroup,
-      attributes: {
-        x: mockupOptions.imagePlaceholderX.toString(),
-        y: mockupOptions.imagePlaceholderY.toString(),
-        width: mockupOptions.imagePlaceholderWidth.toString(),
-        height: mockupOptions.imagePlaceholderHeight.toString(),
-        style: 'fill: #e8e8e8',
-      },
-    });
-    // }
+      createSVGElement({
+        elementName: 'image',
+        parentToAppend: imageElementGroup,
+        attributes: {
+          height: mockupOptions.imagePlaceholderHeight.toString(),
+          width: mockupOptions.imagePlaceholderWidth.toString(),
+          x: mockupOptions.imagePlaceholderX.toString(),
+          y: mockupOptions.imagePlaceholderY.toString(),
+        },
+        attributesNS: {
+          href: imgURL,
+        },
+      });
+    } else {
+      createSVGElement({
+        elementName: 'rect',
+        id: 'image-placeholder',
+        parentToAppend: imageElementGroup,
+        attributes: {
+          x: mockupOptions.imagePlaceholderX.toString(),
+          y: mockupOptions.imagePlaceholderY.toString(),
+          width: mockupOptions.imagePlaceholderWidth.toString(),
+          height: mockupOptions.imagePlaceholderHeight.toString(),
+          style: 'fill: #e8e8e8',
+        },
+      });
+    }
 
     createHTMLElement({
       elementName: 'div',
@@ -270,17 +271,10 @@ export default class ViewController {
       mockup.appendChild(monthContainer);
     }
 
-    // this.cache.cacheMockup(
-    //   this.getCurrentMockup('svg'),
-    //   0,
-    //   this.outputDimensions[this.format].width,
-    //   this.outputDimensions[this.format].height,
-    // );
-
     this.options.hideLoader();
   }
 
-  private async createMultiPageSVGMockups() {
+  private async createMultiPageSVGMockups(storedImages: StoredImage[]) {
     this.options.showLoader();
 
     const mockupOptions = this.options.mockupOptions as MultiPageMockupOutputOptions;
@@ -401,41 +395,41 @@ export default class ViewController {
       });
 
       // Check if current month have a corresponding saved in IDB image
-      // const imageInIDB = this.imagesFromIDB.find((el) => el.id === i);
+      const imageInIDB = storedImages.find((el) => el.id === i);
 
-      // if (imageInIDB) {
-      // ...fetch stored image and place it on mockup
-      // const imageObject = await fetch(imageInIDB.image);
-      // const imgURL = imageObject.url;
+      if (imageInIDB) {
+        // ...fetch stored image and place it on mockup
+        const imageObject = await fetch(imageInIDB.image);
+        const imgURL = imageObject.url;
 
-      // createSVGElement({
-      //   elementName: 'image',
-      //   parentToAppend: monthImageGroup,
-      //   attributes: {
-      //     height: this.mockupOptions.imagePlaceholderHeight.toString(),
-      //     width: this.mockupOptions.imagePlaceholderWidth.toString(),
-      //     x: this.mockupOptions.imagePlaceholderX.toString(),
-      //     y: this.mockupOptions.imagePlaceholderY.toString(),
-      //   },
-      //   attributesNS: {
-      //     href: imgURL,
-      //   },
-      // });
-      // } else {
-      // if no saved image - just put placeholder
-      createSVGElement({
-        elementName: 'rect',
-        id: `image-placeholder-${i}`,
-        parentToAppend: monthImageGroup,
-        attributes: {
-          width: mockupOptions.imagePlaceholderWidth.toString(),
-          height: mockupOptions.imagePlaceholderHeight.toString(),
-          x: mockupOptions.imagePlaceholderX.toString(),
-          y: mockupOptions.imagePlaceholderY.toString(),
-          style: 'fill: #e8e8e8',
-        },
-      });
-      // }
+        createSVGElement({
+          elementName: 'image',
+          parentToAppend: monthImageGroup,
+          attributes: {
+            height: mockupOptions.imagePlaceholderHeight.toString(),
+            width: mockupOptions.imagePlaceholderWidth.toString(),
+            x: mockupOptions.imagePlaceholderX.toString(),
+            y: mockupOptions.imagePlaceholderY.toString(),
+          },
+          attributesNS: {
+            href: imgURL,
+          },
+        });
+      } else {
+        // if no saved image - just put placeholder
+        createSVGElement({
+          elementName: 'rect',
+          id: `image-placeholder-${i}`,
+          parentToAppend: monthImageGroup,
+          attributes: {
+            width: mockupOptions.imagePlaceholderWidth.toString(),
+            height: mockupOptions.imagePlaceholderHeight.toString(),
+            x: mockupOptions.imagePlaceholderX.toString(),
+            y: mockupOptions.imagePlaceholderY.toString(),
+            style: 'fill: #e8e8e8',
+          },
+        });
+      }
 
       monthCounter++;
 

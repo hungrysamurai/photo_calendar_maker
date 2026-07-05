@@ -46,7 +46,7 @@ export default class DataStore {
     }
   }
 
-  private cacheController: MockupsCacheController;
+  cacheController: MockupsCacheController;
 
   saveDataToIDB = async (data: DataToStoreAndCache) => {
     const { width: mockupWidth, height: mockupHeight } =
