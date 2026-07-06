@@ -184,7 +184,6 @@ export default class MockupsCacheController extends EventTarget {
   }
 
   public reset() {
-    // this.mockupsCache = [];
-    this.cachingWorkersPool.clarQueue();
+    this.cachingWorkersPool.clearQueue();
   }
 }

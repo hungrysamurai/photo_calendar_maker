@@ -96,6 +96,8 @@ export default class DataStore {
     this.calendarImagesData = [];
     this.calendarCachedMockupsData = [];
 
+    this.cacheController.reset();
+
     await this.IDBController.resetWithNewData(newCalendarData);
   }
 }

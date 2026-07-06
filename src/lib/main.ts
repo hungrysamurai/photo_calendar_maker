@@ -40,8 +40,7 @@ async function newProject() {
   // Purge all current content
   calendarContainer.innerHTML = '';
 
-  // Set new calendar in IDB
-  // resetProjectIDB(newCalendarData);
+  // Set new calendar in IDB via DS with user's input data
   await dataStore?.reset(newCalendarData);
 
   // Generate new calendar
@@ -92,12 +91,16 @@ window.addEventListener(
     // Generate new calendar from inputs
     getButton.addEventListener('click', newProject);
 
-    // Init dataStore, load fonts from assets
+    // Init dataStore
     dataStore = new DataStore();
 
+    // Load fonts from /assets
     await dataStore.fontsController.loadFonts(fontsData);
+
+    // If some data in IDB - get it and store in DS object
     await dataStore.retrieveDataFromIDB();
 
+    // If data in DS - init new project
     if (dataStore.calendarProjectData) {
       newCalendar();
     }

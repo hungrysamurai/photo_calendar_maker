@@ -32,6 +32,7 @@ export class Calendar {
   constructor(DOMElements: ProvidedDOMElements, dataStore: DataStore) {
     this.dataStore = dataStore;
 
+    // Extract data from DS
     const { lang, firstMonthIndex, startYear, type, format } = this.dataStore.calendarProjectData;
     const storedImages = this.dataStore.calendarImagesData;
     const cachedMockups = this.dataStore.calendarCachedMockupsData;
@@ -39,17 +40,21 @@ export class Calendar {
     this.outputDimensions = this.dataStore.calendarOutputDimensions;
     this.mockupOptions = this.dataStore.currentMockupOptions;
 
+    // Set params of calendar
     this.firstMonth = firstMonthIndex;
     this.startYear = startYear;
     this.lastMonth = (this.firstMonth + 11) % 12;
     this.endYear = this.firstMonth === 0 ? this.startYear : this.startYear + 1;
 
+    // Use provided DOM elements
     this.parentContainer = DOMElements.calendarContainer;
     this.controlsContainer = DOMElements.controlsContainer;
     this.cropControlsContainer = DOMElements.cropControlsContainer;
 
+    // Get loader
     loadingOverlay.mount(this.parentContainer, this.controlsContainer);
 
+    // Init view & SVG mockup
     this.viewController = new ViewController({
       mainContainer: this.parentContainer,
       controlsContainer: this.controlsContainer,
@@ -77,6 +82,7 @@ export class Calendar {
       hideLoader: this.hideLoader,
     });
 
+    // Cropper
     this.imageCropper = new ImageCropper(DOMElements.cropControlsContainer, {
       onBeforeStart: this.showLoader,
       onCropperReady: this.hideLoader,
@@ -86,6 +92,7 @@ export class Calendar {
       getMockupByIndex: this.viewController.getMockupByIndex,
     });
 
+    // Uploader
     this.uploadManager = new UploadManager({
       format: format,
       mockupOptions: this.mockupOptions,
@@ -99,6 +106,7 @@ export class Calendar {
       hideLoader: this.hideLoader,
     });
 
+    // Downloader
     this.downloadManager = new DownloadManager({
       calendarType: type,
       calendarFirstMonth: this.firstMonth,
@@ -114,10 +122,8 @@ export class Calendar {
       hideLoader: this.hideLoader,
     });
 
-    // Subscribe on cache events
+    // Subscribe on DS cache events
     this.subscribeOnCacheEvents();
-
-    console.log(this);
   }
 
   subscribeOnCacheEvents() {
@@ -187,7 +193,7 @@ export class Calendar {
 
   dispose(): void {
     this.imageCropper.dispose();
-    // this.cache.reset();
+
     this.dataStore.cacheController.removeEventListener('workStart', this.showLoader);
     this.dataStore.cacheController.removeEventListener('workDone', this.hideLoader);
   }

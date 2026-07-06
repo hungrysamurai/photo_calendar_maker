@@ -129,11 +129,7 @@ export class WorkerPool<TIn, TOut> {
     }
   }
 
-  /**
-   * Terminates all workers.
-   * Use this when the pool is no longer needed to free resources.
-   */
-  public clarQueue() {
+  public clearQueue() {
     this.workQueue = [];
   }
 }
