@@ -1,15 +1,12 @@
 import ImageCropper from './entities/ImageCropper';
 import loadingOverlay from './entities/LoadingOverlay';
-import MockupsCache from './entities/DataStore/controllers/MockupsCacheController/MockupsCache';
 import UploadManager from './entities/UploadManager';
-
-import { PDFPagesRangeToDownload } from '../types';
 
 import DataStore from './entities/DataStore/DataStore';
 import DownloadManager from './entities/DownloadManager';
 import ViewController from './entities/ViewController';
 
-import { getMonthsList } from './utils/getMonthsList';
+import { PDFPagesRangeToDownload } from '../types';
 
 export class Calendar {
   private dataStore;
@@ -22,8 +19,6 @@ export class Calendar {
   font: FontData = {};
   outputDimensions: OutputDimensions;
   mockupOptions: SinglePageMockupOutputOptions | MultiPageMockupOutputOptions;
-
-  monthsNamesList: ReturnType<typeof getMonthsList>;
 
   firstMonth: number;
   startYear: number;
@@ -39,11 +34,10 @@ export class Calendar {
 
     const { lang, firstMonthIndex, startYear, type, format } = this.dataStore.calendarProjectData;
     const storedImages = this.dataStore.calendarImagesData;
+    const cachedMockups = this.dataStore.calendarCachedMockupsData;
     this.font = this.dataStore.currentFont;
     this.outputDimensions = this.dataStore.calendarOutputDimensions;
     this.mockupOptions = this.dataStore.currentMockupOptions;
-
-    this.monthsNamesList = getMonthsList(lang);
 
     this.firstMonth = firstMonthIndex;
     this.startYear = startYear;
@@ -74,10 +68,11 @@ export class Calendar {
       mockupOptions: this.mockupOptions,
       outputDimensions: this.outputDimensions,
       year: this.startYear,
-      monthsNamesList: this.monthsNamesList,
       font: this.font,
       lang,
       storedImages,
+      cachedMockups,
+      cacheMockups: this.dataStore.setMockupsIDB,
       showLoader: this.showLoader,
       hideLoader: this.hideLoader,
     });
@@ -120,6 +115,8 @@ export class Calendar {
 
     // Subscribe on cache events
     this.subscribeOnCacheEvents();
+
+    console.log(this);
   }
 
   subscribeOnCacheEvents() {

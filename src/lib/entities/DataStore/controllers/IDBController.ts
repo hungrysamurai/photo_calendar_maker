@@ -135,6 +135,22 @@ export default class IDBController {
     }
   }
 
+  async setDataIDB(data: Blob, id: number) {
+    const db = await this.openDB();
+
+    try {
+      const tx = db.transaction(db.objectStoreNames, 'readwrite');
+
+      await this.promisifyRequest(
+        tx.objectStore('current_project_cached_mockups').put({ data, id }),
+      );
+
+      await this.transactionComplete(tx);
+    } finally {
+      db.close();
+    }
+  }
+
   private promisifyRequest<T>(request: IDBRequest<T>): Promise<T> {
     return new Promise((resolve, reject) => {
       request.onsuccess = () => resolve(request.result);

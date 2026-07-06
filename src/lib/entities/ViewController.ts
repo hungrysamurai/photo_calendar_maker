@@ -5,6 +5,7 @@ import { createSVGElement } from '../utils/DOM/createElement/createSVGElement';
 
 import getDaysInMonth from '../utils/getDaysInMonth';
 import getMonthFirstDay from '../utils/getMonthFirstDay';
+import { getMonthsList } from '../utils/getMonthsList';
 import getWeekDays from '../utils/getWeekDays';
 
 import {
@@ -22,10 +23,11 @@ export type ViewControllerOptions = {
   format: FormatName;
   firstMonthIndex: number;
   year: number;
-  monthsNamesList: string[];
   font: FontData;
   lang: CalendarLanguage;
   storedImages: StoredImage[];
+  cachedMockups: CachedMockup[];
+  cacheMockups: (svgMockups: SVGElement[]) => Promise<void>;
   actionsHandlers: MultiPageControlsCallbacks;
   cleanupHandlers: (() => void)[];
   showLoader: () => void;
@@ -38,11 +40,18 @@ export default class ViewController {
 
   controlsManager: BasicControlsManager | MultiPageControlsManager;
 
+  monthsNamesList: ReturnType<typeof getMonthsList>;
   weekDaysNamesList: string[];
 
   currentMonthInView: number = 0;
 
+  svgMockups: SVGElement[];
+
   constructor(private options: ViewControllerOptions) {
+    this.monthsNamesList = getMonthsList(this.options.lang);
+
+    let generatedMockups: Promise<SVGElement[]>;
+
     if (options.type === CalendarType.SinglePage) {
       this.controlsManager = new BasicControlsManager(
         options.controlsContainer,
@@ -53,7 +62,7 @@ export default class ViewController {
 
       this.weekDaysNamesList = getWeekDays('short', options.lang);
 
-      this.createOnePageSVGMockup(this.options.storedImages);
+      generatedMockups = this.createOnePageSVGMockup(this.options.storedImages);
     } else {
       this.controlsManager = new MultiPageControlsManager(
         options.controlsContainer,
@@ -65,18 +74,27 @@ export default class ViewController {
       );
 
       this.controlsManager.init();
+
       this.weekDaysNamesList = getWeekDays('long', options.lang);
 
-      this.createMultiPageSVGMockups(this.options.storedImages);
+      generatedMockups = this.createMultiPageSVGMockups(this.options.storedImages);
     }
+
+    generatedMockups.then((svgMockups) => {
+      this.svgMockups = svgMockups;
+
+      if (this.options.cachedMockups.length === 0) {
+        this.options.cacheMockups(svgMockups);
+      }
+    });
   }
 
-  private async createOnePageSVGMockup(storedImages: StoredImage[]) {
+  private async createOnePageSVGMockup(storedImages: StoredImage[]): Promise<[SVGElement]> {
     this.options.showLoader();
 
     const mockupOptions = this.options.mockupOptions as SinglePageMockupOutputOptions;
     let year = this.options.year;
-    const { format, outputDimensions, firstMonthIndex, monthsNamesList } = this.options;
+    const { format, outputDimensions, firstMonthIndex } = this.options;
 
     this.calendarWrapper = createHTMLElement({
       elementName: 'div',
@@ -194,7 +212,7 @@ export default class ViewController {
         id: 'month-title',
         parentToAppend: monthContainer,
         content: this.getOutline(
-          monthsNamesList[monthCounter],
+          this.monthsNamesList[monthCounter],
           mockupOptions.monthTitleX,
           mockupOptions.monthTitleY,
           mockupOptions.monthTitleFontSize,
@@ -272,14 +290,17 @@ export default class ViewController {
     }
 
     this.options.hideLoader();
+    return [mockup];
   }
 
-  private async createMultiPageSVGMockups(storedImages: StoredImage[]) {
+  private async createMultiPageSVGMockups(storedImages: StoredImage[]): Promise<SVGElement[]> {
     this.options.showLoader();
+
+    const mockups: SVGElement[] = [];
 
     const mockupOptions = this.options.mockupOptions as MultiPageMockupOutputOptions;
     let year = this.options.year;
-    const { format, outputDimensions, firstMonthIndex, monthsNamesList } = this.options;
+    const { format, outputDimensions, firstMonthIndex } = this.options;
 
     this.calendarWrapper = createHTMLElement({
       elementName: 'div',
@@ -343,7 +364,7 @@ export default class ViewController {
         id: `#month-title-${i}`,
         parentToAppend: monthTextGroup,
         content: this.getOutline(
-          monthsNamesList[monthCounter],
+          this.monthsNamesList[monthCounter],
           mockupOptions.monthTitleX,
           mockupOptions.monthTitleY,
           mockupOptions.monthTitleFontSize,
@@ -448,8 +469,13 @@ export default class ViewController {
         mockupOptions.daysFontSize,
         mockupOptions.dayCellStyles,
       );
+
+      mockups.push(monthMockup);
     }
+
     this.options.hideLoader();
+
+    return mockups;
   }
 
   showPrevMonth = () => {

@@ -64,7 +64,21 @@ export default class DataStore {
       mockup: mockupBlob,
     };
 
-    this.IDBController.saveToIDB(dataToStore);
+    await this.IDBController.saveToIDB(dataToStore);
+  };
+
+  setMockupsIDB = async (svgMockups: SVGElement[]) => {
+    console.log(svgMockups);
+    const { width: mockupWidth, height: mockupHeight } =
+      this.calendarOutputDimensions[this.calendarProjectData.format];
+
+    const cacheQueue = svgMockups.map((mockup) => {
+      return this.cacheController.cacheMockup(mockup, mockupWidth, mockupHeight);
+    });
+
+    (await Promise.all(cacheQueue)).forEach((blob, i) => {
+      this.IDBController.setDataIDB(blob, i);
+    });
   };
 
   calendarProjectData: CalendarData;
