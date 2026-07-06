@@ -6,7 +6,7 @@ import { A_outputFormats } from '../../../assets/A_FormatOptions/A_OutputDimensi
 import { CalendarType } from '../../../types';
 import FontsController from './controllers/FontsController';
 import IDBController from './controllers/IDBController';
-import MockupsCacheController from './controllers/MockupsCacheController/MockupsCache';
+import MockupsCacheController from './controllers/MockupsCacheController/MockupsCacheController';
 
 export default class DataStore {
   /**

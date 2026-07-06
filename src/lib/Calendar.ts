@@ -184,8 +184,6 @@ export class Calendar {
   };
 
   hideLoader = (): void => {
-    console.log(this.dataStore.cacheController.state);
-
     if (this.dataStore.cacheController.state === 'idle') {
       loadingOverlay.hide();
     }
