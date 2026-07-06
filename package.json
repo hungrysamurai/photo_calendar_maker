@@ -12,7 +12,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build --base=/ --outDir ./build",
-    "deploy": "vite build --outDir ../../server/dist/public/projects/photo_calendar_maker --base=/projects/photo_calendar_maker/",
+    "deploy": "vite build --outDir ../../server/dist/public/projects/photo_calendar_maker --base=/projects/photo_calendar_maker/ --emptyOutDir",
     "lint": "eslint src --ext .ts --max-warnings 0",
     "format:check": "prettier . --check",
     "format:fix": "prettier --write .",

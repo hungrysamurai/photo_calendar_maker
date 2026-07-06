@@ -65,6 +65,11 @@ export default class DataStore {
     };
 
     await this.IDBController.saveToIDB(dataToStore);
+
+    this.calendarCachedMockupsData[data.index] = {
+      mockup: mockupBlob,
+      id: data.index,
+    };
   };
 
   setMockupsIDB = async (svgMockups: SVGElement[]) => {
