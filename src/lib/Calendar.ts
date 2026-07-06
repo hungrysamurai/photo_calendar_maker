@@ -109,6 +109,7 @@ export class Calendar {
       outputDimensions: this.outputDimensions,
       getCurrentMonth: () => this.viewController.currentMonthInView,
       getCurrentMockup: this.viewController.getCurrentMockup,
+      cachedMockups,
       showLoader: this.showLoader,
       hideLoader: this.hideLoader,
     });

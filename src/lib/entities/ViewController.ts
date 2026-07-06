@@ -82,6 +82,7 @@ export default class ViewController {
 
     generatedMockups.then((svgMockups) => {
       this.svgMockups = svgMockups;
+      console.log(this.options.cachedMockups);
 
       if (this.options.cachedMockups.length === 0) {
         this.options.cacheMockups(svgMockups);

@@ -8,6 +8,7 @@ export type DownloadManagerOptions = {
   calendarEndYear: number;
   format: FormatName;
   outputDimensions: OutputDimensions;
+  cachedMockups: CachedMockup[];
   getCurrentMonth: () => number;
   getCurrentMockup: (element?: string) => SVGElement | SVGImageElement;
   showLoader: () => void;
@@ -19,7 +20,7 @@ export default class DownloadManager {
 
   public downloadCurrentJPG(): void {
     const monthIndex = this.options.getCurrentMonth();
-    const url = URL.createObjectURL(this.options.cache.cachedMockups[monthIndex]);
+    const url = URL.createObjectURL(this.options.cachedMockups[monthIndex].mockup);
     const fileName = this.getFileName();
 
     this.downloadElement(url, fileName);
@@ -35,10 +36,10 @@ export default class DownloadManager {
 
     const pagesToDownload =
       range === PDFPagesRangeToDownload.All
-        ? this.options.cache.cachedMockups
-        : [this.options.cache.cachedMockups[monthIndex]];
+        ? this.options.cachedMockups
+        : [this.options.cachedMockups[monthIndex]];
 
-    for (const blob of pagesToDownload) {
+    for (const { mockup: blob } of pagesToDownload) {
       const arrayBuffer = await blob.arrayBuffer();
 
       const image = await pdf.embedJpg(arrayBuffer);
