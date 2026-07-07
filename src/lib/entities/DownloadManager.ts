@@ -78,10 +78,19 @@ export default class DownloadManager {
     const pages = this.options.svgMockups;
     console.log(pages);
 
-    const pdf = new jsPDF(width > height ? 'l' : 'p', 'px', [width, height]);
+    const pdf = new jsPDF(width > height ? 'l' : 'p', 'mm', [210, 297]);
 
     for (let i = 0; i < pages.length; i++) {
-      await pdf.svg(pages[i], { x: 0, y: 0, width, height });
+      const pageClone = pages[i].cloneNode(true) as SVGElement;
+      const image = pageClone.querySelector('image');
+
+      if (image) {
+        image.remove();
+      }
+
+      console.log(width, height);
+
+      await pdf.svg(pageClone, { x: 0, y: 0, width: 210, height: 297 });
       if (i !== pages.length - 1) pdf.addPage();
     }
 
