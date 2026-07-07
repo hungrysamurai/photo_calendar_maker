@@ -1,5 +1,5 @@
-import { icons } from '../../assets/icons';
-import { createHTMLElement } from '../utils/DOM/createElement/createHTMLElement';
+import { icons } from '../../../assets/icons';
+import { createHTMLElement } from '../../utils/DOM/createElement/createHTMLElement';
 
 export type ControlsCallbacks = {
   onDownloadCurrentPdf: () => void;

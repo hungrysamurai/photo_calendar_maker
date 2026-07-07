@@ -12,7 +12,7 @@ import {
   MultiPageControlsCallbacks,
   BasicControlsManager,
   MultiPageControlsManager,
-} from '../ControlsManager';
+} from './ControlsManager';
 import OutlineCache from './OutlineCache';
 
 interface DayCell {
@@ -164,7 +164,7 @@ export default class ViewController {
   private async createOnePageSVGMockup(storedImages: StoredImage[]): Promise<[SVGElement]> {
     this.options.showLoader();
 
-    const startTime = performance.now();
+    // const startTime = performance.now();
 
     const mockupOptions = this.options.mockupOptions as SinglePageMockupOutputOptions;
     let year = this.options.year;
@@ -372,7 +372,7 @@ export default class ViewController {
     }
 
     this.options.hideLoader();
-    console.log(performance.now() - startTime);
+    // console.log(performance.now() - startTime);
 
     return [mockup];
   }
