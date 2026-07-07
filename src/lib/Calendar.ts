@@ -118,6 +118,7 @@ export class Calendar {
       getCurrentMonth: () => this.viewController.currentMonthInView,
       getCurrentMockup: this.viewController.getCurrentMockup,
       cachedMockups,
+      svgMockups: this.viewController.svgMockups,
       showLoader: this.showLoader,
       hideLoader: this.hideLoader,
     });
@@ -140,7 +141,9 @@ export class Calendar {
   onDownloadCurrentPdf = () => {
     this.removeCropperIfActive();
 
-    this.downloadManager.downloadPDF(PDFPagesRangeToDownload.Current);
+    // this.downloadManager.downloadPDF(PDFPagesRangeToDownload.Current);
+
+    this.downloadManager.downloadPDF2();
   };
 
   onDownloadJpg = () => {

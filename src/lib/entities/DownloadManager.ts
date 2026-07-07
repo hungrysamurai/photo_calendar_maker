@@ -1,5 +1,8 @@
 import { CalendarType, FormatName, PDFPagesRangeToDownload } from '../../types';
 
+import jsPDF from 'jspdf';
+import 'svg2pdf.js';
+
 export type DownloadManagerOptions = {
   calendarType: CalendarType;
   calendarFirstMonth: number;
@@ -9,6 +12,7 @@ export type DownloadManagerOptions = {
   format: FormatName;
   outputDimensions: OutputDimensions;
   cachedMockups: CachedMockup[];
+  svgMockups: SVGElement[];
   getCurrentMonth: () => number;
   getCurrentMockup: (element?: string) => SVGElement | SVGImageElement;
   showLoader: () => void;
@@ -67,6 +71,21 @@ export default class DownloadManager {
 
     this.options.hideLoader();
     URL.revokeObjectURL(blobURL);
+  }
+
+  public async downloadPDF2() {
+    const { width, height } = this.options.outputDimensions[this.options.format];
+    const pages = this.options.svgMockups;
+    console.log(pages);
+
+    const pdf = new jsPDF(width > height ? 'l' : 'p', 'px', [width, height]);
+
+    for (let i = 0; i < pages.length; i++) {
+      await pdf.svg(pages[i], { x: 0, y: 0, width, height });
+      if (i !== pages.length - 1) pdf.addPage();
+    }
+
+    pdf.save('result.pdf');
   }
 
   private getFileName(span?: boolean): string {

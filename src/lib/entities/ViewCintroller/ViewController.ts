@@ -51,7 +51,7 @@ export default class ViewController {
 
   currentMonthInView: number = 0;
 
-  svgMockups: SVGElement[];
+  svgMockups: SVGElement[] = [];
 
   private outlineCache: OutlineCache;
 
@@ -91,7 +91,7 @@ export default class ViewController {
     }
 
     generatedMockups.then((svgMockups) => {
-      this.svgMockups = svgMockups;
+      svgMockups.forEach((m) => this.svgMockups.push(m));
 
       if (this.options.cachedMockups.length === 0) {
         this.options.cacheMockups(svgMockups);
