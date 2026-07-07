@@ -32,8 +32,6 @@ export type ViewControllerOptions = {
   font: FontData;
   lang: CalendarLanguage;
   storedImages: StoredImage[];
-  cachedMockups: CachedMockup[];
-  cacheMockups: (svgMockups: SVGElement[]) => Promise<void>;
   actionsHandlers: MultiPageControlsCallbacks;
   cleanupHandlers: (() => void)[];
   showLoader: () => void;
@@ -92,10 +90,6 @@ export default class ViewController {
 
     generatedMockups.then((svgMockups) => {
       svgMockups.forEach((m) => this.svgMockups.push(m));
-
-      if (this.options.cachedMockups.length === 0) {
-        this.options.cacheMockups(svgMockups);
-      }
     });
   }
 
@@ -212,8 +206,7 @@ export default class ViewController {
     const imageInIDB: StoredImage | undefined = storedImages[0];
 
     if (imageInIDB) {
-      const imageObject = await fetch(imageInIDB.image);
-      const imgURL = imageObject.url;
+      const imgURL = URL.createObjectURL(imageInIDB.image);
 
       createSVGElement({
         elementName: 'image',
@@ -512,8 +505,7 @@ export default class ViewController {
 
       if (imageInIDB) {
         // ...fetch stored image and place it on mockup
-        const imageObject = await fetch(imageInIDB.image);
-        const imgURL = imageObject.url;
+        const imgURL = URL.createObjectURL(imageInIDB.image);
 
         createSVGElement({
           elementName: 'image',

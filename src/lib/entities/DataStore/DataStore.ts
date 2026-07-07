@@ -6,7 +6,6 @@ import { A_outputFormats } from '../../../assets/A_FormatOptions/A_OutputDimensi
 import { CalendarType } from '../../../types';
 import FontsController from './controllers/FontsController';
 import IDBController from './controllers/IDBController';
-import MockupsCacheController from './controllers/MockupsCacheController/MockupsCacheController';
 
 export default class DataStore {
   /**
@@ -38,75 +37,34 @@ export default class DataStore {
     const dataFromIDB = await this.IDBController.initIDB();
 
     if (dataFromIDB) {
-      const { data, images, cachedMockups } = dataFromIDB;
+      const { data, images } = dataFromIDB;
+
+      images.forEach((image) => {
+        this.calendarImagesData.push(image);
+      });
 
       this.calendarProjectData = data;
-      this.calendarImagesData = images;
-      this.calendarCachedMockupsData = cachedMockups;
+      // this.calendarImagesData = images;
     }
   }
 
-  cacheController: MockupsCacheController;
+  saveImageToIDB = async (image: Blob, index: number) => {
+    await this.IDBController.saveToIDB(image, index);
 
-  saveDataToIDB = async (data: DataToStoreAndCache) => {
-    const { width: mockupWidth, height: mockupHeight } =
-      this.calendarOutputDimensions[this.calendarProjectData.format];
-
-    const mockupBlob = await this.cacheController.cacheMockup(
-      data.mockup,
-      mockupWidth,
-      mockupHeight,
-    );
-
-    const dataToStore: DataToStore = {
-      id: data.index,
-      image: data.image,
-      mockup: mockupBlob,
-    };
-
-    await this.IDBController.saveToIDB(dataToStore);
-
-    this.calendarCachedMockupsData[data.index] = {
-      mockup: mockupBlob,
-      id: data.index,
-    };
-  };
-
-  setMockupsIDB = async (svgMockups: SVGElement[]) => {
-    console.log(svgMockups);
-    const { width: mockupWidth, height: mockupHeight } =
-      this.calendarOutputDimensions[this.calendarProjectData.format];
-
-    const cacheQueue = svgMockups.map((mockup) => {
-      return this.cacheController.cacheMockup(mockup, mockupWidth, mockupHeight);
-    });
-
-    (await Promise.all(cacheQueue)).forEach((blob, i) => {
-      this.IDBController.setDataIDB(blob, i);
-
-      this.calendarCachedMockupsData[i] = {
-        mockup: blob,
-        id: i,
-      };
-    });
+    this.calendarImagesData.push({ id: index, image });
   };
 
   calendarProjectData: CalendarData;
   calendarImagesData: StoredImage[] = [];
-  calendarCachedMockupsData: CachedMockup[] = [];
 
   constructor() {
     this.fontsController = new FontsController();
     this.IDBController = new IDBController();
-    this.cacheController = new MockupsCacheController();
   }
 
   public async reset(newCalendarData: CalendarData) {
     this.calendarProjectData = newCalendarData;
     this.calendarImagesData = [];
-    this.calendarCachedMockupsData = [];
-
-    this.cacheController.reset();
 
     await this.IDBController.resetWithNewData(newCalendarData);
   }

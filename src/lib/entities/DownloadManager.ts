@@ -11,8 +11,9 @@ export type DownloadManagerOptions = {
   calendarEndYear: number;
   format: FormatName;
   outputDimensions: OutputDimensions;
-  cachedMockups: CachedMockup[];
+  mockupOptions: SinglePageMockupOutputOptions | MultiPageMockupOutputOptions;
   svgMockups: SVGElement[];
+  storedImages: StoredImage[];
   getCurrentMonth: () => number;
   getCurrentMockup: (element?: string) => SVGElement | SVGImageElement;
   showLoader: () => void;
@@ -74,23 +75,51 @@ export default class DownloadManager {
   }
 
   public async downloadPDF2() {
-    const { width, height } = this.options.outputDimensions[this.options.format];
+    const {
+      mockupWidth,
+      mockupHeight,
+      imagePlaceholderHeight,
+      imagePlaceholderWidth,
+      imagePlaceholderX,
+      imagePlaceholderY,
+    } = this.options.mockupOptions;
     const pages = this.options.svgMockups;
-    console.log(pages);
 
-    const pdf = new jsPDF(width > height ? 'l' : 'p', 'mm', [210, 297]);
+    const pdf = new jsPDF(mockupWidth > mockupHeight ? 'l' : 'p', 'mm', [
+      mockupWidth,
+      mockupHeight,
+    ]);
 
     for (let i = 0; i < pages.length; i++) {
       const pageClone = pages[i].cloneNode(true) as SVGElement;
-      const image = pageClone.querySelector('image');
 
-      if (image) {
-        image.remove();
+      const imageEl = pageClone.querySelector('image');
+      if (imageEl) {
+        imageEl.remove();
       }
 
-      console.log(width, height);
+      await pdf.svg(pageClone, { x: 0, y: 0, width: mockupWidth, height: mockupHeight });
 
-      await pdf.svg(pageClone, { x: 0, y: 0, width: 210, height: 297 });
+      const imageBlob = this.options.storedImages.find((el) => el.id === i);
+      console.log(imageBlob?.image);
+      if (imageBlob) {
+        const { width: imgWidth, height: imgHeight } = await getImageSize(imageBlob.image);
+
+        console.log(imgHeight, imgWidth);
+
+        const arrayBuffer = await imageBlob.image.arrayBuffer();
+        const uint8Array = new Uint8Array(arrayBuffer);
+
+        pdf.addImage(
+          uint8Array,
+          'JPEG',
+          imagePlaceholderX,
+          imagePlaceholderY,
+          imagePlaceholderWidth,
+          imagePlaceholderHeight,
+        );
+      }
+
       if (i !== pages.length - 1) pdf.addPage();
     }
 
@@ -134,4 +163,13 @@ export default class DownloadManager {
     a.click();
     a.remove();
   }
+}
+
+async function getImageSize(blob: Blob) {
+  const bitmap = await createImageBitmap(blob);
+
+  return {
+    width: bitmap.width,
+    height: bitmap.height,
+  };
 }

@@ -35,15 +35,6 @@ export default class IDBController {
     imagesStore.createIndex('images', ['images'], {
       unique: false,
     });
-
-    const cachedMockupsStore = db.createObjectStore('current_project_cached_mockups', {
-      keyPath: 'id',
-      autoIncrement: true,
-    });
-
-    cachedMockupsStore.createIndex('cachedMockups', ['cachedMockups'], {
-      unique: false,
-    });
   }
 
   private openDB(): Promise<IDBDatabase> {
@@ -70,27 +61,23 @@ export default class IDBController {
   async initIDB(): Promise<void | {
     data: CalendarData;
     images: StoredImage[];
-    cachedMockups: CachedMockup[];
   }> {
     const db = await this.openDB();
 
     try {
       const tx = db.transaction(db.objectStoreNames, 'readonly');
 
-      const [data, images, cachedMockups] = await Promise.all([
+      const [data, images] = await Promise.all([
         this.promisifyRequest<CalendarData | undefined>(
           tx.objectStore('current_project_data').get(0),
         ),
         this.promisifyRequest<StoredImage[]>(tx.objectStore('current_project_images').getAll()),
-        this.promisifyRequest<CachedMockup[]>(
-          tx.objectStore('current_project_cached_mockups').getAll(),
-        ),
       ]);
 
       await this.transactionComplete(tx);
 
       if (data) {
-        return { data, images, cachedMockups };
+        return { data, images };
       }
     } finally {
       db.close();
@@ -105,7 +92,6 @@ export default class IDBController {
       await Promise.all([
         this.promisifyRequest(tx.objectStore('current_project_data').put({ id: 0, ...newData })),
         this.promisifyRequest(tx.objectStore('current_project_images').clear()),
-        this.promisifyRequest(tx.objectStore('current_project_cached_mockups').clear()),
       ]);
 
       await this.transactionComplete(tx);
@@ -114,21 +100,15 @@ export default class IDBController {
     }
   }
 
-  async saveToIDB(data: DataToStore) {
+  async saveToIDB(image: Blob, index: number) {
     const db = await this.openDB();
-
-    const { id, mockup, image } = data;
 
     try {
       const tx = db.transaction(db.objectStoreNames, 'readwrite');
 
-      await Promise.all([
-        await this.promisifyRequest(tx.objectStore('current_project_images').put({ image, id })),
-        await this.promisifyRequest(
-          tx.objectStore('current_project_cached_mockups').put({ mockup, id }),
-        ),
-      ]);
-
+      await this.promisifyRequest(
+        tx.objectStore('current_project_images').put({ image, id: index }),
+      );
       await this.transactionComplete(tx);
     } finally {
       db.close();

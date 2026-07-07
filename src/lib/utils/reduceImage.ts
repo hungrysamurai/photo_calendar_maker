@@ -1,41 +1,55 @@
 export default function reduceImageSize(
-  base64Str: string,
+  file: File,
   maxWidth: number,
   maxHeight: number,
-): Promise<string | void> {
-  return new Promise((resolve) => {
+): Promise<Blob | void> {
+  return new Promise((resolve, reject) => {
     const img = new Image();
-    img.src = base64Str;
+    const url = URL.createObjectURL(file);
 
     img.onload = () => {
-      let width = img.width;
-      let height = img.height;
+      URL.revokeObjectURL(url);
+
+      let { width, height } = img;
 
       if (width <= maxWidth && height <= maxHeight) {
         resolve();
         return;
       }
 
-      if (width > height) {
-        if (width > maxWidth) {
-          height *= maxWidth / width;
-          width = maxWidth;
-        }
-      } else {
-        if (height > maxHeight) {
-          width *= maxHeight / height;
-          height = maxHeight;
-        }
-      }
+      const scale = Math.min(maxWidth / width, maxHeight / height);
+
+      width = Math.round(width * scale);
+      height = Math.round(height * scale);
 
       const canvas = document.createElement('canvas');
       canvas.width = width;
       canvas.height = height;
 
-      const ctx = canvas.getContext('2d') as CanvasRenderingContext2D;
+      const ctx = canvas.getContext('2d');
+
+      if (!ctx) {
+        reject(new Error('Failed to get canvas context'));
+        return;
+      }
+
       ctx.drawImage(img, 0, 0, width, height);
 
-      resolve(canvas.toDataURL('image/png'));
+      canvas.toBlob((blob) => {
+        if (!blob) {
+          reject(new Error('Failed to create blob'));
+          return;
+        }
+
+        resolve(blob);
+      }, file.type || 'image/png');
     };
+
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      reject(new Error('Failed to load image'));
+    };
+
+    img.src = url;
   });
 }

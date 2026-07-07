@@ -35,7 +35,6 @@ export class Calendar {
     // Extract data from DS
     const { lang, firstMonthIndex, startYear, type, format } = this.dataStore.calendarProjectData;
     const storedImages = this.dataStore.calendarImagesData;
-    const cachedMockups = this.dataStore.calendarCachedMockupsData;
     this.font = this.dataStore.currentFont;
     this.outputDimensions = this.dataStore.calendarOutputDimensions;
     this.mockupOptions = this.dataStore.currentMockupOptions;
@@ -76,8 +75,6 @@ export class Calendar {
       font: this.font,
       lang,
       storedImages,
-      cachedMockups,
-      cacheMockups: this.dataStore.setMockupsIDB,
       showLoader: this.showLoader,
       hideLoader: this.hideLoader,
     });
@@ -87,7 +84,7 @@ export class Calendar {
       onBeforeStart: this.showLoader,
       onCropperReady: this.hideLoader,
       onAfterRemove: () => this.cropControlsContainer.classList.add('hide'),
-      saveImage: this.dataStore.saveDataToIDB,
+      saveImage: this.dataStore.saveImageToIDB,
       getCurrentMonthInViewIndex: () => this.viewController.currentMonthInView,
       getMockupByIndex: this.viewController.getMockupByIndex,
     });
@@ -101,7 +98,7 @@ export class Calendar {
       getCurrentMockup: this.viewController.getCurrentMockup,
       getMockupByIndex: this.viewController.getMockupByIndex,
       getImageGroupByIndex: this.viewController.getImageGroupByIndex,
-      saveImage: this.dataStore.saveDataToIDB,
+      saveImage: this.dataStore.saveImageToIDB,
       showLoader: this.showLoader,
       hideLoader: this.hideLoader,
     });
@@ -115,21 +112,14 @@ export class Calendar {
       calendarEndYear: this.endYear,
       format: format,
       outputDimensions: this.outputDimensions,
+      mockupOptions: this.mockupOptions,
       getCurrentMonth: () => this.viewController.currentMonthInView,
       getCurrentMockup: this.viewController.getCurrentMockup,
-      cachedMockups,
       svgMockups: this.viewController.svgMockups,
+      storedImages,
       showLoader: this.showLoader,
       hideLoader: this.hideLoader,
     });
-
-    // Subscribe on DS cache events
-    this.subscribeOnCacheEvents();
-  }
-
-  subscribeOnCacheEvents() {
-    this.dataStore.cacheController.addEventListener('workStart', this.showLoader);
-    this.dataStore.cacheController.addEventListener('workDone', this.hideLoader);
   }
 
   removeCropperIfActive = () => {
@@ -142,7 +132,6 @@ export class Calendar {
     this.removeCropperIfActive();
 
     // this.downloadManager.downloadPDF(PDFPagesRangeToDownload.Current);
-
     this.downloadManager.downloadPDF2();
   };
 
@@ -187,15 +176,14 @@ export class Calendar {
   };
 
   hideLoader = (): void => {
-    if (this.dataStore.cacheController.state === 'idle') {
-      loadingOverlay.hide();
-    }
+    loadingOverlay.hide();
   };
 
   dispose(): void {
+    this.viewController.svgMockups.forEach((m) => {
+      const imageLink = m.querySelector('image')?.href.baseVal;
+      if (imageLink) URL.revokeObjectURL(imageLink);
+    });
     this.imageCropper.dispose();
-
-    this.dataStore.cacheController.removeEventListener('workStart', this.showLoader);
-    this.dataStore.cacheController.removeEventListener('workDone', this.hideLoader);
   }
 }

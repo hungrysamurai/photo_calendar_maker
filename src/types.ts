@@ -65,7 +65,7 @@ declare global {
 
   type StoredImage = {
     id: number;
-    image: string;
+    image: Blob;
   };
 
   type CachedMockup = {

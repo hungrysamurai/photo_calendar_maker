@@ -2,9 +2,10 @@ import Cropper from 'cropperjs';
 
 import { icons } from '../../assets/icons';
 import { createHTMLElement } from '../utils/DOM/createElement/createHTMLElement';
+import canvasToBlob from '../utils/canvasToBlob';
 
 export type ImageCropperCallbacks = {
-  saveImage: (data: DataToStoreAndCache) => Promise<void>;
+  saveImage: (image: Blob, index: number) => Promise<void>;
   getCurrentMonthInViewIndex: () => number;
   getMockupByIndex: (index: number) => SVGElement;
   onBeforeStart: () => void;
@@ -161,18 +162,18 @@ export default class ImageCropper {
     }) as CanvasRenderingContext2D;
     ctx.drawImage(canvas, 0, 0);
 
-    const resultURL = canvas.toDataURL('image/jpeg');
+    const blob = await canvasToBlob(canvas);
+    const resultURL = URL.createObjectURL(blob);
+
+    // Clean Up
+    const prevImageLink = this.imageToCrop.href.baseVal;
+    if (prevImageLink) URL.revokeObjectURL(prevImageLink);
 
     this.imageToCrop.setAttributeNS('http://www.w3.org/1999/xlink', 'href', resultURL);
 
     const currentMockupIndex = this.callbacks.getCurrentMonthInViewIndex();
-    const mockup = this.callbacks.getMockupByIndex(currentMockupIndex);
 
-    await this.callbacks.saveImage({
-      index: currentMockupIndex,
-      image: resultURL,
-      mockup,
-    });
+    await this.callbacks.saveImage(blob, currentMockupIndex);
 
     this.removeCropper();
   }

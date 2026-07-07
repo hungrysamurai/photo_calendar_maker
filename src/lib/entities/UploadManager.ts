@@ -10,7 +10,7 @@ export type UploadManagerOptions = {
   getCurrentMockup: (element?: string) => SVGElement | SVGImageElement;
   getMockupByIndex: (index: number) => SVGElement;
   getImageGroupByIndex?: (index: number) => SVGGElement;
-  saveImage: (data: DataToStoreAndCache) => Promise<void>;
+  saveImage: (image: Blob, index: number) => Promise<void>;
   showLoader: () => void;
   hideLoader: () => void;
 };
@@ -62,6 +62,10 @@ export default class UploadManager {
     imageGroup: SVGGElement,
     mockupIndex: number,
   ): Promise<void> {
+    // Clean Up
+    const prevImageLink = imageGroup.querySelector('image')?.href.baseVal;
+    if (prevImageLink) URL.revokeObjectURL(prevImageLink);
+
     imageGroup.innerHTML = '';
 
     const imageEl = createSVGElement({
@@ -75,39 +79,20 @@ export default class UploadManager {
       },
     }) as SVGImageElement;
 
-    const fileDataUrl = await this.readFile(file);
-
     const reduced = await reduceImageSize(
-      fileDataUrl,
+      file,
       this.options.mockupOptions.imagePlaceholderWidth * this.imageReduceSizeRate,
       this.options.mockupOptions.imagePlaceholderHeight * this.imageReduceSizeRate,
     );
 
-    const resultImage = reduced ?? fileDataUrl;
+    const resultImage = reduced ?? file;
 
-    imageEl.setAttributeNS('http://www.w3.org/1999/xlink', 'href', resultImage);
+    imageEl.setAttributeNS(
+      'http://www.w3.org/1999/xlink',
+      'href',
+      URL.createObjectURL(resultImage),
+    );
 
-    await this.options.saveImage({
-      index: mockupIndex,
-      mockup: this.options.getMockupByIndex(mockupIndex),
-      image: resultImage,
-    });
-  }
-
-  private async readFile(file: File): Promise<string> {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => {
-        if (typeof reader.result === 'string') {
-          resolve(reader.result);
-        } else {
-          reject(new Error('FileReader failed'));
-        }
-      };
-      reader.onerror = () => {
-        reject(reader.error);
-      };
-      reader.readAsDataURL(file);
-    });
+    await this.options.saveImage(resultImage, mockupIndex);
   }
 }
