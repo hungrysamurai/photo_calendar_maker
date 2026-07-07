@@ -1,18 +1,24 @@
-import { CalendarLanguage, CalendarType, FormatName } from '../../types';
+import { CalendarLanguage, CalendarType, FormatName } from '../../../types';
 
-import { createHTMLElement } from '../utils/DOM/createElement/createHTMLElement';
-import { createSVGElement } from '../utils/DOM/createElement/createSVGElement';
+import { createHTMLElement } from '../../utils/DOM/createElement/createHTMLElement';
+import { createSVGElement } from '../../utils/DOM/createElement/createSVGElement';
 
-import getDaysInMonth from '../utils/getDaysInMonth';
-import getMonthFirstDay from '../utils/getMonthFirstDay';
-import { getMonthsList } from '../utils/getMonthsList';
-import getWeekDays from '../utils/getWeekDays';
+import getDaysInMonth from '../../utils/getDaysInMonth';
+import getMonthFirstDay from '../../utils/getMonthFirstDay';
+import { getMonthsList } from '../../utils/getMonthsList';
+import getWeekDays from '../../utils/getWeekDays';
 
 import {
   MultiPageControlsCallbacks,
   BasicControlsManager,
   MultiPageControlsManager,
-} from './ControlsManager';
+} from '../ControlsManager';
+import OutlineCache from './OutlineCache';
+
+interface DayCell {
+  root: SVGGElement;
+  digitContainer: SVGGElement;
+}
 
 export type ViewControllerOptions = {
   mainContainer: HTMLDivElement;
@@ -47,7 +53,11 @@ export default class ViewController {
 
   svgMockups: SVGElement[];
 
+  private outlineCache: OutlineCache;
+
   constructor(private options: ViewControllerOptions) {
+    this.outlineCache = new OutlineCache(options.font);
+
     this.monthsNamesList = getMonthsList(this.options.lang);
 
     let generatedMockups: Promise<SVGElement[]>;
@@ -89,8 +99,72 @@ export default class ViewController {
     });
   }
 
+  showPrevMonth = () => {
+    this.options.cleanupHandlers.forEach((cb) => {
+      cb();
+    });
+
+    this.currentMonthInView--;
+    if (this.currentMonthInView < 0) {
+      this.currentMonthInView = 11;
+    }
+
+    this.setVisibleMonth();
+  };
+
+  showNextMonth = () => {
+    this.options.cleanupHandlers.forEach((cb) => {
+      cb();
+    });
+
+    this.currentMonthInView++;
+
+    if (this.currentMonthInView > 11) {
+      this.currentMonthInView = 0;
+    }
+
+    this.setVisibleMonth();
+  };
+
+  /**
+   * @property {Function} setVisibleMonth - show current month mockup in DOM by translate calendarInner container by X axis
+   */
+  setVisibleMonth(): void {
+    this.calendarInner.style.transform = `translateX(calc(-8.333333% * ${this.currentMonthInView}))`;
+  }
+
+  /**
+   * @property {Function} getCurrentMockup - Get current mockup to manipulate
+   * @param {string} [element=""] element - selector string to pick specific element e.g. 'image' or 'svg'
+   */
+  getCurrentMockup = (element: string = ''): SVGElement | SVGImageElement => {
+    if (this.options.type === CalendarType.MultiPage) {
+      return this.calendarInner.querySelector(
+        `#month-${this.currentMonthInView}-container ${element}`,
+      ) as SVGElement;
+    }
+
+    return this.calendarInner.querySelector(`#mockup-container ${element}`) as SVGElement;
+  };
+
+  /**
+   * @property {Function} getMockupByIndex - Get mockup to manipulate by index of month
+   * @param {number} index
+   */
+  getMockupByIndex = (index: number): SVGElement => {
+    return this.calendarInner.querySelector(`#mockup-${index}`) as SVGElement;
+  };
+
+  getImageGroupByIndex = (index: number): SVGGElement => {
+    return this.calendarInner.querySelector(
+      `#month-${index}-container #image-group`,
+    ) as SVGGElement;
+  };
+
   private async createOnePageSVGMockup(storedImages: StoredImage[]): Promise<[SVGElement]> {
     this.options.showLoader();
+
+    const startTime = performance.now();
 
     const mockupOptions = this.options.mockupOptions as SinglePageMockupOutputOptions;
     let year = this.options.year;
@@ -211,24 +285,28 @@ export default class ViewController {
         elementName: 'g',
         id: 'month-title',
         parentToAppend: monthContainer,
-        content: this.getOutline(
-          this.monthsNamesList[monthCounter],
-          mockupOptions.monthTitleX,
-          mockupOptions.monthTitleY,
-          mockupOptions.monthTitleFontSize,
-        ),
+        children: [
+          this.createOutlinePath(
+            this.monthsNamesList[monthCounter],
+            mockupOptions.monthTitleX,
+            mockupOptions.monthTitleY,
+            mockupOptions.monthTitleFontSize,
+          ),
+        ],
       });
 
       createSVGElement({
         elementName: 'g',
         id: 'year-title',
         parentToAppend: monthContainer,
-        content: this.getOutline(
-          `${year}`,
-          mockupOptions.yearTitleX,
-          mockupOptions.yearTitleY,
-          mockupOptions.yearTitleFontSize,
-        ),
+        children: [
+          this.createOutlinePath(
+            `${year}`,
+            mockupOptions.yearTitleX,
+            mockupOptions.yearTitleY,
+            mockupOptions.yearTitleFontSize,
+          ),
+        ],
       });
 
       const daysTitles = createSVGElement({
@@ -290,6 +368,8 @@ export default class ViewController {
     }
 
     this.options.hideLoader();
+    console.log(performance.now() - startTime);
+
     return [mockup];
   }
 
@@ -363,24 +443,28 @@ export default class ViewController {
         elementName: 'g',
         id: `#month-title-${i}`,
         parentToAppend: monthTextGroup,
-        content: this.getOutline(
-          this.monthsNamesList[monthCounter],
-          mockupOptions.monthTitleX,
-          mockupOptions.monthTitleY,
-          mockupOptions.monthTitleFontSize,
-        ),
+        children: [
+          this.createOutlinePath(
+            this.monthsNamesList[monthCounter],
+            mockupOptions.monthTitleX,
+            mockupOptions.monthTitleY,
+            mockupOptions.monthTitleFontSize,
+          ),
+        ],
       });
 
       createSVGElement({
         elementName: 'g',
         id: `#year-title-${i}`,
         parentToAppend: monthTextGroup,
-        content: this.getOutline(
-          `${year}`,
-          mockupOptions.yearTitleX,
-          mockupOptions.yearTitleY,
-          mockupOptions.yearTitleFontSize,
-        ),
+        children: [
+          this.createOutlinePath(
+            `${year}`,
+            mockupOptions.yearTitleX,
+            mockupOptions.yearTitleY,
+            mockupOptions.yearTitleFontSize,
+          ),
+        ],
       });
 
       const daysTitles = createSVGElement({
@@ -478,260 +562,168 @@ export default class ViewController {
     return mockups;
   }
 
-  showPrevMonth = () => {
-    this.options.cleanupHandlers.forEach((cb) => {
-      cb();
-    });
-
-    this.currentMonthInView--;
-    if (this.currentMonthInView < 0) {
-      this.currentMonthInView = 11;
-    }
-
-    this.setVisibleMonth();
-  };
-
-  showNextMonth = () => {
-    this.options.cleanupHandlers.forEach((cb) => {
-      cb();
-    });
-
-    this.currentMonthInView++;
-
-    if (this.currentMonthInView > 11) {
-      this.currentMonthInView = 0;
-    }
-
-    this.setVisibleMonth();
-  };
-
-  /**
-   * @property {Function} setVisibleMonth - show current month mockup in DOM by translate calendarInner container by X axis
-   */
-  setVisibleMonth(): void {
-    this.calendarInner.style.transform = `translateX(calc(-8.333333% * ${this.currentMonthInView}))`;
-  }
-
-  /**
-   * @property {Function} getCurrentMockup - Get current mockup to manipulate
-   * @param {string} [element=""] element - selector string to pick specific element e.g. 'image' or 'svg'
-   */
-  getCurrentMockup = (element: string = ''): SVGElement | SVGImageElement => {
-    if (this.options.type === CalendarType.MultiPage) {
-      return this.calendarInner.querySelector(
-        `#month-${this.currentMonthInView}-container ${element}`,
-      ) as SVGElement;
-    }
-
-    return this.calendarInner.querySelector(`#mockup-container ${element}`) as SVGElement;
-  };
-
-  /**
-   * @property {Function} getMockupByIndex - Get mockup to manipulate by index of month
-   * @param {number} index
-   */
-  getMockupByIndex = (index: number): SVGElement => {
-    return this.calendarInner.querySelector(`#mockup-${index}`) as SVGElement;
-  };
-
-  getImageGroupByIndex = (index: number): SVGGElement => {
-    return this.calendarInner.querySelector(
-      `#month-${index}-container #image-group`,
-    ) as SVGGElement;
-  };
-
-  /**
-   * @property {Function} getOutline - create outline (<path> element) from given string, and set it x-coords, y-coords, size and fill
-   * @param {string} string - text to outline
-   * @param {number} x - x-coords to place element
-   * @param {number} y - y-coords to place element
-   * @param {number} fontSize
-   * @param {string} fontWeight
-   * @param {string} fill
-   * @returns {string} - string representation of <path> element
-   */
-  getOutline(
-    string: string,
+  createOutlinePath(
+    text: string,
     x: number,
     y: number,
-    fontSize: number,
-    fontWeight: string = 'bold',
-    fill: string = '#231f20',
-  ): string {
-    const outline = this.options.font[fontWeight].getPath(string, x, y, fontSize);
-    outline.fill = fill;
-    return outline.toSVG(2);
-  }
-
-  /**
-   * @property {Function} getAndPlaceOutline - creates path for individual day digit in calendar grid
-   * @param {string} string - text to outline (number as string)
-   * @param {number} x - x-coords to place element
-   * @param {number} y - y-coords to place element
-   * @param {number} fontSize
-   * @param {string} fontWeight
-   * @param {string} fill
-   * @returns {SVGPathElement} - <path>
-   */
-  getAndPlaceOutline(
-    string: string,
-    x: number,
-    y: number,
-    fontSize: number,
-    fontWeight: string = 'bold',
-    fill: string = '#231f20',
+    size: number,
+    weight: 'bold' | 'regular' = 'bold',
+    fill = '#231f20',
   ): SVGPathElement {
-    const outline = this.options.font[fontWeight].getPath(string, x, y, fontSize);
+    const outline = this.outlineCache.get(text, size, weight);
 
-    const { x1, x2, y1, y2 } = outline.getBoundingBox();
-
-    const xShift = Number(((x2 - x1) / 2).toFixed(2));
-    const yShift = Number(((y2 - y1) / 2).toFixed(2));
-
-    const pathElement = createSVGElement({
+    return createSVGElement({
       elementName: 'path',
       attributes: {
-        d: outline.toPathData(2),
-        transform: `translate(-${xShift} ${yShift})`,
+        d: outline.d,
         fill,
+        transform: `translate(${x - outline.xShift} ${y + outline.yShift})`,
       },
     });
-
-    return pathElement;
   }
 
-  /**
-   * @property {Function} createMonthGrid - Generates month grid in given DOM element with provided parameters
-   * @param {SVGGElement} monthGrid - element to append calendar grid
-   * @param {number} startIndex - first day of month
-   * @param {number} totalDays - number of days in current month
-   * @param {number} prevMonthDaysNumber - number of days in prev month
-   * @param {number} initialX - initial X coords to place day cell
-   * @param {number} initialY - initial Y coords to place day cell
-   * @param {number} fontSize - Object with SVG glyphs
-   * @param {string} cellStyles - additional styles for each day cell
-   */
-  createMonthGrid(
+  getAndPlaceOutline(
+    text: string,
+    x: number,
+    y: number,
+    fontSize: number,
+    fontWeight: 'bold' | 'regular' = 'bold',
+    fill = '#231f20',
+  ): SVGPathElement {
+    const outline = this.outlineCache.get(text, fontSize, fontWeight);
+
+    return createSVGElement({
+      elementName: 'path',
+      attributes: {
+        d: outline.d,
+        fill,
+        transform: `translate(${x - outline.xShift} ${y + outline.yShift})`,
+      },
+    });
+  }
+
+  private createMonthGrid(
     monthGrid: SVGGElement,
     startIndex: number,
     totalDays: number,
-    prevMonthDaysNumber: number,
+    prevMonthDays: number,
     initialX: number,
     initialY: number,
     fontSize: number,
     cellStyles: string,
   ): void {
+    const { dayCellWidth, dayCellHeight } = this.options.mockupOptions;
+
+    const cells: DayCell[] = [];
+
     let x = initialX;
     let y = initialY;
 
-    let currentDayIndex = startIndex;
-    let prevMonthDaysCount = prevMonthDaysNumber;
+    //
+    // Создаем сетку
+    //
 
-    // Set empty grid
-    for (let i = 1; i < 43; i++) {
-      if (i % 7 !== 0) {
-        monthGrid.appendChild(this.createDayCell(x, y, i, cellStyles));
-        x += this.options.mockupOptions.dayCellWidth;
-      } else {
-        monthGrid.appendChild(this.createDayCell(x, y, i, cellStyles));
+    for (let i = 0; i < 42; i++) {
+      const cell = this.createDayCell(x, y, cellStyles);
+
+      cells.push(cell);
+
+      monthGrid.appendChild(cell.root);
+
+      x += dayCellWidth;
+
+      if ((i + 1) % 7 === 0) {
         x = initialX;
-        y += this.options.mockupOptions.dayCellHeight;
+        y += dayCellHeight;
       }
     }
 
-    // All text elements in generated cells
-    const cellsTextFields = monthGrid.querySelectorAll('g .cell-digit');
+    //
+    // Предыдущий месяц
+    //
 
-    // Set days digits in cells
-    for (let i = 1; i < totalDays + 1; i++) {
-      cellsTextFields[currentDayIndex].appendChild(
+    let prev = prevMonthDays;
+
+    for (let i = startIndex - 1; i >= 0; i--) {
+      cells[i].digitContainer.appendChild(
         this.getAndPlaceOutline(
-          `${i}`,
-          this.options.mockupOptions.dayCellWidth / 2,
-          this.options.mockupOptions.dayCellHeight / 2,
+          `${prev}`,
+          dayCellWidth / 2,
+          dayCellHeight / 2,
           fontSize,
+          'regular',
+          '#999',
         ),
       );
 
-      currentDayIndex++;
+      prev--;
     }
 
-    // Prepend previous month
-    if (startIndex !== 0) {
-      for (let i = startIndex - 1; i >= 0; i--) {
-        cellsTextFields[i].appendChild(
-          this.getAndPlaceOutline(
-            `${prevMonthDaysCount}`,
-            this.options.mockupOptions.dayCellWidth / 2,
-            this.options.mockupOptions.dayCellHeight / 2,
-            fontSize,
-            'regular',
-            '#999',
-          ),
-        );
+    //
+    // Текущий месяц
+    //
 
-        prevMonthDaysCount--;
-      }
+    let cellIndex = startIndex;
+
+    for (let day = 1; day <= totalDays; day++) {
+      cells[cellIndex].digitContainer.appendChild(
+        this.getAndPlaceOutline(`${day}`, dayCellWidth / 2, dayCellHeight / 2, fontSize),
+      );
+
+      cellIndex++;
     }
 
-    // Extend on next month
-    if (currentDayIndex <= 42) {
-      for (let i = 1; currentDayIndex < 42; currentDayIndex++) {
-        cellsTextFields[currentDayIndex].appendChild(
-          this.getAndPlaceOutline(
-            `${i}`,
-            this.options.mockupOptions.dayCellWidth / 2,
-            this.options.mockupOptions.dayCellHeight / 2,
-            fontSize,
-            'regular',
-            '#999',
-          ),
-        );
+    //
+    // Следующий месяц
+    //
 
-        i++;
-      }
+    let next = 1;
+
+    while (cellIndex < 42) {
+      cells[cellIndex].digitContainer.appendChild(
+        this.getAndPlaceOutline(
+          `${next}`,
+          dayCellWidth / 2,
+          dayCellHeight / 2,
+          fontSize,
+          'regular',
+          '#999',
+        ),
+      );
+
+      next++;
+      cellIndex++;
     }
   }
 
-  /**
-   * @property {Function} createDayCell - Create individual day cell
-   * @param {number} x - x coordinate of cell
-   * @param {number} y - y coordinate of cell
-   * @param {number} cellNumber - number of day
-   * @param {string} cellStyles - addition CSS styles for cell
-   * @returns {SVGGElement} - DOM element of cell
-   */
-  createDayCell(x: number, y: number, cellNumber: number, cellStyles: string): SVGGElement {
-    const dayGroup = createSVGElement({
+  private createDayCell(x: number, y: number, styles: string): DayCell {
+    const root = createSVGElement({
       elementName: 'g',
-      id: `day-${cellNumber}-cell`,
-      attributes: {
-        width: this.options.mockupOptions.dayCellWidth.toString(),
-        height: this.options.mockupOptions.dayCellHeight.toString(),
-      },
     });
 
     createSVGElement({
       elementName: 'rect',
-      parentToAppend: dayGroup,
+      parentToAppend: root,
       attributes: {
-        x: x.toString(),
-        y: y.toString(),
-        width: this.options.mockupOptions.dayCellWidth.toString(),
-        height: this.options.mockupOptions.dayCellHeight.toString(),
-        style: cellStyles ? cellStyles : '',
+        x: `${x}`,
+        y: `${y}`,
+        width: `${this.options.mockupOptions.dayCellWidth}`,
+        height: `${this.options.mockupOptions.dayCellHeight}`,
+        style: styles,
       },
     });
 
-    createSVGElement({
+    const digitContainer = createSVGElement({
       elementName: 'g',
-      parentToAppend: dayGroup,
+      parentToAppend: root,
       attributes: {
-        class: 'cell-digit',
         transform: `translate(${x} ${y})`,
       },
     });
 
-    return dayGroup;
+    return {
+      root,
+      digitContainer,
+    };
   }
 }

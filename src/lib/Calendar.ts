@@ -4,7 +4,7 @@ import UploadManager from './entities/UploadManager';
 
 import DataStore from './entities/DataStore/DataStore';
 import DownloadManager from './entities/DownloadManager';
-import ViewController from './entities/ViewController';
+import ViewController from './entities/ViewCintroller/ViewController';
 
 import { PDFPagesRangeToDownload } from '../types';
 

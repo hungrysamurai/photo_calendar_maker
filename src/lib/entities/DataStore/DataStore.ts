@@ -83,6 +83,11 @@ export default class DataStore {
 
     (await Promise.all(cacheQueue)).forEach((blob, i) => {
       this.IDBController.setDataIDB(blob, i);
+
+      this.calendarCachedMockupsData[i] = {
+        mockup: blob,
+        id: i,
+      };
     });
   };
 
