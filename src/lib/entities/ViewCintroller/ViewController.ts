@@ -281,32 +281,36 @@ export default class ViewController {
       // Increment x-movement
       x += mockupOptions.monthCellWidth + mockupOptions.monthCellPadding;
 
+      const monthOutline = this.options.font['bold'].getPath(
+        this.monthsNamesList[monthCounter],
+        mockupOptions.monthTitleX,
+        mockupOptions.monthTitleY,
+        mockupOptions.monthTitleFontSize,
+      );
+      monthOutline.fill = '#231f20';
+      const monthSVG = monthOutline.toSVG(2);
+
       createSVGElement({
         elementName: 'g',
         id: 'month-title',
         parentToAppend: monthContainer,
-        children: [
-          this.createOutlinePath(
-            this.monthsNamesList[monthCounter],
-            mockupOptions.monthTitleX,
-            mockupOptions.monthTitleY,
-            mockupOptions.monthTitleFontSize,
-          ),
-        ],
+        content: monthSVG,
       });
+
+      const yearOutline = this.options.font['bold'].getPath(
+        `${year}`,
+        mockupOptions.yearTitleX,
+        mockupOptions.yearTitleY,
+        mockupOptions.yearTitleFontSize,
+      );
+      yearOutline.fill = '#231f20';
+      const yearSVG = yearOutline.toSVG(2);
 
       createSVGElement({
         elementName: 'g',
         id: 'year-title',
         parentToAppend: monthContainer,
-        children: [
-          this.createOutlinePath(
-            `${year}`,
-            mockupOptions.yearTitleX,
-            mockupOptions.yearTitleY,
-            mockupOptions.yearTitleFontSize,
-          ),
-        ],
+        content: yearSVG,
       });
 
       const daysTitles = createSVGElement({
@@ -439,32 +443,36 @@ export default class ViewController {
         parentToAppend: monthMockup,
       });
 
+      const monthOutline = this.options.font['bold'].getPath(
+        this.monthsNamesList[monthCounter],
+        mockupOptions.monthTitleX,
+        mockupOptions.monthTitleY,
+        mockupOptions.monthTitleFontSize,
+      );
+      monthOutline.fill = '#231f20';
+      const monthSVG = monthOutline.toSVG(2);
+
       createSVGElement({
         elementName: 'g',
         id: `#month-title-${i}`,
         parentToAppend: monthTextGroup,
-        children: [
-          this.createOutlinePath(
-            this.monthsNamesList[monthCounter],
-            mockupOptions.monthTitleX,
-            mockupOptions.monthTitleY,
-            mockupOptions.monthTitleFontSize,
-          ),
-        ],
+        content: monthSVG,
       });
+
+      const yearOutline = this.options.font['bold'].getPath(
+        `${year}`,
+        mockupOptions.yearTitleX,
+        mockupOptions.yearTitleY,
+        mockupOptions.yearTitleFontSize,
+      );
+      yearOutline.fill = '#231f20';
+      const yearSVG = yearOutline.toSVG(2);
 
       createSVGElement({
         elementName: 'g',
         id: `#year-title-${i}`,
         parentToAppend: monthTextGroup,
-        children: [
-          this.createOutlinePath(
-            `${year}`,
-            mockupOptions.yearTitleX,
-            mockupOptions.yearTitleY,
-            mockupOptions.yearTitleFontSize,
-          ),
-        ],
+        content: yearSVG,
       });
 
       const daysTitles = createSVGElement({
