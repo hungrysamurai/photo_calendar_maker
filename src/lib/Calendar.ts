@@ -131,8 +131,7 @@ export class Calendar {
   onDownloadCurrentPdf = () => {
     this.removeCropperIfActive();
 
-    // this.downloadManager.downloadPDF(PDFPagesRangeToDownload.Current);
-    this.downloadManager.downloadPDF2();
+    this.downloadManager.downloadPDF(PDFPagesRangeToDownload.Current);
   };
 
   onDownloadJpg = () => {
