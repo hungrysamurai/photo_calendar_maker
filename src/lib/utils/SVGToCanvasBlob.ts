@@ -1,4 +1,6 @@
-export default async function SVGToRasterBlob(svg: SVGElement, width: number, heigth: number) {
+import canvasToBlob from './canvasToBlob';
+
+export default async function SVGToCanvasBlob(svg: SVGElement, width: number, heigth: number) {
   const canvas = await SVGToCanvas(svg, width, heigth);
   return canvasToBlob(canvas);
 }
@@ -35,17 +37,5 @@ async function SVGToCanvas(
     };
 
     img.src = svgBlobURL;
-  });
-}
-
-async function canvasToBlob(canvas: HTMLCanvasElement): Promise<Blob> {
-  return new Promise((resolve, reject) => {
-    canvas.toBlob((blob: Blob | null) => {
-      if (blob) {
-        resolve(blob);
-      } else {
-        reject(new Error('Failed to convert canvas to Blob.'));
-      }
-    }, 'image/jpeg');
   });
 }

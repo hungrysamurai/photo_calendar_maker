@@ -179,7 +179,7 @@ body {
 
 svg {
   height: 100%;
-  filter: drop-shadow(3px 3px 12px rgba(0, 0, 0, 0.33));
+  filter: drop-shadow(0px 3px 18px rgba(0, 0, 0, 0.66));
 }
 
 svg > svg {
@@ -224,14 +224,19 @@ svg > svg {
 
 .controls-container {
   position: fixed;
-  bottom: 0;
+  bottom: 10px;
+  right: 50%;
+  transform: translateX(50%);
   height: 60px;
   z-index: 2;
   background-color: #231f20;
-  width: 100%;
+  width: 70%;
   display: flex;
   align-items: center;
   justify-content: center;
+  border-radius: 100px;
+  filter: drop-shadow(0px 3px 18px rgba(0, 0, 0, 0.44));
+  z-index: 999;
 }
 
 .controls-container button,

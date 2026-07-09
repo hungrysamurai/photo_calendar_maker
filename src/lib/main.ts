@@ -5,7 +5,6 @@ import { createFormatsOptions } from './utils/DOM/initializers/createFormatsOpti
 import { createMonthsOptions } from './utils/DOM/initializers/createMonthsOptions';
 import { createYearsOptions } from './utils/DOM/initializers/createYearsOptions';
 
-import fontsData from '../assets/sourceFontsData';
 import { Calendar } from './Calendar';
 import {
   calendarContainer,
@@ -22,10 +21,10 @@ import {
   newProjectContainer,
   yearInput,
 } from './DOMElements';
-import DataStore from './entities/DataStore/DataStore';
+import DataController from './entities/DataController/DataController';
 
 let activeCalendar: Calendar | null = null;
-let dataStore: DataStore | null;
+let dataController: DataController | null;
 
 async function newProject() {
   const newCalendarData: CalendarData = collectDataFromInputs(
@@ -41,7 +40,7 @@ async function newProject() {
   calendarContainer.innerHTML = '';
 
   // Set new calendar in IDB via DS with user's input data
-  await dataStore?.reset(newCalendarData);
+  await dataController?.reset(newCalendarData);
 
   // Generate new calendar
   newCalendar();
@@ -60,7 +59,7 @@ function newCalendar() {
       controlsContainer,
       cropControlsContainer,
     },
-    dataStore as DataStore,
+    dataController as DataController,
   );
 }
 
@@ -91,17 +90,17 @@ window.addEventListener(
     // Generate new calendar from inputs
     getButton.addEventListener('click', newProject);
 
-    // Init dataStore
-    dataStore = new DataStore();
+    // Init dataController
+    dataController = new DataController();
 
     // Load fonts from /assets
-    await dataStore.fontsController.loadFonts(fontsData);
+    await dataController.loadFonts();
 
     // If some data in IDB - get it and store in DS object
-    await dataStore.retrieveDataFromIDB();
+    await dataController.retrieveDataFromIDB();
 
     // If data in DS - init new project
-    if (dataStore.calendarProjectData) {
+    if (dataController.calendarProjectData) {
       newCalendar();
     }
   },

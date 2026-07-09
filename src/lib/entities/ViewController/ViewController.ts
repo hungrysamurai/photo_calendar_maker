@@ -158,8 +158,6 @@ export default class ViewController {
   private async createOnePageSVGMockup(storedImages: StoredImage[]): Promise<[SVGElement]> {
     this.options.showLoader();
 
-    // const startTime = performance.now();
-
     const mockupOptions = this.options.mockupOptions as SinglePageMockupOutputOptions;
     let year = this.options.year;
     const { format, outputDimensions, firstMonthIndex } = this.options;
@@ -365,8 +363,6 @@ export default class ViewController {
     }
 
     this.options.hideLoader();
-    // console.log(performance.now() - startTime);
-
     return [mockup];
   }
 

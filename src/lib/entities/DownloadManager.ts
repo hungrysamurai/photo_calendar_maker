@@ -4,8 +4,9 @@ import jsPDF from 'jspdf';
 import 'svg2pdf.js';
 import getImageSize from '../utils/getImageSize';
 import getImageScaleAndPlacement from '../utils/getImageScaleAndPlacement';
-import SVGToRasterBlob from '../utils/SVGToRasterBlob';
+import SVGToCanvasBlob from '../utils/SVGToCanvasBlob';
 import { createSVGElement } from '../utils/DOM/createElement/createSVGElement';
+import readFile from '../utils/readFile';
 
 export type DownloadManagerOptions = {
   calendarType: CalendarType;
@@ -28,6 +29,8 @@ export default class DownloadManager {
   constructor(private options: DownloadManagerOptions) {}
 
   public async downloadCurrentJPG(): Promise<void> {
+    this.options.showLoader();
+
     const monthIndex = this.options.getCurrentMonth();
     const { width, height } = this.options.outputDimensions[this.options.format];
 
@@ -55,19 +58,21 @@ export default class DownloadManager {
       const imageBlob = this.options.storedImages.find((el) => el.id === monthIndex);
 
       if (imageBlob) {
-        const imageDataUrl = await this.readFile(imageBlob.image);
+        const imageDataUrl = await readFile(imageBlob.image);
 
         // Embed base64 to image
         newImageEl.setAttributeNS('http://www.w3.org/1999/xlink', 'href', imageDataUrl);
       }
     }
 
-    const imageBlob = await SVGToRasterBlob(pageClone, width, height);
+    const imageBlob = await SVGToCanvasBlob(pageClone, width, height);
 
     const imageUrl = URL.createObjectURL(imageBlob);
     const fileName = this.getFileName();
 
     this.downloadElement(imageUrl, fileName);
+
+    this.options.hideLoader();
   }
 
   public async downloadPDF(range: PDFPagesRangeToDownload) {
@@ -104,7 +109,10 @@ export default class DownloadManager {
 
       await pdf.svg(pageClone, { x: 0, y: 0, width: mockupWidth, height: mockupHeight });
 
-      const imageBlob = this.options.storedImages.find((el) => el.id === i);
+      // If download individual page - find image by index of SVG, else - proceed in sequence
+      const imageIndex = range === PDFPagesRangeToDownload.All ? i : monthIndex;
+
+      const imageBlob = this.options.storedImages.find((el) => el.id === imageIndex);
 
       if (imageBlob) {
         const arrayBuffer = await imageBlob.image.arrayBuffer();
@@ -166,23 +174,6 @@ export default class DownloadManager {
     const monthName = date.toLocaleString('default', { month: 'long' });
 
     return `${monthName}_${year}`;
-  }
-
-  private async readFile(file: File | Blob): Promise<string> {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => {
-        if (typeof reader.result === 'string') {
-          resolve(reader.result);
-        } else {
-          reject(new Error('FileReader failed'));
-        }
-      };
-      reader.onerror = () => {
-        reject(reader.error);
-      };
-      reader.readAsDataURL(file);
-    });
   }
 
   private downloadElement(elementURL: string, fileName: string): void {

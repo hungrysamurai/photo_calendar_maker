@@ -3,7 +3,7 @@ import opentype from 'opentype.js';
 export default class FontsController {
   fonts: LoadedFontsObject = {};
 
-  public async loadFonts(src: SourceFontsData): Promise<void> {
+  async loadFonts(src: SourceFontsData): Promise<void> {
     for (const [fontTitle, fontVariants] of Object.entries(src)) {
       const { fontNameBold, fontNameRegular } = fontVariants;
 
@@ -20,7 +20,7 @@ export default class FontsController {
     }
   }
 
-  public getFont(font: string): FontData {
+  getFont(font: string): FontData {
     return {
       bold: this.fonts[font][0],
       regular: this.fonts[font][1],

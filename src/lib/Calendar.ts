@@ -2,14 +2,14 @@ import ImageCropper from './entities/ImageCropper';
 import loadingOverlay from './entities/LoadingOverlay';
 import UploadManager from './entities/UploadManager';
 
-import DataStore from './entities/DataStore/DataStore';
+import DataController from './entities/DataController/DataController';
 import DownloadManager from './entities/DownloadManager';
 import ViewController from './entities/ViewController/ViewController';
 
 import { PDFPagesRangeToDownload } from '../types';
 
 export class Calendar {
-  private dataStore;
+  private dataController: DataController;
 
   private imageCropper: ImageCropper;
   private viewController: ViewController;
@@ -29,15 +29,16 @@ export class Calendar {
   controlsContainer: HTMLDivElement;
   cropControlsContainer: HTMLDivElement;
 
-  constructor(DOMElements: ProvidedDOMElements, dataStore: DataStore) {
-    this.dataStore = dataStore;
+  constructor(DOMElements: ProvidedDOMElements, dataController: DataController) {
+    this.dataController = dataController;
 
-    // Extract data from DS
-    const { lang, firstMonthIndex, startYear, type, format } = this.dataStore.calendarProjectData;
-    const storedImages = this.dataStore.calendarImagesData;
-    this.font = this.dataStore.currentFont;
-    this.outputDimensions = this.dataStore.calendarOutputDimensions;
-    this.mockupOptions = this.dataStore.currentMockupOptions;
+    // Extract data from DC
+    const { lang, firstMonthIndex, startYear, type, format } =
+      this.dataController.calendarProjectData;
+    const storedImages = this.dataController.calendarImagesData;
+    this.font = this.dataController.currentFont;
+    this.outputDimensions = this.dataController.calendarOutputDimensions;
+    this.mockupOptions = this.dataController.currentMockupOptions;
 
     // Set params of calendar
     this.firstMonth = firstMonthIndex;
@@ -84,7 +85,7 @@ export class Calendar {
       onBeforeStart: this.showLoader,
       onCropperReady: this.hideLoader,
       onAfterRemove: () => this.cropControlsContainer.classList.add('hide'),
-      saveImage: this.dataStore.saveImageToIDB,
+      saveImage: this.dataController.saveImageToIDB,
       getCurrentMonthInViewIndex: () => this.viewController.currentMonthInView,
       getMockupByIndex: this.viewController.getMockupByIndex,
     });
@@ -98,7 +99,7 @@ export class Calendar {
       getCurrentMockup: this.viewController.getCurrentMockup,
       getMockupByIndex: this.viewController.getMockupByIndex,
       getImageGroupByIndex: this.viewController.getImageGroupByIndex,
-      saveImage: this.dataStore.saveImageToIDB,
+      saveImage: this.dataController.saveImageToIDB,
       showLoader: this.showLoader,
       hideLoader: this.hideLoader,
     });
@@ -183,6 +184,7 @@ export class Calendar {
       const imageLink = m.querySelector('image')?.href.baseVal;
       if (imageLink) URL.revokeObjectURL(imageLink);
     });
+
     this.imageCropper.dispose();
   }
 }

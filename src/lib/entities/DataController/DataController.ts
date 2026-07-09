@@ -3,11 +3,14 @@ import {
   A_FormatSinglePageMockupOptions,
 } from '../../../assets/A_FormatOptions/A_FormatOptions';
 import { A_outputFormats } from '../../../assets/A_FormatOptions/A_OutputDimensions';
+import fontsData from '../../../assets/sourceFontsData';
 import { CalendarType } from '../../../types';
 import FontsController from './controllers/FontsController';
 import IDBController from './controllers/IDBController';
 
-export default class DataStore {
+export default class DataController {
+  calendarProjectData: CalendarData;
+  calendarImagesData: StoredImage[] = [];
   /**
    * Dimensions of document (px)
    */
@@ -17,6 +20,10 @@ export default class DataStore {
 
   get currentFont(): FontData {
     return this.fontsController.getFont(this.calendarProjectData.font);
+  }
+
+  async loadFonts() {
+    await this.fontsController.loadFonts(fontsData);
   }
 
   get currentMockupOptions(): SinglePageMockupOutputOptions | MultiPageMockupOutputOptions {
@@ -44,27 +51,21 @@ export default class DataStore {
       });
 
       this.calendarProjectData = data;
-      // this.calendarImagesData = images;
     }
   }
 
   saveImageToIDB = async (image: Blob, index: number) => {
-    console.log('save');
-
     await this.IDBController.saveToIDB(image, index);
 
     this.calendarImagesData[index] = { id: index, image };
   };
-
-  calendarProjectData: CalendarData;
-  calendarImagesData: StoredImage[] = [];
 
   constructor() {
     this.fontsController = new FontsController();
     this.IDBController = new IDBController();
   }
 
-  public async reset(newCalendarData: CalendarData) {
+  async reset(newCalendarData: CalendarData) {
     this.calendarProjectData = newCalendarData;
     this.calendarImagesData = [];
 
