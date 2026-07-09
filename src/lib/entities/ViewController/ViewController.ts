@@ -58,8 +58,6 @@ export default class ViewController {
 
     this.monthsNamesList = getMonthsList(this.options.lang);
 
-    let generatedMockups: Promise<SVGElement[]>;
-
     if (options.type === CalendarType.SinglePage) {
       this.controlsManager = new BasicControlsManager(
         options.controlsContainer,
@@ -70,7 +68,9 @@ export default class ViewController {
 
       this.weekDaysNamesList = getWeekDays('short', options.lang);
 
-      generatedMockups = this.createOnePageSVGMockup(this.options.storedImages);
+      const generatedMockup = this.createOnePageSVGMockup(this.options.storedImages);
+
+      this.svgMockups.push(generatedMockup);
     } else {
       this.controlsManager = new MultiPageControlsManager(
         options.controlsContainer,
@@ -85,12 +85,10 @@ export default class ViewController {
 
       this.weekDaysNamesList = getWeekDays('long', options.lang);
 
-      generatedMockups = this.createMultiPageSVGMockups(this.options.storedImages);
-    }
+      const generatedMockups = this.createMultiPageSVGMockups(this.options.storedImages);
 
-    generatedMockups.then((svgMockups) => {
-      svgMockups.forEach((m) => this.svgMockups.push(m));
-    });
+      generatedMockups.forEach((m) => this.svgMockups.push(m));
+    }
   }
 
   showPrevMonth = () => {
@@ -155,7 +153,7 @@ export default class ViewController {
     ) as SVGGElement;
   };
 
-  private async createOnePageSVGMockup(storedImages: StoredImage[]): Promise<[SVGElement]> {
+  private createOnePageSVGMockup(storedImages: StoredImage[]): SVGElement {
     this.options.showLoader();
 
     const mockupOptions = this.options.mockupOptions as SinglePageMockupOutputOptions;
@@ -363,10 +361,10 @@ export default class ViewController {
     }
 
     this.options.hideLoader();
-    return [mockup];
+    return mockup;
   }
 
-  private async createMultiPageSVGMockups(storedImages: StoredImage[]): Promise<SVGElement[]> {
+  private createMultiPageSVGMockups(storedImages: StoredImage[]): SVGElement[] {
     this.options.showLoader();
 
     const mockups: SVGElement[] = [];
@@ -558,26 +556,6 @@ export default class ViewController {
     return mockups;
   }
 
-  createOutlinePath(
-    text: string,
-    x: number,
-    y: number,
-    size: number,
-    weight: 'bold' | 'regular' = 'bold',
-    fill = '#231f20',
-  ): SVGPathElement {
-    const outline = this.outlineCache.get(text, size, weight);
-
-    return createSVGElement({
-      elementName: 'path',
-      attributes: {
-        d: outline.d,
-        fill,
-        transform: `translate(${x - outline.xShift} ${y + outline.yShift})`,
-      },
-    });
-  }
-
   getAndPlaceOutline(
     text: string,
     x: number,
@@ -593,7 +571,7 @@ export default class ViewController {
       attributes: {
         d: outline.d,
         fill,
-        transform: `translate(${x - outline.xShift} ${y + outline.yShift})`,
+        transform: `translate(${(x - outline.xShift).toFixed(3)} ${(y + outline.yShift).toFixed(3)})`,
       },
     });
   }
