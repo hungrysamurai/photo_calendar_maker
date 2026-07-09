@@ -5,6 +5,7 @@ import 'svg2pdf.js';
 import getImageSize from '../utils/getImageSize';
 import getImageScaleAndPlacement from '../utils/getImageScaleAndPlacement';
 import SVGToRasterBlob from '../utils/SVGToRasterBlob';
+import { createSVGElement } from '../utils/DOM/createElement/createSVGElement';
 
 export type DownloadManagerOptions = {
   calendarType: CalendarType;
@@ -30,7 +31,38 @@ export default class DownloadManager {
     const monthIndex = this.options.getCurrentMonth();
     const { width, height } = this.options.outputDimensions[this.options.format];
 
-    const imageBlob = await SVGToRasterBlob(this.options.svgMockups[monthIndex], width, height);
+    const pageClone = this.options.svgMockups[monthIndex].cloneNode(true) as SVGElement;
+    const imageEl = pageClone.querySelector('image');
+
+    if (imageEl) {
+      // Get imageGroup of image element
+      const imageGroup = imageEl.parentElement as unknown as SVGGElement;
+      // Cut out image el
+      imageEl.remove();
+
+      // Re-create image element
+      const newImageEl = createSVGElement({
+        elementName: 'image',
+        parentToAppend: imageGroup,
+        attributes: {
+          height: this.options.mockupOptions.imagePlaceholderHeight.toString(),
+          width: this.options.mockupOptions.imagePlaceholderWidth.toString(),
+          x: this.options.mockupOptions.imagePlaceholderX.toString(),
+          y: this.options.mockupOptions.imagePlaceholderY.toString(),
+        },
+      }) as SVGImageElement;
+
+      const imageBlob = this.options.storedImages.find((el) => el.id === monthIndex);
+
+      if (imageBlob) {
+        const imageDataUrl = await this.readFile(imageBlob.image);
+
+        // Embed base64 to image
+        newImageEl.setAttributeNS('http://www.w3.org/1999/xlink', 'href', imageDataUrl);
+      }
+    }
+
+    const imageBlob = await SVGToRasterBlob(pageClone, width, height);
 
     const imageUrl = URL.createObjectURL(imageBlob);
     const fileName = this.getFileName();
@@ -134,6 +166,23 @@ export default class DownloadManager {
     const monthName = date.toLocaleString('default', { month: 'long' });
 
     return `${monthName}_${year}`;
+  }
+
+  private async readFile(file: File | Blob): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        if (typeof reader.result === 'string') {
+          resolve(reader.result);
+        } else {
+          reject(new Error('FileReader failed'));
+        }
+      };
+      reader.onerror = () => {
+        reject(reader.error);
+      };
+      reader.readAsDataURL(file);
+    });
   }
 
   private downloadElement(elementURL: string, fileName: string): void {

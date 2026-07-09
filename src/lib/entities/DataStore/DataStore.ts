@@ -49,9 +49,11 @@ export default class DataStore {
   }
 
   saveImageToIDB = async (image: Blob, index: number) => {
+    console.log('save');
+
     await this.IDBController.saveToIDB(image, index);
 
-    this.calendarImagesData.push({ id: index, image });
+    this.calendarImagesData[index] = { id: index, image };
   };
 
   calendarProjectData: CalendarData;
