@@ -1,7 +1,9 @@
+import { icons } from '../../../assets/icons';
 import { CalendarLanguage, CalendarType, FormatName } from '../../../types';
 
 import { createHTMLElement } from '../../utils/DOM/createElement/createHTMLElement';
 import { createSVGElement } from '../../utils/DOM/createElement/createSVGElement';
+import createSvgElementFromString from '../../utils/DOM/createElement/createSVGElementFromString';
 
 import getDaysInMonth from '../../utils/getDaysInMonth';
 import getMonthFirstDay from '../../utils/getMonthFirstDay';
@@ -225,18 +227,34 @@ export default class ViewController {
         },
       });
     } else {
+      const placeholderWidth = mockupOptions.imagePlaceholderWidth.toString();
+      const placeholderHeight = mockupOptions.imagePlaceholderHeight.toString();
+      const placeholderX = mockupOptions.imagePlaceholderX.toString();
+      const placeholderY = mockupOptions.imagePlaceholderY.toString();
+
+      const iconX =
+        mockupOptions.imagePlaceholderX + (mockupOptions.imagePlaceholderWidth - 48) / 2;
+      const iconY =
+        mockupOptions.imagePlaceholderY + (mockupOptions.imagePlaceholderHeight - 38) / 2;
+
       createSVGElement({
         elementName: 'rect',
         id: 'image-placeholder',
         parentToAppend: imageElementGroup,
         attributes: {
-          x: mockupOptions.imagePlaceholderX.toString(),
-          y: mockupOptions.imagePlaceholderY.toString(),
-          width: mockupOptions.imagePlaceholderWidth.toString(),
-          height: mockupOptions.imagePlaceholderHeight.toString(),
+          x: placeholderX,
+          y: placeholderY,
+          width: placeholderWidth,
+          height: placeholderHeight,
           style: 'fill: #e8e8e8',
         },
       });
+
+      const icon = createSvgElementFromString(icons.uploadSingleImage, {
+        transform: `translate(${iconX} ${iconY}) scale(${1})`,
+      });
+
+      imageElementGroup.append(icon);
     }
 
     createHTMLElement({
