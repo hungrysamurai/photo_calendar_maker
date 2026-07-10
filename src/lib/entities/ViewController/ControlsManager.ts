@@ -19,7 +19,10 @@ export type MultiPageControlsCallbacks = ControlsCallbacks & {
 };
 
 export abstract class ControlsManager {
-  constructor(protected controlsContainer: HTMLDivElement) {}
+  constructor(
+    protected controlsContainer: HTMLDivElement,
+    protected imagesContainers: SVGGElement[],
+  ) {}
 
   init(): void {
     this.controlsContainer.innerHTML = '';
@@ -40,9 +43,10 @@ export class BasicControlsManager extends ControlsManager {
 
   constructor(
     controlsContainer: HTMLDivElement,
+    protected imagesContainers: SVGGElement[],
     protected callbacks: ControlsCallbacks,
   ) {
-    super(controlsContainer);
+    super(controlsContainer, imagesContainers);
   }
 
   protected createControls(): void {
@@ -107,6 +111,12 @@ export class BasicControlsManager extends ControlsManager {
     this.uploadImgInput.addEventListener('input', (event) => {
       this.callbacks.onUploadImage(event as InputEvent);
     });
+
+    this.imagesContainers.forEach((g) => {
+      g.addEventListener('click', () => {
+        this.uploadImgInput.click();
+      });
+    });
   }
 }
 
@@ -119,10 +129,11 @@ export class MultiPageControlsManager extends BasicControlsManager {
 
   constructor(
     controlsContainer: HTMLDivElement,
+    protected imagesContainers: SVGGElement[],
     protected callbacks: MultiPageControlsCallbacks,
     protected viewCallbacks: MultipageViewControllsCallbacks,
   ) {
-    super(controlsContainer, callbacks);
+    super(controlsContainer, imagesContainers, callbacks);
   }
 
   protected createControls(): void {

@@ -83,6 +83,7 @@ export default class ImageCropper {
     }) as HTMLImageElement;
 
     this.imageToCrop.style.visibility = 'hidden';
+    this.cropperOuter.style.pointerEvents = 'auto';
 
     this.cropper = new Cropper(this.tempCropImageElement, {
       viewMode: 0,
@@ -182,6 +183,7 @@ export default class ImageCropper {
     if (!this.cropper || !this.imageToCrop) return;
 
     this.imageToCrop.style.visibility = 'visible';
+    this.cropperOuter.style.pointerEvents = 'none';
     this.cropper.destroy();
     this.cropper = undefined;
 

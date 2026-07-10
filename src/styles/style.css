@@ -186,6 +186,10 @@ svg > svg {
   filter: initial;
 }
 
+#image-group {
+  cursor: pointer;
+}
+
 .loading-screen {
   position: absolute;
   top: var(--new-calendar-controls-height);
@@ -213,6 +217,7 @@ svg > svg {
   height: 100%;
   margin: 0;
   position: relative;
+  pointer-events: none;
 }
 
 .image-element {

@@ -57,7 +57,13 @@ export default class DataController {
   saveImageToIDB = async (image: Blob, index: number) => {
     await this.IDBController.saveToIDB(image, index);
 
-    this.calendarImagesData[index] = { id: index, image };
+    const oldImageIndex = this.calendarImagesData.findIndex((el) => el.id === index);
+
+    if (oldImageIndex >= 0) {
+      this.calendarImagesData[oldImageIndex] = { id: index, image };
+    } else {
+      this.calendarImagesData.push({ id: index, image });
+    }
   };
 
   constructor() {

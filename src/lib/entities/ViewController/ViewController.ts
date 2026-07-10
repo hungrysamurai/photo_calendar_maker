@@ -50,6 +50,7 @@ export default class ViewController {
   currentMonthInView: number = 0;
 
   svgMockups: SVGElement[] = [];
+  imagesContainers: SVGGElement[] = [];
 
   private outlineCache: OutlineCache;
 
@@ -59,35 +60,41 @@ export default class ViewController {
     this.monthsNamesList = getMonthsList(this.options.lang);
 
     if (options.type === CalendarType.SinglePage) {
-      this.controlsManager = new BasicControlsManager(
-        options.controlsContainer,
-        options.actionsHandlers,
-      );
-
-      this.controlsManager.init();
-
       this.weekDaysNamesList = getWeekDays('short', options.lang);
 
       const generatedMockup = this.createOnePageSVGMockup(this.options.storedImages);
-
       this.svgMockups.push(generatedMockup);
+
+      const imageGroup = generatedMockup.querySelector('#image-group') as SVGGElement;
+      this.imagesContainers.push(imageGroup);
+
+      this.controlsManager = new BasicControlsManager(
+        options.controlsContainer,
+        this.imagesContainers,
+        options.actionsHandlers,
+      );
+      this.controlsManager.init();
     } else {
+      this.weekDaysNamesList = getWeekDays('long', options.lang);
+
+      const generatedMockups = this.createMultiPageSVGMockups(this.options.storedImages);
+      generatedMockups.forEach((m) => {
+        const imageGroup = m.querySelector('#image-group') as SVGGElement;
+
+        this.imagesContainers.push(imageGroup);
+        this.svgMockups.push(m);
+      });
+
       this.controlsManager = new MultiPageControlsManager(
         options.controlsContainer,
+        this.imagesContainers,
         options.actionsHandlers,
         {
           onPrevMonth: this.showPrevMonth,
           onNextMonth: this.showNextMonth,
         },
       );
-
       this.controlsManager.init();
-
-      this.weekDaysNamesList = getWeekDays('long', options.lang);
-
-      const generatedMockups = this.createMultiPageSVGMockups(this.options.storedImages);
-
-      generatedMockups.forEach((m) => this.svgMockups.push(m));
     }
   }
 
