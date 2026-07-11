@@ -164,6 +164,9 @@ declare global {
     imagePlaceholderHeight: number;
     imagePlaceholderX: number;
     imagePlaceholderY: number;
+    imagePlaceholderIconScale: number;
+    imagePlaceholderIconX: number;
+    imagePlaceholderIconY: number;
     monthTitleX: number;
     monthTitleY: number;
     monthTitleFontSize: number;

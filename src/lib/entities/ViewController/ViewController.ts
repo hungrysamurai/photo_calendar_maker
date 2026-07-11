@@ -226,7 +226,29 @@ export default class ViewController {
         },
       });
     } else {
-      this.getAndPlaceImagePlaceholder(imageElementGroup);
+      // this.getAndPlaceImagePlaceholder(imageElementGroup);
+
+      createSVGElement({
+        elementName: 'rect',
+        id: 'image-placeholder',
+        parentToAppend: imageElementGroup,
+        attributes: {
+          x: mockupOptions.imagePlaceholderX.toString(),
+          y: mockupOptions.imagePlaceholderY.toString(),
+          width: mockupOptions.imagePlaceholderWidth.toString(),
+          height: mockupOptions.imagePlaceholderHeight.toString(),
+          style: 'fill: #e8e8e8',
+        },
+      });
+
+      createSVGElement({
+        elementName: 'g',
+        parentToAppend: imageElementGroup,
+        content: icons.uploadSingleImage,
+        attributes: {
+          transform: `translate(${mockupOptions.imagePlaceholderIconX} ${mockupOptions.imagePlaceholderIconY}) scale(${mockupOptions.imagePlaceholderIconScale})`,
+        },
+      });
     }
 
     createHTMLElement({
@@ -525,6 +547,15 @@ export default class ViewController {
             style: 'fill: #e8e8e8',
           },
         });
+
+        createSVGElement({
+          elementName: 'g',
+          parentToAppend: monthImageGroup,
+          content: icons.uploadSingleImage,
+          attributes: {
+            transform: `translate(${mockupOptions.imagePlaceholderIconX} ${mockupOptions.imagePlaceholderIconY}) scale(${mockupOptions.imagePlaceholderIconScale})`,
+          },
+        });
       }
 
       monthCounter++;
@@ -551,45 +582,6 @@ export default class ViewController {
     this.options.hideLoader();
 
     return mockups;
-  }
-
-  getAndPlaceImagePlaceholder(imageElementGroupToPlace: SVGGElement): void {
-    const { mockupOptions } = this.options;
-
-    const placeholderWidth = mockupOptions.imagePlaceholderWidth.toString();
-    const placeholderHeight = mockupOptions.imagePlaceholderHeight.toString();
-    const placeholderX = mockupOptions.imagePlaceholderX.toString();
-    const placeholderY = mockupOptions.imagePlaceholderY.toString();
-
-    const iconScale = mockupOptions.imagePlaceholderWidth * 0.35;
-
-    console.log(iconScale);
-
-    const iconX = mockupOptions.imagePlaceholderX + (mockupOptions.imagePlaceholderWidth - 75) / 2;
-    const iconY = mockupOptions.imagePlaceholderY + (mockupOptions.imagePlaceholderHeight - 75) / 2;
-
-    createSVGElement({
-      elementName: 'rect',
-      id: 'image-placeholder',
-      parentToAppend: imageElementGroupToPlace,
-      attributes: {
-        x: placeholderX,
-        y: placeholderY,
-        width: placeholderWidth,
-        height: placeholderHeight,
-        style: 'fill: #e8e8e8',
-      },
-    });
-    console.log(mockupOptions);
-
-    createSVGElement({
-      elementName: 'g',
-      parentToAppend: imageElementGroupToPlace,
-      content: icons.uploadSingleImage,
-      attributes: {
-        transform: `translate(${iconX} ${iconY}) scale(${iconScale / 100})`,
-      },
-    });
   }
 
   getAndPlaceOutline(
