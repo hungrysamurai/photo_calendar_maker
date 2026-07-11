@@ -1,5 +1,4 @@
-const newProjectContainer = document.querySelector('.new-project-container') as HTMLDivElement;
-const newProjectBtn = document.querySelector('#new-project') as HTMLButtonElement;
+const newProjectOverlayTriggerBtn = document.querySelector('.new-project-overlay-trigger-btn');
 
 const newCalendarInputsContainer = document.querySelector(
   '.new-calendar-controls',
@@ -29,7 +28,6 @@ export {
   monthInput,
   multiModeBtn,
   newCalendarInputsContainer,
-  newProjectBtn,
-  newProjectContainer,
+  newProjectOverlayTriggerBtn,
   yearInput,
 };

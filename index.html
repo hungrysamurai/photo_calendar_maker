@@ -10,9 +10,21 @@
 </head>
 
 <body>
-  <div class="new-project-container">
-    <button id="new-project">Create new calendar</button>
-  </div>
+
+  <!-- New project overlay -->
+  <button class="new-project-overlay-trigger-btn">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+      class="lucide lucide-file-plus-corner-icon lucide-file-plus-corner">
+      <path
+        d="M11.35 22H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.706.706l3.588 3.588A2.4 2.4 0 0 1 20 8v5.35" />
+      <path d="M14 2v5a1 1 0 0 0 1 1h5" />
+      <path d="M14 19h6" />
+      <path d="M17 16v6" />
+    </svg>
+  </button>
+
+
   <div class="new-calendar-controls">
     <div class="row-1">
       <div class="mode-radio-container">
@@ -48,6 +60,7 @@
     </div>
   </div>
 
+  <!-- Calendar mockup -->
   <div class="calendar-container"></div>
   <div class="controls-container hide"></div>
   <div class="crop-controls-container hide"></div>

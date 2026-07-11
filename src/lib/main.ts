@@ -18,9 +18,6 @@ import {
   langInput,
   monthInput,
   multiModeBtn,
-  newCalendarInputsContainer,
-  newProjectBtn,
-  newProjectContainer,
   yearInput,
 } from './DOMElements';
 import DataController from './entities/DataController/DataController';
@@ -46,8 +43,6 @@ async function newProject() {
 
   // Generate new calendar
   newCalendar();
-
-  newProjectContainer.style.top = '0px';
 }
 
 function newCalendar() {
@@ -76,19 +71,19 @@ window.addEventListener(
     monthInput.innerHTML = createMonthsOptions();
     formatInput.innerHTML = createFormatsOptions();
 
-    // Show/Hide "New calendar container"
-    newProjectBtn.addEventListener('click', () => {
-      newProjectContainer.style.top = '-100px';
-    });
+    // // Show/Hide "New calendar container"
+    // newProjectBtn.addEventListener('click', () => {
+    //   newProjectContainer.style.top = '-100px';
+    // });
 
-    document.addEventListener('click', (e) => {
-      if (
-        !newCalendarInputsContainer.contains(e.target as Document) &&
-        e.target !== newProjectBtn
-      ) {
-        newProjectContainer.style.top = '0px';
-      }
-    });
+    // document.addEventListener('click', (e) => {
+    //   if (
+    //     !newCalendarInputsContainer.contains(e.target as Document) &&
+    //     e.target !== newProjectBtn
+    //   ) {
+    //     newProjectContainer.style.top = '0px';
+    //   }
+    // });
 
     // Generate new calendar from inputs
     getButton.addEventListener('click', newProject);
