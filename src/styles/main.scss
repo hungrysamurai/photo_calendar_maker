@@ -1,10 +1,13 @@
+// Abstracts
+
+@use './abstracts/variables' as vars;
+@use './abstracts/mixins' as mixins;
+
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap');
 
 :root {
   touch-action: pan-x pan-y;
   height: 100%;
-  --dark: #231f20;
-  --primary: #ff0073;
   --new-calendar-controls-height: 4.5rem;
 }
 
@@ -28,7 +31,7 @@ body {
   justify-content: center;
   width: 100%;
   height: var(--new-calendar-controls-height);
-  background-color: #231f20;
+  background-color: vars.$gray-dark;
   position: fixed;
   top: 0;
   z-index: 3;
@@ -58,7 +61,7 @@ body {
   flex-direction: column;
   width: 100%;
   height: var(--new-calendar-controls-height);
-  background-color: #231f20;
+  background-color: vars.$gray-dark;
   position: fixed;
   top: 0;
   z-index: 2;
@@ -182,7 +185,7 @@ svg {
   filter: drop-shadow(0px 3px 18px rgba(0, 0, 0, 0.66));
 }
 
-svg>svg {
+svg > svg {
   filter: initial;
 }
 
@@ -234,7 +237,7 @@ svg>svg {
   transform: translateX(50%);
   height: 60px;
   z-index: 2;
-  background-color: #231f20;
+  background-color: vars.$gray-dark;
   width: 70%;
   display: flex;
   align-items: center;
@@ -242,6 +245,10 @@ svg>svg {
   border-radius: 100px;
   filter: drop-shadow(0px 3px 18px rgba(0, 0, 0, 0.44));
   z-index: 999;
+}
+
+.controls-container.hide {
+  visibility: hidden;
 }
 
 .controls-container button,
@@ -270,7 +277,7 @@ svg>svg {
 .controls-container button:hover,
 .controls-container label:hover {
   transform: scale(0.95);
-  background-color: var(--primary);
+  background-color: vars.$primary;
 }
 
 .controls-container button:active,
@@ -341,7 +348,6 @@ svg>svg {
 }
 
 @media (max-width: 768px) {
-
   .controls-container button,
   .controls-container label {
     font-size: 0.5rem;
@@ -371,38 +377,38 @@ svg>svg {
 /* Cropper styles */
 .cropper-view-box {
   outline: 3px solid #fff;
-  outline-color: #231f20;
+  outline-color: vars.$gray-dark;
 }
 
 .cropper-dashed {
-  border: 0 dashed #231f20;
+  border: 0 dashed vars.$gray-dark;
   filter: invert(1);
 }
 
 .cropper-center::before,
 .cropper-center::after {
-  background-color: #231f20;
+  background-color: vars.$gray-dark;
   filter: invert(1);
 }
 
 .cropper-face {
-  background-color: #231f20;
+  background-color: vars.$gray-dark;
   opacity: 0;
 }
 
 .cropper-line {
-  background-color: #231f20;
+  background-color: vars.$gray-dark;
   filter: invert(1);
 }
 
 .cropper-point {
-  background-color: #231f20;
+  background-color: vars.$gray-dark;
   filter: invert(1);
 }
 
 @media (min-width: 1200px) {
   .cropper-point.point-se::before {
-    background-color: #231f20;
+    background-color: vars.$gray-dark;
   }
 }
 

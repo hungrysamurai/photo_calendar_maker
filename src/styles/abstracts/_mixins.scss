@@ -1,0 +1,13 @@
+// Breakponint argument variants: phone, tab-port, tab-land, desk
+@mixin resize($breakpoint) {
+  @if $breakpoint == 600 {
+    @media (max-width: 600px) {
+      @content;
+    }
+  }
+  @if $breakpoint == 800 {
+    @media (max-width: 800px) {
+      @content;
+    }
+  }
+}

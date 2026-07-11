@@ -1,3 +1,5 @@
+import '../styles/main.scss';
+
 import { collectDataFromInputs } from './utils/DOM/collectDataFromInputs';
 
 import { createFontsOptions } from './utils/DOM/initializers/createFontsOptions';
@@ -49,6 +51,7 @@ async function newProject() {
 }
 
 function newCalendar() {
+  controlsContainer.classList.remove('hide');
   if (activeCalendar) {
     activeCalendar.dispose();
   }
