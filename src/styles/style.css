@@ -182,7 +182,7 @@ svg {
   filter: drop-shadow(0px 3px 18px rgba(0, 0, 0, 0.66));
 }
 
-svg > svg {
+svg>svg {
   filter: initial;
 }
 
@@ -341,6 +341,7 @@ svg > svg {
 }
 
 @media (max-width: 768px) {
+
   .controls-container button,
   .controls-container label {
     font-size: 0.5rem;

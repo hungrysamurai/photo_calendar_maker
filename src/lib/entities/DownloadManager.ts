@@ -3,7 +3,7 @@ import { CalendarType, FormatName, PDFPagesRangeToDownload } from '../../types';
 import jsPDF from 'jspdf';
 import 'svg2pdf.js';
 import getImageSize from '../utils/getImageSize';
-import getImageScaleAndPlacement from '../utils/getImageScaleAndPlacement';
+import getImageDimensionsAndPlacement from '../utils/getImageDimensionsAndPlacement';
 import SVGToCanvasBlob from '../utils/SVGToCanvasBlob';
 import { createSVGElement } from '../utils/DOM/createElement/createSVGElement';
 import readFile from '../utils/readFile';
@@ -119,7 +119,7 @@ export default class DownloadManager {
         const uint8Array = new Uint8Array(arrayBuffer);
 
         const { width: imgWidth, height: imgHeight } = await getImageSize(imageBlob.image);
-        const { offsetX, offsetY, scaledWidth, scaledHeight } = getImageScaleAndPlacement(
+        const { offsetX, offsetY, scaledWidth, scaledHeight } = getImageDimensionsAndPlacement(
           imagePlaceholderWidth,
           imagePlaceholderHeight,
           imagePlaceholderX,

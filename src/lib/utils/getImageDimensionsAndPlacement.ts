@@ -1,4 +1,4 @@
-export default function getImageScaleAndPlacement(
+export default function getImageDimensionsAndPlacement(
   imagePlaceholderWidth: number,
   imagePlaceholderHeight: number,
   imagePlaceholderX: number,
