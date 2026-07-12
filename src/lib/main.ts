@@ -19,8 +19,10 @@ import {
   monthInput,
   multiModeBtn,
   yearInput,
+  newProjectOverlayTriggerBtn,
 } from './DOMElements';
 import DataController from './entities/DataController/DataController';
+import animateTriggerBtn from './animations/animateTriggerBtn';
 
 let activeCalendar: Calendar | null = null;
 let dataController: DataController | null;
@@ -71,22 +73,12 @@ window.addEventListener(
     monthInput.innerHTML = createMonthsOptions();
     formatInput.innerHTML = createFormatsOptions();
 
-    // // Show/Hide "New calendar container"
-    // newProjectBtn.addEventListener('click', () => {
-    //   newProjectContainer.style.top = '-100px';
-    // });
-
-    // document.addEventListener('click', (e) => {
-    //   if (
-    //     !newCalendarInputsContainer.contains(e.target as Document) &&
-    //     e.target !== newProjectBtn
-    //   ) {
-    //     newProjectContainer.style.top = '0px';
-    //   }
-    // });
-
     // Generate new calendar from inputs
     getButton.addEventListener('click', newProject);
+
+    // Animate new project overlay trigger button on hover
+    newProjectOverlayTriggerBtn?.addEventListener('mouseenter', animateTriggerBtn);
+    newProjectOverlayTriggerBtn?.addEventListener('mouseleave', animateTriggerBtn);
 
     // Init dataController
     dataController = new DataController();

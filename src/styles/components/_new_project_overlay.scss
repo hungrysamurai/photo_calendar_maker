@@ -5,19 +5,14 @@
   bottom: 5rem;
   left: 50%;
   transform: translateX(-50%);
+  transform-origin: center center;
   width: 5rem;
   height: 5rem;
   border-radius: 50%;
   border: none;
-  background-color: vars.$gray-dark;
+  background-color: vars.$primary;
   z-index: 2;
   cursor: pointer;
-  filter: vars.$element-shadow-blur;
-  transition: all 0.2s ease-in;
-
-  &:hover {
-    filter: vars.$element-shadow-focus;
-  }
 
   svg {
     width: 50%;
