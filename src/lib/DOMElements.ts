@@ -1,7 +1,10 @@
-const newProjectOverlayTriggerBtn = document.querySelector('.new-project-overlay-trigger-btn');
-
-const newCalendarInputsContainer = document.querySelector(
-  '.new-calendar-controls',
+const newProjectOverlayTriggerBtn = document.querySelector(
+  '.new-project-overlay-trigger-btn',
+) as HTMLButtonElement;
+const newProjectOverlaySection = document.querySelector('.new-project-section') as HTMLElement;
+const newProjectOverlayBG = document.querySelector('.new-project-bg') as HTMLElement;
+const newProjectOverlayCloseBtn = document.querySelector(
+  '.new-project-section__close-modal',
 ) as HTMLDivElement;
 
 const getButton = document.querySelector('#get-button') as HTMLButtonElement;
@@ -27,7 +30,9 @@ export {
   langInput,
   monthInput,
   multiModeBtn,
-  newCalendarInputsContainer,
   newProjectOverlayTriggerBtn,
+  newProjectOverlaySection,
+  newProjectOverlayBG,
+  newProjectOverlayCloseBtn,
   yearInput,
 };

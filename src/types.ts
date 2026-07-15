@@ -47,6 +47,8 @@ declare global {
     cropControlsContainer: HTMLDivElement;
   };
 
+  type NewProjectOverlayAnimation = 'in' | 'out';
+
   interface Cropper {
     initialZoomRatio: number;
     initialCanvasData: Cropper.CanvasData;

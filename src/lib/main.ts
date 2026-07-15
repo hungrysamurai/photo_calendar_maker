@@ -20,9 +20,13 @@ import {
   multiModeBtn,
   yearInput,
   newProjectOverlayTriggerBtn,
+  newProjectOverlaySection,
+  newProjectOverlayBG,
+  newProjectOverlayCloseBtn,
 } from './DOMElements';
 import DataController from './entities/DataController/DataController';
 import animateTriggerBtn from './animations/animateTriggerBtn';
+import animateNewProjectOverlay from './animations/animateNewProjectOverlay';
 
 let activeCalendar: Calendar | null = null;
 let dataController: DataController | null;
@@ -74,11 +78,22 @@ window.addEventListener(
     formatInput.innerHTML = createFormatsOptions();
 
     // Generate new calendar from inputs
-    getButton.addEventListener('click', newProject);
+    getButton.addEventListener('click', () => {
+      animateNewProjectOverlay(newProjectOverlayBG, newProjectOverlaySection, 'out');
+      newProject();
+    });
 
     // Animate new project overlay trigger button on hover
     newProjectOverlayTriggerBtn?.addEventListener('mouseenter', animateTriggerBtn);
     newProjectOverlayTriggerBtn?.addEventListener('mouseleave', animateTriggerBtn);
+
+    // Animate & toggle new project container
+    newProjectOverlayTriggerBtn?.addEventListener('click', () => {
+      animateNewProjectOverlay(newProjectOverlayBG, newProjectOverlaySection, 'in');
+    });
+    newProjectOverlayCloseBtn.addEventListener('click', () => {
+      animateNewProjectOverlay(newProjectOverlayBG, newProjectOverlaySection, 'out');
+    });
 
     // Init dataController
     dataController = new DataController();

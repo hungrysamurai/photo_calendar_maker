@@ -1,10 +1,10 @@
 @use '../abstracts/variables' as vars;
+@use '../abstracts/mixins' as mixins;
 
 .new-project-overlay-trigger-btn {
   position: fixed;
-  bottom: 5rem;
-  left: 50%;
-  transform: translateX(-50%);
+  bottom: 2rem;
+  right: 2rem;
   transform-origin: center center;
   width: 5rem;
   height: 5rem;
@@ -18,93 +18,138 @@
     width: 50%;
     stroke: vars.$light-primary;
   }
+
+  @include mixins.resize(600) {
+    width: 3rem;
+    height: 3rem;
+  }
 }
 
-.new-calendar-controls {
-  transform: scale(0);
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  height: var(--new-calendar-controls-height);
+.new-project-bg {
   background-color: vars.$gray-dark;
   position: fixed;
+  right: 2rem;
+  bottom: 2rem;
+  width: 5rem;
+  height: 5rem;
+  transform-origin: center center;
+  z-index: 3;
+  border-radius: 50%;
+  display: none;
+}
+
+.new-project-section {
+  position: fixed;
   top: 0;
-  z-index: 2;
-  overflow: hidden;
-}
-
-.new-calendar-controls .row-1,
-.new-calendar-controls .row-2 {
+  left: 0;
   width: 100%;
-  width: 700px;
-  max-width: 100%;
-  margin: 0 auto;
-  min-height: 40%;
-}
-
-.new-calendar-controls .row-1 .mode-radio-container {
-  color: #fff;
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-around;
-  padding: 0.5rem;
   height: 100%;
-}
-
-.new-calendar-controls .row-2 {
-  margin-top: 0.25rem;
-  display: flex;
-  align-items: center;
-  justify-content: space-around;
-}
-
-.new-calendar-controls .row-2 .select-options-container {
-  display: flex;
   align-items: center;
   justify-content: center;
-  height: 100%;
+  z-index: 4;
+  text-align: center;
+  display: none;
+  padding: 1rem;
+
+  &__close-modal {
+    color: vars.$light-primary;
+    position: absolute;
+    top: 2rem;
+    right: 2rem;
+    cursor: pointer;
+
+    svg {
+      width: 5rem;
+      height: 5rem;
+    }
+  }
 }
 
-.select-options-container select {
-  height: 100%;
-  font-size: 1rem;
-  padding: 0.25rem;
-  font-family: inherit;
-  font-weight: inherit;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
+// .new-calendar-controls {
+//   transform: scale(0);
+//   display: flex;
+//   flex-direction: column;
+//   width: 100%;
+//   height: var(--new-calendar-controls-height);
+//   background-color: vars.$gray-dark;
+//   position: fixed;
+//   top: 0;
+//   z-index: 2;
+//   overflow: hidden;
+// }
 
-.new-calendar-controls select option {
-  font-family: inherit;
-  font-weight: inherit;
-}
+// .new-calendar-controls .row-1,
+// .new-calendar-controls .row-2 {
+//   width: 100%;
+//   width: 700px;
+//   max-width: 100%;
+//   margin: 0 auto;
+//   min-height: 40%;
+// }
 
-.new-calendar-controls .row-2 .get-button-container {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
+// .new-calendar-controls .row-1 .mode-radio-container {
+//   color: #fff;
+//   display: flex;
+//   align-items: flex-start;
+//   justify-content: space-around;
+//   padding: 0.5rem;
+//   height: 100%;
+// }
 
-.new-calendar-controls button {
-  height: 100%;
-  padding: 0.5rem;
-  font-family: inherit;
-  font-weight: inherit;
-  border: none;
-  cursor: pointer;
-}
+// .new-calendar-controls .row-2 {
+//   margin-top: 0.25rem;
+//   display: flex;
+//   align-items: center;
+//   justify-content: space-around;
+// }
 
-.new-calendar-controls button:focus {
-  outline: none;
-}
+// .new-calendar-controls .row-2 .select-options-container {
+//   display: flex;
+//   align-items: center;
+//   justify-content: center;
+//   height: 100%;
+// }
 
-.new-calendar-controls button:hover {
-  transform: scale(0.95);
-}
+// .select-options-container select {
+//   height: 100%;
+//   font-size: 1rem;
+//   padding: 0.25rem;
+//   font-family: inherit;
+//   font-weight: inherit;
+//   cursor: pointer;
+//   display: flex;
+//   align-items: center;
+//   justify-content: center;
+// }
 
-.new-calendar-controls button:active {
-  transform: scale(0.85);
-}
+// .new-calendar-controls select option {
+//   font-family: inherit;
+//   font-weight: inherit;
+// }
+
+// .new-calendar-controls .row-2 .get-button-container {
+//   display: flex;
+//   align-items: center;
+//   justify-content: center;
+// }
+
+// .new-calendar-controls button {
+//   height: 100%;
+//   padding: 0.5rem;
+//   font-family: inherit;
+//   font-weight: inherit;
+//   border: none;
+//   cursor: pointer;
+// }
+
+// .new-calendar-controls button:focus {
+//   outline: none;
+// }
+
+// .new-calendar-controls button:hover {
+//   transform: scale(0.95);
+// }
+
+// .new-calendar-controls button:active {
+//   transform: scale(0.85);
+// }
