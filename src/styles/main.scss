@@ -15,8 +15,11 @@
   height: 100%;
 
   --shadow-grey: #{vars.$shadow-grey};
-  --apricot-cream: #{vars.$apricot-cream};
   --sandy-clay: #{vars.$sandy-clay};
+  --apricot-cream: #{vars.$apricot-cream};
+  --beige: #{vars.$beige};
+  --cool-steel: #{vars.$cool-steel};
+  --text-light: #{vars.$text-light};
 }
 
 * {

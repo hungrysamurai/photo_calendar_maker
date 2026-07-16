@@ -10,13 +10,13 @@
   height: 5rem;
   border-radius: 50%;
   border: none;
-  background-color: vars.$sandy-clay;
+  background-color: var(--sandy-clay);
   z-index: 2;
   cursor: pointer;
 
   svg {
     width: 2.5rem;
-    stroke: vars.$light-primary;
+    stroke: var(--text-light);
   }
 
   @include mixins.resize(600) {
@@ -26,7 +26,7 @@
 }
 
 .new-project-bg {
-  background-color: vars.$gray-dark;
+  background-color: var(--shadow-grey);
   position: fixed;
   right: 2rem;
   bottom: 2rem;
@@ -52,10 +52,10 @@
   text-align: center;
   display: none;
   padding: 1rem;
-  color: vars.$light-primary;
+  color: var(--text-light);
 
   &__close-modal {
-    color: vars.$light-primary;
+    color: var(--text-light);
     position: absolute;
     top: 2rem;
     right: 2rem;
@@ -88,7 +88,7 @@
       height: 2rem;
       margin: -0.15rem 0.75rem 0 0;
       flex-shrink: 0;
-      border: 2px solid vars.$primary;
+      border: 2px solid var(--sandy-clay);
       border-radius: 50%;
       background: #fff;
       cursor: pointer;
@@ -98,10 +98,10 @@
 
       &::before {
         content: '';
-        width: 8px;
-        height: 8px;
+        width: 0.5rem;
+        height: 0.5rem;
         border-radius: 50%;
-        background: vars.$gray-dark;
+        background: var(--shadow-grey);
 
         transform: scale(0);
         transition: transform 0.15s ease;
@@ -130,7 +130,7 @@
       background: linear-gradient(
         90deg,
         rgba(255, 255, 255, 0) 0%,
-        vars.$light-primary 50%,
+        var(--sandy-clay) 50%,
         rgba(255, 255, 255, 0) 100%
       );
     }

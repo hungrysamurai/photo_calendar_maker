@@ -40,7 +40,7 @@ export default function animateTriggerBtn(e: Event) {
       {
         rotation: 0,
         borderRadius: 50,
-        backgroundColor: '#efd09e',
+        backgroundColor: '#d4aa7d',
         duration: 0.75,
         ease: easeOut,
       },
