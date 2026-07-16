@@ -4,8 +4,8 @@ export default function animateTriggerBtn(e: Event) {
   const target = e.currentTarget as HTMLElement;
   const svg = target.querySelector('svg');
 
-  const easeIn = 'elastic.inOut(1,0.5)';
-  const easeOut = 'elastic.inOut(1,0.5)';
+  const easeIn = 'power3.in';
+  const easeOut = 'power3.out';
 
   const tl = gsap.timeline();
 
@@ -15,8 +15,8 @@ export default function animateTriggerBtn(e: Event) {
       {
         rotation: 45,
         borderRadius: 25,
-        backgroundColor: '#231f20',
-        duration: 0.75,
+        backgroundColor: '#272727',
+        duration: 0.3,
         ease: easeIn,
       },
       0,
@@ -27,7 +27,7 @@ export default function animateTriggerBtn(e: Event) {
         svg,
         {
           rotation: -45,
-          duration: 0.75,
+          duration: 0.3,
           scale: 1.25,
           ease: easeIn,
         },
@@ -40,7 +40,7 @@ export default function animateTriggerBtn(e: Event) {
       {
         rotation: 0,
         borderRadius: 50,
-        backgroundColor: '#ff0073',
+        backgroundColor: '#efd09e',
         duration: 0.75,
         ease: easeOut,
       },

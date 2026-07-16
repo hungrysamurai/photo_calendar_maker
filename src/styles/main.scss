@@ -13,7 +13,10 @@
 :root {
   touch-action: pan-x pan-y;
   height: 100%;
-  --new-calendar-controls-height: 4.5rem;
+
+  --shadow-grey: #{vars.$shadow-grey};
+  --apricot-cream: #{vars.$apricot-cream};
+  --sandy-clay: #{vars.$sandy-clay};
 }
 
 * {
@@ -32,9 +35,9 @@ body {
 
 .calendar-container {
   position: absolute;
-  top: var(--new-calendar-controls-height);
+  top: 0;
   width: 100%;
-  height: calc(100% - 60px - var(--new-calendar-controls-height));
+  height: calc(100% - 60px - 4rem);
 }
 
 .calendar-wrapper {

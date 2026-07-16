@@ -10,12 +10,12 @@
   height: 5rem;
   border-radius: 50%;
   border: none;
-  background-color: vars.$primary;
+  background-color: vars.$sandy-clay;
   z-index: 2;
   cursor: pointer;
 
   svg {
-    width: 50%;
+    width: 2.5rem;
     stroke: vars.$light-primary;
   }
 
@@ -46,10 +46,13 @@
   height: 100%;
   align-items: center;
   justify-content: center;
+  flex-direction: column;
+  gap: 2.5rem;
   z-index: 4;
   text-align: center;
   display: none;
   padding: 1rem;
+  color: vars.$light-primary;
 
   &__close-modal {
     color: vars.$light-primary;
@@ -59,97 +62,83 @@
     cursor: pointer;
 
     svg {
-      width: 5rem;
-      height: 5rem;
+      width: 2.5rem;
+      height: 2.5rem;
     }
   }
+
+  &__mode-radio-btns {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    font-size: 1.5rem;
+
+    position: relative;
+    padding-bottom: 1.5rem;
+
+    > div {
+      display: flex;
+      align-items: center;
+    }
+
+    input[type='radio'] {
+      appearance: none;
+      -webkit-appearance: none;
+      width: 2rem;
+      height: 2rem;
+      margin: -0.15rem 0.75rem 0 0;
+      flex-shrink: 0;
+      border: 2px solid vars.$primary;
+      border-radius: 50%;
+      background: #fff;
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+      transition: border-color 0.15s ease;
+
+      &::before {
+        content: '';
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: vars.$gray-dark;
+
+        transform: scale(0);
+        transition: transform 0.15s ease;
+      }
+
+      &:checked::before {
+        transform: scale(2);
+      }
+    }
+
+    label {
+      cursor: pointer;
+      user-select: none;
+      line-height: 1.2;
+    }
+
+    &::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+
+      height: 0.15rem;
+
+      background: linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0) 0%,
+        vars.$light-primary 50%,
+        rgba(255, 255, 255, 0) 100%
+      );
+    }
+  }
+
+  &__calendar-options {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
 }
-
-// .new-calendar-controls {
-//   transform: scale(0);
-//   display: flex;
-//   flex-direction: column;
-//   width: 100%;
-//   height: var(--new-calendar-controls-height);
-//   background-color: vars.$gray-dark;
-//   position: fixed;
-//   top: 0;
-//   z-index: 2;
-//   overflow: hidden;
-// }
-
-// .new-calendar-controls .row-1,
-// .new-calendar-controls .row-2 {
-//   width: 100%;
-//   width: 700px;
-//   max-width: 100%;
-//   margin: 0 auto;
-//   min-height: 40%;
-// }
-
-// .new-calendar-controls .row-1 .mode-radio-container {
-//   color: #fff;
-//   display: flex;
-//   align-items: flex-start;
-//   justify-content: space-around;
-//   padding: 0.5rem;
-//   height: 100%;
-// }
-
-// .new-calendar-controls .row-2 {
-//   margin-top: 0.25rem;
-//   display: flex;
-//   align-items: center;
-//   justify-content: space-around;
-// }
-
-// .new-calendar-controls .row-2 .select-options-container {
-//   display: flex;
-//   align-items: center;
-//   justify-content: center;
-//   height: 100%;
-// }
-
-// .select-options-container select {
-//   height: 100%;
-//   font-size: 1rem;
-//   padding: 0.25rem;
-//   font-family: inherit;
-//   font-weight: inherit;
-//   cursor: pointer;
-//   display: flex;
-//   align-items: center;
-//   justify-content: center;
-// }
-
-// .new-calendar-controls select option {
-//   font-family: inherit;
-//   font-weight: inherit;
-// }
-
-// .new-calendar-controls .row-2 .get-button-container {
-//   display: flex;
-//   align-items: center;
-//   justify-content: center;
-// }
-
-// .new-calendar-controls button {
-//   height: 100%;
-//   padding: 0.5rem;
-//   font-family: inherit;
-//   font-weight: inherit;
-//   border: none;
-//   cursor: pointer;
-// }
-
-// .new-calendar-controls button:focus {
-//   outline: none;
-// }
-
-// .new-calendar-controls button:hover {
-//   transform: scale(0.95);
-// }
-
-// .new-calendar-controls button:active {
-//   transform: scale(0.85);
-// }
