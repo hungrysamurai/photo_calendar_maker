@@ -2,10 +2,10 @@ import '../styles/main.scss';
 
 import { collectDataFromInputs } from './utils/DOM/collectDataFromInputs';
 
-import { createFontsOptions } from './utils/DOM/initializers/createFontsOptions';
-import { createFormatsOptions } from './utils/DOM/initializers/createFormatsOptions';
-import { createMonthsOptions } from './utils/DOM/initializers/createMonthsOptions';
-import { createYearsOptions } from './utils/DOM/initializers/createYearsOptions';
+// import { createFontsOptions } from './utils/DOM/initializers/createFontsOptions';
+// import { createFormatsOptions } from './utils/DOM/initializers/createFormatsOptions';
+// import { createMonthsOptions } from './utils/DOM/initializers/createMonthsOptions';
+// import { createYearsOptions } from './utils/DOM/initializers/createYearsOptions';
 
 import { Calendar } from './Calendar';
 import {
@@ -27,6 +27,7 @@ import {
 import DataController from './entities/DataController/DataController';
 import animateTriggerBtn from './animations/animateTriggerBtn';
 import animateNewProjectOverlay from './animations/animateNewProjectOverlay';
+import createDropdowns from './utils/DOM/createDropdowns';
 
 let activeCalendar: Calendar | null = null;
 let dataController: DataController | null;
@@ -72,10 +73,11 @@ window.addEventListener(
   'DOMContentLoaded',
   async () => {
     // Fill inputs with dynamic options
-    yearInput.innerHTML = createYearsOptions(10);
-    fontInput.innerHTML = createFontsOptions();
-    monthInput.innerHTML = createMonthsOptions();
-    formatInput.innerHTML = createFormatsOptions();
+    // yearInput.innerHTML = createYearsOptions(10);
+    // fontInput.innerHTML = createFontsOptions();
+    // monthInput.innerHTML = createMonthsOptions();
+    // formatInput.innerHTML = createFormatsOptions();
+    createDropdowns();
 
     // Generate new calendar from inputs
     getButton.addEventListener('click', () => {

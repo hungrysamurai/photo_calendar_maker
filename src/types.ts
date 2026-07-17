@@ -91,7 +91,7 @@ declare global {
   };
 
   type SourceFontsData = {
-    Garamond: SourceFontData;
+    'EB Garamond': SourceFontData;
     Montserrat: SourceFontData;
     Caveat: SourceFontData;
   };

@@ -1,5 +1,5 @@
 const fontsData: SourceFontsData = {
-  Garamond: {
+  ['EB Garamond']: {
     fontNameBold: 'EBGaramondBold',
     fontNameRegular: 'EBGaramondRegular',
   },

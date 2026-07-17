@@ -139,6 +139,9 @@
   &__calendar-options {
     display: flex;
     flex-direction: column;
+    align-items: center;
     gap: 1.5rem;
+    width: 800px;
+    max-width: 80%;
   }
 }
