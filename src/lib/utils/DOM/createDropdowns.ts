@@ -12,7 +12,7 @@ import getYears from '../getYears';
 import { getMonthsList } from '../getMonthsList';
 import fontsData from '../../../assets/sourceFontsData';
 import { A_outputFormats } from '../../../assets/A_FormatOptions/A_OutputDimensions';
-import { FormatName } from '../../../types';
+import { CalendarLanguage, FormatName } from '../../../types';
 
 export default function createDropdowns() {
   // Create years dropdown
@@ -29,19 +29,19 @@ export default function createDropdowns() {
   const currentMonth = new Date().getMonth();
   const monthsList = getMonthsList();
 
-  const monthsInput = new Dropdown<string>({
+  const monthsInput = new Dropdown<number>({
     container: monthDropdownContainer,
-    items: monthsList,
-    value: monthsList[currentMonth],
+    items: Array.from({ length: monthsList.length + 1 }, (_, i) => i),
+    value: currentMonth,
     caption: 'Первый месяц',
-    renderItem: (item) => item,
+    renderItem: (item) => monthsList[item],
   });
 
   // Create langs dropdown
-  const langsInput = new Dropdown<string>({
+  const langsInput = new Dropdown<CalendarLanguage>({
     container: langDropdownContainer,
-    items: ['ru', 'en'],
-    value: 'ru',
+    items: [CalendarLanguage.RU, CalendarLanguage.EN],
+    value: CalendarLanguage.RU,
     caption: 'Язык календаря',
     renderItem: (item) => {
       if (item === 'ru') {
@@ -64,10 +64,10 @@ export default function createDropdowns() {
     `,
   });
 
-  // Create fotmats dropdown
-  const formatsInput = new Dropdown<string>({
+  // Create formats dropdown
+  const formatsInput = new Dropdown<FormatName>({
     container: formatDropdownContainer,
-    items: Object.keys(A_outputFormats),
+    items: Object.keys(A_outputFormats) as FormatName[],
     value: FormatName.A4_Y,
     caption: 'Формат',
     renderItem: (format) => {

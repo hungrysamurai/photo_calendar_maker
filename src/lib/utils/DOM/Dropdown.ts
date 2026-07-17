@@ -116,7 +116,5 @@ export class Dropdown<T> {
     if (emit) {
       this.options.onChange?.(item);
     }
-
-    console.log(this.value);
   }
 }

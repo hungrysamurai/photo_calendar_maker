@@ -1,24 +1,12 @@
 import '../styles/main.scss';
 
-import { collectDataFromInputs } from './utils/DOM/collectDataFromInputs';
-
-// import { createFontsOptions } from './utils/DOM/initializers/createFontsOptions';
-// import { createFormatsOptions } from './utils/DOM/initializers/createFormatsOptions';
-// import { createMonthsOptions } from './utils/DOM/initializers/createMonthsOptions';
-// import { createYearsOptions } from './utils/DOM/initializers/createYearsOptions';
-
 import { Calendar } from './Calendar';
 import {
   calendarContainer,
   controlsContainer,
   cropControlsContainer,
-  fontInput,
-  formatInput,
   getButton,
-  langInput,
-  monthInput,
   multiModeBtn,
-  yearInput,
   newProjectOverlayTriggerBtn,
   newProjectOverlaySection,
   newProjectOverlayBG,
@@ -28,26 +16,27 @@ import DataController from './entities/DataController/DataController';
 import animateTriggerBtn from './animations/animateTriggerBtn';
 import animateNewProjectOverlay from './animations/animateNewProjectOverlay';
 import createDropdowns from './utils/DOM/createDropdowns';
+import { CalendarType } from '../types';
 
 let activeCalendar: Calendar | null = null;
 let dataController: DataController | null;
 
+let userInputs: ReturnType<typeof createDropdowns>;
+
 async function newProject() {
-  const newCalendarData: CalendarData = collectDataFromInputs(
-    yearInput,
-    monthInput,
-    langInput,
-    fontInput,
-    formatInput,
-    multiModeBtn,
-  );
+  const newCalendarData: CalendarData = {
+    startYear: userInputs.yearsInput.value,
+    firstMonthIndex: userInputs.monthsInput.value,
+    lang: userInputs.langsInput.value,
+    font: userInputs.fontsInput.value,
+    format: userInputs.formatsInput.value,
+    type: multiModeBtn.checked ? CalendarType.MultiPage : CalendarType.SinglePage,
+  };
 
   // Purge all current content
   calendarContainer.innerHTML = '';
-
   // Set new calendar in IDB via DS with user's input data
   await dataController?.reset(newCalendarData);
-
   // Generate new calendar
   newCalendar();
 }
@@ -72,12 +61,7 @@ function newCalendar() {
 window.addEventListener(
   'DOMContentLoaded',
   async () => {
-    // Fill inputs with dynamic options
-    // yearInput.innerHTML = createYearsOptions(10);
-    // fontInput.innerHTML = createFontsOptions();
-    // monthInput.innerHTML = createMonthsOptions();
-    // formatInput.innerHTML = createFormatsOptions();
-    createDropdowns();
+    userInputs = createDropdowns();
 
     // Generate new calendar from inputs
     getButton.addEventListener('click', () => {
