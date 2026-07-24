@@ -172,22 +172,22 @@ export const icons = {
 `,
   loader: `<?xml version="1.0" encoding="utf-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" style="margin: auto; display: block; shape-rendering: auto;" width="150px" height="150px" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid">
-<rect x="19" y="19" width="20" height="20" fill="#231f20">
-  <animate attributeName="fill" values="#ff0073;#231f20;#231f20" keyTimes="0;0.125;1" dur="1s" repeatCount="indefinite" begin="0s" calcMode="discrete"></animate>
-</rect><rect x="40" y="19" width="20" height="20" fill="#231f20">
-  <animate attributeName="fill" values="#ff0073;#231f20;#231f20" keyTimes="0;0.125;1" dur="1s" repeatCount="indefinite" begin="0.125s" calcMode="discrete"></animate>
-</rect><rect x="61" y="19" width="20" height="20" fill="#231f20">
-  <animate attributeName="fill" values="#ff0073;#231f20;#231f20" keyTimes="0;0.125;1" dur="1s" repeatCount="indefinite" begin="0.25s" calcMode="discrete"></animate>
-</rect><rect x="19" y="40" width="20" height="20" fill="#231f20">
-  <animate attributeName="fill" values="#ff0073;#231f20;#231f20" keyTimes="0;0.125;1" dur="1s" repeatCount="indefinite" begin="0.875s" calcMode="discrete"></animate>
-</rect><rect x="61" y="40" width="20" height="20" fill="#231f20">
-  <animate attributeName="fill" values="#ff0073;#231f20;#231f20" keyTimes="0;0.125;1" dur="1s" repeatCount="indefinite" begin="0.375s" calcMode="discrete"></animate>
-</rect><rect x="19" y="61" width="20" height="20" fill="#231f20">
-  <animate attributeName="fill" values="#ff0073;#231f20;#231f20" keyTimes="0;0.125;1" dur="1s" repeatCount="indefinite" begin="0.75s" calcMode="discrete"></animate>
-</rect><rect x="40" y="61" width="20" height="20" fill="#231f20">
-  <animate attributeName="fill" values="#ff0073;#231f20;#231f20" keyTimes="0;0.125;1" dur="1s" repeatCount="indefinite" begin="0.625s" calcMode="discrete"></animate>
-</rect><rect x="61" y="61" width="20" height="20" fill="#231f20">
-  <animate attributeName="fill" values="#ff0073;#231f20;#231f20" keyTimes="0;0.125;1" dur="1s" repeatCount="indefinite" begin="0.5s" calcMode="discrete"></animate>
+<rect x="19" y="19" width="20" height="20" fill="#272727">
+  <animate attributeName="fill" values="#d2d8b3;#272727;#272727" keyTimes="0;0.125;1" dur="1s" repeatCount="indefinite" begin="0s" calcMode="discrete"></animate>
+</rect><rect x="40" y="19" width="20" height="20" fill="#272727">
+  <animate attributeName="fill" values="#d2d8b3;#272727;#272727" keyTimes="0;0.125;1" dur="1s" repeatCount="indefinite" begin="0.125s" calcMode="discrete"></animate>
+</rect><rect x="61" y="19" width="20" height="20" fill="#272727">
+  <animate attributeName="fill" values="#d2d8b3;#272727;#272727" keyTimes="0;0.125;1" dur="1s" repeatCount="indefinite" begin="0.25s" calcMode="discrete"></animate>
+</rect><rect x="19" y="40" width="20" height="20" fill="#272727">
+  <animate attributeName="fill" values="#d2d8b3;#272727;#272727" keyTimes="0;0.125;1" dur="1s" repeatCount="indefinite" begin="0.875s" calcMode="discrete"></animate>
+</rect><rect x="61" y="40" width="20" height="20" fill="#272727">
+  <animate attributeName="fill" values="#d2d8b3;#272727;#272727" keyTimes="0;0.125;1" dur="1s" repeatCount="indefinite" begin="0.375s" calcMode="discrete"></animate>
+</rect><rect x="19" y="61" width="20" height="20" fill="#272727">
+  <animate attributeName="fill" values="#d2d8b3;#272727;#272727" keyTimes="0;0.125;1" dur="1s" repeatCount="indefinite" begin="0.75s" calcMode="discrete"></animate>
+</rect><rect x="40" y="61" width="20" height="20" fill="#272727">
+  <animate attributeName="fill" values="#d2d8b3;#272727;#272727" keyTimes="0;0.125;1" dur="1s" repeatCount="indefinite" begin="0.625s" calcMode="discrete"></animate>
+</rect><rect x="61" y="61" width="20" height="20" fill="#272727">
+  <animate attributeName="fill" values="#d2d8b3;#272727;#272727" keyTimes="0;0.125;1" dur="1s" repeatCount="indefinite" begin="0.5s" calcMode="discrete"></animate>
 </rect>
 </svg>`,
   uploadSingleImage: `
