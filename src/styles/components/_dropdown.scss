@@ -45,6 +45,7 @@
 
     @include mixins.resize(600) {
       height: 2.5rem;
+      width: 300px;
       font-size: 1rem;
     }
   }

@@ -68,7 +68,6 @@ export class Calendar {
         onDownloadAllPdf: this.onDownloadAllPdf,
         onUploadMultipleImages: this.onUploadMultipleImages,
       },
-      cleanupHandlers: [this.removeCropperIfActive],
       type,
       format,
       firstMonthIndex,
@@ -128,27 +127,15 @@ export class Calendar {
     });
   }
 
-  removeCropperIfActive = () => {
-    if (this.imageCropper.isActive) {
-      this.imageCropper.removeCropper();
-    }
-  };
-
   onDownloadCurrentPdf = () => {
-    this.removeCropperIfActive();
-
     this.downloadManager.downloadPDF(PDFPagesRangeToDownload.Current);
   };
 
   onDownloadJpg = () => {
-    this.removeCropperIfActive();
-
     this.downloadManager.downloadCurrentJPG();
   };
 
   onDownloadAllPdf = () => {
-    this.removeCropperIfActive();
-
     this.downloadManager.downloadPDF(PDFPagesRangeToDownload.All);
   };
 
@@ -164,14 +151,10 @@ export class Calendar {
   };
 
   onUploadImage = (e: InputEvent) => {
-    this.removeCropperIfActive();
-
     this.uploadManager.uploadSingleImage(e);
   };
 
   onUploadMultipleImages = (e: Event) => {
-    this.removeCropperIfActive();
-
     this.uploadManager.uploadMultipleImages(e);
   };
 

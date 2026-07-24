@@ -35,7 +35,6 @@ export type ViewControllerOptions = {
   lang: CalendarLanguage;
   storedImages: StoredImage[];
   actionsHandlers: MultiPageControlsCallbacks;
-  cleanupHandlers: (() => void)[];
   showLoader: () => void;
   hideLoader: () => void;
 };
@@ -105,10 +104,6 @@ export default class ViewController {
   }
 
   showPrevMonth = () => {
-    this.options.cleanupHandlers.forEach((cb) => {
-      cb();
-    });
-
     this.currentMonthInView--;
     if (this.currentMonthInView < 0) {
       this.currentMonthInView = 11;
@@ -118,10 +113,6 @@ export default class ViewController {
   };
 
   showNextMonth = () => {
-    this.options.cleanupHandlers.forEach((cb) => {
-      cb();
-    });
-
     this.currentMonthInView++;
 
     if (this.currentMonthInView > 11) {
