@@ -1,0 +1,49 @@
+@use '../abstracts/variables' as vars;
+@use '../abstracts/mixins' as mixins;
+
+.controls-container {
+  position: fixed;
+  bottom: 2.5rem;
+  left: 2rem;
+  width: calc(100% - 6rem);
+  z-index: 2;
+  display: flex;
+  gap: 0.5rem;
+
+  &.hide {
+    visibility: hidden;
+  }
+
+  button,
+  label {
+    width: 3rem;
+    height: 3rem;
+    border-radius: 50%;
+    background-color: var(--cool-steel);
+    cursor: pointer;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    &:hover {
+      // transform: scale(0.95);
+      // background-color: vars.$primary;
+    }
+
+    &:active {
+      // transform: scale(0.85);
+    }
+
+    svg {
+      width: 2rem;
+      height: 2rem;
+    }
+  }
+
+  button {
+    &:focus {
+      outline: none;
+    }
+  }
+}

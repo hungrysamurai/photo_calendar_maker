@@ -9,6 +9,8 @@
 @use './components/dropdown';
 @use './components/loader';
 @use './components/calendar-container';
+@use './components/controls-container';
+@use './components/crop-controls-container';
 
 // Import Fonts
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap');
@@ -39,149 +41,32 @@ body {
   font-weight: 700;
 }
 
-.controls-container {
-  position: fixed;
-  bottom: 10px;
-  right: 50%;
-  transform: translateX(50%);
-  height: 60px;
-  z-index: 2;
-  background-color: vars.$gray-dark;
-  width: 70%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 100px;
-  filter: drop-shadow(0px 3px 18px rgba(0, 0, 0, 0.44));
-  z-index: 999;
-}
+// @media (max-width: 768px) {
+//   .controls-container button,
+//   .controls-container label {
+//     font-size: 0.5rem;
+//     padding: 0.25rem;
+//     margin: 0 0.1rem;
+//     font-family: inherit;
+//     font-weight: inherit;
+//     background-color: white;
+//     cursor: pointer;
+//   }
 
-.controls-container.hide {
-  visibility: hidden;
-}
+//   .controls-container select {
+//     font-family: inherit;
+//     font-weight: inherit;
+//     font-size: 0.8rem;
+//     padding: 0.15rem;
+//     cursor: pointer;
+//   }
 
-.controls-container button,
-.controls-container label {
-  font-size: 1rem;
-  padding: 0.25rem;
-  margin: 0 0.5rem;
-  font-family: inherit;
-  font-weight: inherit;
-  background-color: white;
-  cursor: pointer;
-  border: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: transform 0.2s ease;
-}
-
-.controls-container button svg,
-.controls-container label svg {
-  width: 40px;
-  height: 40px;
-  transition: transform 0.2s ease;
-}
-
-.controls-container button:hover,
-.controls-container label:hover {
-  transform: scale(0.95);
-  background-color: vars.$primary;
-}
-
-.controls-container button:active,
-.controls-container label:active {
-  transform: scale(0.85);
-}
-
-.controls-container button:focus {
-  outline: none;
-}
-
-.controls-container select {
-  font-family: inherit;
-  font-weight: inherit;
-  font-size: 1rem;
-  height: 40px;
-  padding: 0.2rem;
-  margin: 0 0.5rem;
-  cursor: pointer;
-}
-
-.controls-container select option {
-  font-family: inherit;
-  font-weight: inherit;
-}
-
-.crop-controls-container {
-  position: fixed;
-  bottom: calc(60px + 1.5rem);
-  right: 5%;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 5.5rem;
-}
-
-.crop-controls-container button {
-  padding: 0.5rem;
-  border-radius: 50%;
-  cursor: pointer;
-  filter: drop-shadow(3px 3px 12px rgba(0, 0, 0, 0.33));
-  background-color: #fff;
-  border: none;
-  width: 2.5rem;
-  height: 2.5rem;
-  padding: 4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: transform 0.2s ease;
-}
-
-.crop-controls-container button:hover {
-  transform: scale(0.95);
-}
-
-.crop-controls-container button:active {
-  transform: scale(0.85);
-}
-
-.crop-controls-container svg {
-  width: 1.25rem;
-  height: 1.25rem;
-}
-
-.crop-controls-container.hide {
-  visibility: hidden;
-}
-
-@media (max-width: 768px) {
-  .controls-container button,
-  .controls-container label {
-    font-size: 0.5rem;
-    padding: 0.25rem;
-    margin: 0 0.1rem;
-    font-family: inherit;
-    font-weight: inherit;
-    background-color: white;
-    cursor: pointer;
-  }
-
-  .controls-container select {
-    font-family: inherit;
-    font-weight: inherit;
-    font-size: 0.8rem;
-    padding: 0.15rem;
-    cursor: pointer;
-  }
-
-  .controls-container button svg,
-  .controls-container label svg {
-    width: 30px;
-    height: 30px;
-  }
-}
+//   .controls-container button svg,
+//   .controls-container label svg {
+//     width: 30px;
+//     height: 30px;
+//   }
+// }
 
 /* Cropper styles */
 .cropper-view-box {
@@ -221,30 +106,10 @@ body {
   }
 }
 
-@media (max-width: 500px) {
-  .new-calendar-controls .row-1 .mode-radio-container {
-    padding: 0.25rem;
-  }
-
-  .select-options-container select {
-    height: 100%;
-    font-size: 0.6rem;
-    padding: 0.1rem;
-    font-family: inherit;
-    font-weight: inherit;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .new-calendar-controls button {
-    padding: 0.25rem;
-  }
-
-  .controls-container button svg,
-  .controls-container label svg {
-    width: 22px;
-    height: 22px;
-  }
-}
+// @media (max-width: 500px) {
+//   .controls-container button svg,
+//   .controls-container label svg {
+//     width: 22px;
+//     height: 22px;
+//   }
+// }
