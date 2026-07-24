@@ -47,7 +47,7 @@ declare global {
     cropControlsContainer: HTMLDivElement;
   };
 
-  type NewProjectOverlayAnimation = 'in' | 'out';
+  type AnimationDirection = 'in' | 'out';
 
   interface Cropper {
     initialZoomRatio: number;

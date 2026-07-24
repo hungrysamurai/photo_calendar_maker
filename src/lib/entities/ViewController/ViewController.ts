@@ -1,5 +1,6 @@
 import { icons } from '../../../assets/icons';
 import { CalendarLanguage, CalendarType, FormatName } from '../../../types';
+import animateControlsContainer from '../../animations/animateControlsContainer';
 
 import { createHTMLElement } from '../../utils/DOM/createElement/createHTMLElement';
 import { createSVGElement } from '../../utils/DOM/createElement/createSVGElement';
@@ -75,6 +76,8 @@ export default class ViewController {
         options.actionsHandlers,
       );
       this.controlsManager.init();
+
+      animateControlsContainer(options.controlsContainer, 'in');
     } else {
       this.weekDaysNamesList = getWeekDays('long', options.lang);
 

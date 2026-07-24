@@ -3,7 +3,7 @@ import gsap from 'gsap';
 export default function animateNewProjectOverlay(
   bgElement: HTMLElement,
   sectionElement: HTMLElement,
-  direction: NewProjectOverlayAnimation,
+  direction: AnimationDirection,
 ) {
   if (direction === 'in') {
     gsap.set(bgElement, { display: 'block' });
