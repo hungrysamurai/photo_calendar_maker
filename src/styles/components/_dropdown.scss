@@ -1,3 +1,5 @@
+@use '../abstracts/mixins' as mixins;
+
 .dropdown {
   position: relative;
   width: 100%;
@@ -7,11 +9,15 @@
     font-size: 1rem;
     font-weight: normal;
     opacity: 0.75;
+
+    @include mixins.resize(600) {
+      font-size: 0.75rem;
+    }
   }
 
   &__trigger {
     margin-top: 0.5rem;
-    height: 4rem;
+    height: 3.5rem;
 
     font-size: 1.5rem;
     font-family: inherit;
@@ -26,22 +32,24 @@
     border: 2px solid var(--sandy-clay);
     border-radius: 1rem;
 
-    background: #222;
-    color: white;
+    background: var(--shadow-grey);
+    color: var(--text-light);
 
     cursor: pointer;
 
-    transition:
-      border-color 0.2s,
-      background 0.2s;
-  }
+    transition: border-color 0.2s;
 
-  &__trigger:hover {
-    border-color: #888;
+    &:hover {
+      border-color: var(--cool-steel);
+    }
+
+    @include mixins.resize(600) {
+      height: 2.5rem;
+      font-size: 1rem;
+    }
   }
 
   &__value {
-    // overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
@@ -49,6 +57,10 @@
   &__arrow {
     margin-left: 1rem;
     transition: transform 0.25s;
+
+    @include mixins.resize(600) {
+      margin-left: 0.5rem;
+    }
   }
 
   &--open &__arrow {
@@ -59,14 +71,12 @@
     position: absolute;
     left: 0;
     right: 0;
-    top: calc(100% + 6px);
+    top: calc(100% + 0.35rem);
 
-    padding: 6px;
-
-    border: 1px solid #555;
-    border-radius: 8px;
-
-    background: #222;
+    padding: 0.35rem;
+    border: 2px solid var(--sandy-clay);
+    border-radius: 1rem;
+    background: var(--shadow-grey);
 
     opacity: 0;
     visibility: hidden;
@@ -83,7 +93,7 @@
     max-height: 250px;
     overflow-y: auto;
 
-    scrollbar-width: thin;
+    scrollbar-width: none;
   }
 
   &--open &__menu {
@@ -97,9 +107,8 @@
   }
 
   &__item {
-    padding: 10px 12px;
-
-    border-radius: 6px;
+    padding: 0.5rem;
+    border-radius: 0.5rem;
 
     cursor: pointer;
 
@@ -107,10 +116,10 @@
   }
 
   &__item:hover {
-    background: #333;
+    background: var(--sandy-clay);
   }
 
   &__item--selected {
-    background: #444;
+    background: var(--cool-steel);
   }
 }

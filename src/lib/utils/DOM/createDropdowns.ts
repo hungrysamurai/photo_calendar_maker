@@ -31,7 +31,7 @@ export default function createDropdowns() {
 
   const monthsInput = new Dropdown<number>({
     container: monthDropdownContainer,
-    items: Array.from({ length: monthsList.length + 1 }, (_, i) => i),
+    items: Array.from({ length: monthsList.length }, (_, i) => i),
     value: currentMonth,
     caption: 'Первый месяц',
     renderItem: (item) => monthsList[item],

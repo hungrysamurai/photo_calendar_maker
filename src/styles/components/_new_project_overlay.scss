@@ -22,6 +22,10 @@
   @include mixins.resize(600) {
     width: 3rem;
     height: 3rem;
+
+    svg {
+      width: 1.5rem;
+    }
   }
 }
 
@@ -54,9 +58,21 @@
   padding: 1rem;
   color: var(--text-light);
 
+  overflow-y: scroll;
+
+  @include mixins.resize(600) {
+    gap: 1.5rem;
+  }
+
+  h1 {
+    @include mixins.resize(600) {
+      font-size: 1.5rem;
+    }
+  }
+
   &__close-modal {
     color: var(--text-light);
-    position: absolute;
+    position: fixed;
     top: 2rem;
     right: 2rem;
     cursor: pointer;
@@ -64,6 +80,16 @@
     svg {
       width: 2.5rem;
       height: 2.5rem;
+    }
+
+    @include mixins.resize(600) {
+      top: 1.5rem;
+      right: 1.5rem;
+
+      svg {
+        width: 1.5rem;
+        height: 1.5rem;
+      }
     }
   }
 
@@ -75,6 +101,12 @@
 
     position: relative;
     padding-bottom: 1.5rem;
+
+    @include mixins.resize(600) {
+      gap: 0.75rem;
+      font-size: 1rem;
+      padding-bottom: 1rem;
+    }
 
     > div {
       display: flex;
@@ -95,6 +127,11 @@
       display: grid;
       place-items: center;
       transition: border-color 0.15s ease;
+
+      @include mixins.resize(600) {
+        width: 1.25rem;
+        height: 1.25rem;
+      }
 
       &::before {
         content: '';
@@ -143,5 +180,41 @@
     gap: 1.5rem;
     width: 800px;
     max-width: 80%;
+
+    @include mixins.resize(600) {
+      gap: 0.75rem;
+    }
+  }
+
+  &__get-button-container {
+    button {
+      border: none;
+      background-color: var(--sandy-clay);
+      font-size: 1.5rem;
+      font-family: inherit;
+      font-weight: inherit;
+      color: var(--shadow-grey);
+      padding: 0.75rem 1.25rem;
+      cursor: pointer;
+      border-radius: 1rem;
+      transition:
+        transform 0.3s,
+        background-color 0.3s ease-in;
+      color: 0.3s ease-in;
+
+      &:hover {
+        color: var(--text-light);
+        background-color: var(--cool-steel);
+      }
+
+      &:active {
+        transform: scale(0.95);
+      }
+
+      @include mixins.resize(600) {
+        font-size: 1rem;
+        padding: 0.5rem 1rem;
+      }
+    }
   }
 }
