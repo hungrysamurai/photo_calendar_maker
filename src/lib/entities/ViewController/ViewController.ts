@@ -99,6 +99,8 @@ export default class ViewController {
         },
       );
       this.controlsManager.init();
+
+      animateControlsContainer(options.controlsContainer, 'in');
     }
   }
 

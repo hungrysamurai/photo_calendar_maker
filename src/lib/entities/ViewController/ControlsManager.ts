@@ -141,6 +141,7 @@ export class MultiPageControlsManager extends BasicControlsManager {
     this.allPDFDownloadBtn = createHTMLElement({
       elementName: 'button',
       id: 'pdf-download-all',
+      className: 'multiple-btn',
       content: icons.pdfMulti,
       insertTo: {
         element: this.controlsContainer,
@@ -151,6 +152,7 @@ export class MultiPageControlsManager extends BasicControlsManager {
     this.prevBtn = createHTMLElement({
       elementName: 'button',
       id: 'prev-month',
+      className: 'nav-btn',
       content: icons.prev,
       insertTo: {
         element: this.controlsContainer,
@@ -177,6 +179,7 @@ export class MultiPageControlsManager extends BasicControlsManager {
     this.uploadMultipleImgsBtn = createHTMLElement({
       elementName: 'label',
       id: 'upload-multiple',
+      className: 'multiple-btn',
       content: icons.uploadMulti,
       attributes: {
         for: 'upload-multiple-input',
@@ -190,6 +193,7 @@ export class MultiPageControlsManager extends BasicControlsManager {
     this.nextBtn = createHTMLElement({
       elementName: 'button',
       id: 'next-month',
+      className: 'nav-btn',
       content: icons.next,
       insertTo: {
         element: this.controlsContainer,
