@@ -7,6 +7,8 @@ import DownloadManager from './entities/DownloadManager';
 import ViewController from './entities/ViewController/ViewController';
 
 import { PDFPagesRangeToDownload } from '../types';
+import animateControlsContainer from './animations/animateControlsContainer';
+import animateCropControlsContainer from './animations/animateCropControlsContainer';
 
 export class Calendar {
   private dataController: DataController;
@@ -84,7 +86,10 @@ export class Calendar {
     this.imageCropper = new ImageCropper(DOMElements.cropControlsContainer, {
       onBeforeStart: this.showLoader,
       onCropperReady: this.hideLoader,
-      onAfterRemove: () => this.cropControlsContainer.classList.add('hide'),
+      onAfterRemove: () => {
+        animateControlsContainer(this.controlsContainer, 'in');
+        animateCropControlsContainer(this.cropControlsContainer, 'out');
+      },
       saveImage: this.dataController.saveImageToIDB,
       getCurrentMonthInViewIndex: () => this.viewController.currentMonthInView,
       getMockupByIndex: this.viewController.getMockupByIndex,
@@ -148,11 +153,12 @@ export class Calendar {
   };
 
   onCrop = () => {
-    if (this.imageCropper.isActive) return;
-
     const currentImageElement = this.viewController.getCurrentMockup('image');
 
     if (currentImageElement) {
+      animateControlsContainer(this.controlsContainer, 'out');
+      animateCropControlsContainer(this.cropControlsContainer, 'in');
+
       this.imageCropper.start(currentImageElement as SVGImageElement);
     }
   };

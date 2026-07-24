@@ -1,24 +1,14 @@
 export const icons = {
-  cancel: `<?xml version="1.0" encoding="utf-8"?>
-<svg version="1.1" id="Layer_2_1_" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
-	 viewBox="0 0 100 100" style="enable-background:new 0 0 100 100;" xml:space="preserve">
-<style type="text/css">
-	.st0{fill-rule:evenodd;clip-rule:evenodd;}
-</style>
-<g>
-	<path class="st0" d="M50,47.2L91.2,6L94,8.8L52.8,50L94,91.2L91.2,94L50,52.8L8.8,94L6,91.2L47.2,50L6,8.8L8.8,6
-		C8.8,6,50,47.2,50,47.2z"/>
-</g>
+  cancel: `<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 viewBox="0 0 24 24" style="enable-background:new 0 0 24 24;" xml:space="preserve">
+<path class="icon-light-stroke" d="M22.512,1.488L1.488,22.512"/>
+<path class="icon-light-stroke" d="M1.488,1.488l21.024,21.024"/>
 </svg>`,
 
   done: `
-<?xml version="1.0" encoding="utf-8"?>
-<svg version="1.1" id="Layer_2_1_" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
-	 viewBox="0 0 100 100" style="enable-background:new 0 0 100 100;" xml:space="preserve">
-<style type="text/css">
-	.st0{fill-rule:evenodd;clip-rule:evenodd;}
-</style>
-<path class="st0" d="M98,16.7L32.7,86L2,49.8l3-2.6L32.8,80l62.2-66L98,16.7z"/>
+<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 viewBox="0 0 24 24" style="enable-background:new 0 0 24 24;" xml:space="preserve">
+<path class="icon-light-stroke" d="M22.512,4.773L8.058,19.227l-6.57-6.57"/>
 </svg>
 `,
 

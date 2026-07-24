@@ -24,7 +24,7 @@
 
     .icon-dark-stroke {
       fill: none;
-      stroke: #272727;
+      stroke: var(--shadow-grey);
       stroke-width: 2;
       stroke-linecap: round;
       stroke-linejoin: round;
@@ -37,14 +37,14 @@
     &:hover {
       transform: scale(0.95);
       background-color: vars.$cool-steel;
-    }
 
-    &:hover .icon-dark-stroke {
-      stroke: #fff;
-    }
+      .icon-dark-stroke {
+        stroke: #fff;
+      }
 
-    &:hover .icon-dark-fill {
-      fill: #fff;
+      .icon-dark-fill {
+        fill: #fff;
+      }
     }
 
     &:active {

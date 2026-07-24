@@ -51,8 +51,6 @@ export default class ImageCropper {
       parentToAppend: this.cropControlsContainer,
     }) as HTMLButtonElement;
 
-    this.cropControlsContainer.classList.add('hide');
-
     this.applyCropBtn.addEventListener('click', () => this.applyCrop());
     this.cancelCropBtn.addEventListener('click', () => this.removeCropper());
   }
@@ -98,8 +96,6 @@ export default class ImageCropper {
         }
 
         window.addEventListener('resize', this.boundUpdateCropperPosition);
-
-        this.cropControlsContainer.classList.remove('hide');
 
         this.callbacks.onCropperReady();
       },
@@ -196,7 +192,6 @@ export default class ImageCropper {
     }
 
     this.cropperOuter.innerHTML = '';
-    this.cropControlsContainer.classList.add('hide');
     this.callbacks.onAfterRemove?.();
   }
 
