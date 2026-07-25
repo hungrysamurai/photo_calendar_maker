@@ -75,8 +75,6 @@ export default class ViewController {
         options.actionsHandlers,
       );
       this.controlsManager.init();
-
-      animateControlsContainer(options.controlsContainer, 'in');
     } else {
       this.weekDaysNamesList = getWeekDays('long', options.lang);
 
@@ -98,9 +96,9 @@ export default class ViewController {
         },
       );
       this.controlsManager.init();
-
-      animateControlsContainer(options.controlsContainer, 'in');
     }
+
+    animateControlsContainer(options.controlsContainer, 'in');
   }
 
   showPrevMonth = () => {

@@ -137,11 +137,6 @@
       place-items: center;
       transition: border-color 0.15s ease;
 
-      @include mixins.resize(600) {
-        width: 1.25rem;
-        height: 1.25rem;
-      }
-
       &::before {
         content: '';
         width: 0.5rem;
@@ -155,6 +150,16 @@
 
       &:checked::before {
         transform: scale(2);
+      }
+
+      @include mixins.resize(600) {
+        width: 1.25rem;
+        height: 1.25rem;
+
+        &::before {
+          width: 0.25rem;
+          height: 0.25rem;
+        }
       }
     }
 

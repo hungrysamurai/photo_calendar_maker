@@ -41,33 +41,6 @@ body {
   font-weight: 700;
 }
 
-// @media (max-width: 768px) {
-//   .controls-container button,
-//   .controls-container label {
-//     font-size: 0.5rem;
-//     padding: 0.25rem;
-//     margin: 0 0.1rem;
-//     font-family: inherit;
-//     font-weight: inherit;
-//     background-color: white;
-//     cursor: pointer;
-//   }
-
-//   .controls-container select {
-//     font-family: inherit;
-//     font-weight: inherit;
-//     font-size: 0.8rem;
-//     padding: 0.15rem;
-//     cursor: pointer;
-//   }
-
-//   .controls-container button svg,
-//   .controls-container label svg {
-//     width: 30px;
-//     height: 30px;
-//   }
-// }
-
 /* Cropper styles */
 .cropper-view-box {
   outline: 3px solid #fff;
@@ -105,11 +78,3 @@ body {
     background-color: vars.$gray-dark;
   }
 }
-
-// @media (max-width: 500px) {
-//   .controls-container button svg,
-//   .controls-container label svg {
-//     width: 22px;
-//     height: 22px;
-//   }
-// }
