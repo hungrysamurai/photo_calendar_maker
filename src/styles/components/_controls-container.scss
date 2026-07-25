@@ -10,6 +10,12 @@
   display: flex;
   gap: 0.5rem;
 
+  @include mixins.resize(600) {
+    gap: 0.25rem;
+    left: 1rem;
+    width: calc(100% - 6rem);
+  }
+
   button,
   label {
     width: 4rem;
@@ -39,11 +45,11 @@
       background-color: vars.$cool-steel;
 
       .icon-dark-stroke {
-        stroke: #fff;
+        stroke: var(--text-light);
       }
 
       .icon-dark-fill {
-        fill: #fff;
+        fill: var(--text-light);
       }
     }
 
@@ -123,11 +129,5 @@
     svg {
       left: 0.25rem;
     }
-  }
-
-  @include mixins.resize(600) {
-    gap: 0.25rem;
-    left: 1rem;
-    width: calc(100% - 6rem);
   }
 }

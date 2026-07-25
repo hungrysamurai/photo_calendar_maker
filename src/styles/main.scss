@@ -44,37 +44,37 @@ body {
 /* Cropper styles */
 .cropper-view-box {
   outline: 3px solid #fff;
-  outline-color: vars.$gray-dark;
+  outline-color: var(--shadow-grey);
 }
 
 .cropper-dashed {
-  border: 0 dashed vars.$gray-dark;
+  border: 0 dashed var(--shadow-grey);
   filter: invert(1);
 }
 
 .cropper-center::before,
 .cropper-center::after {
-  background-color: vars.$gray-dark;
+  background-color: var(--shadow-grey);
   filter: invert(1);
 }
 
 .cropper-face {
-  background-color: vars.$gray-dark;
+  background-color: var(--shadow-grey);
   opacity: 0;
 }
 
 .cropper-line {
-  background-color: vars.$gray-dark;
+  background-color: var(--shadow-grey);
   filter: invert(1);
 }
 
 .cropper-point {
-  background-color: vars.$gray-dark;
+  background-color: var(--shadow-grey);
   filter: invert(1);
 }
 
 @media (min-width: 1200px) {
   .cropper-point.point-se::before {
-    background-color: vars.$gray-dark;
+    background-color: var(--shadow-grey);
   }
 }
