@@ -8,7 +8,7 @@ export type ControlsCallbacks = {
   onUploadImage: (event: InputEvent) => void;
 };
 
-export type MultipageViewControllsCallbacks = {
+export type MultiPageViewControllsCallbacks = {
   onPrevMonth: () => void;
   onNextMonth: () => void;
 };
@@ -114,7 +114,15 @@ export class BasicControlsManager extends ControlsManager {
 
     this.imagesContainers.forEach((g) => {
       g.addEventListener('click', () => {
-        this.uploadImgInput.click();
+        // Check if image uploaded...
+        const imageInGroup = g.querySelector('image');
+        if (imageInGroup) {
+          // ...if uploaded - get the Cropper
+          this.callbacks.onCrop();
+        } else {
+          // ...if not - upload it
+          this.uploadImgInput.click();
+        }
       });
     });
   }
@@ -131,7 +139,7 @@ export class MultiPageControlsManager extends BasicControlsManager {
     controlsContainer: HTMLDivElement,
     protected imagesContainers: SVGGElement[],
     protected callbacks: MultiPageControlsCallbacks,
-    protected viewCallbacks: MultipageViewControllsCallbacks,
+    protected viewCallbacks: MultiPageViewControllsCallbacks,
   ) {
     super(controlsContainer, imagesContainers, callbacks);
   }
