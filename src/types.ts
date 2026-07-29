@@ -70,19 +70,6 @@ declare global {
     image: Blob;
   };
 
-  type CachedMockup = {
-    id: number;
-    mockup: Blob;
-  };
-
-  type DataToStore = StoredImage & CachedMockup;
-
-  type DataToStoreAndCache = {
-    index: number;
-    mockup: SVGElement;
-    image: string;
-  };
-
   type FontArray = Font[];
 
   type SourceFontData = {
@@ -103,10 +90,6 @@ declare global {
   type FontData = {
     [key: string]: Font;
   };
-
-  type MockupCacheEventType = 'workStart' | 'workDone';
-
-  type CacheWorkerWork = { bmp: ImageBitmap };
 
   interface CreateHTMLElementParams<TagName> {
     elementName: TagName;
