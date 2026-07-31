@@ -87,12 +87,16 @@ window.addEventListener(
     // Load fonts from /assets
     await dataController.loadFonts();
 
-    // If some data in IDB - get it and store in DS object
-    await dataController.retrieveDataFromIDB();
+    try {
+      // If some data in IDB - get it and store in DS object
+      await dataController.retrieveDataFromIDB();
 
-    // If data in DS - init new project
-    if (dataController.calendarProjectData) {
-      newCalendar();
+      // If data in DS - init new project
+      if (dataController.calendarProjectData) {
+        newCalendar();
+      }
+    } catch (err) {
+      console.log('Failed to restore saved project:', err);
     }
   },
   { once: true },

@@ -83,8 +83,8 @@ export class Calendar {
 
     // Cropper
     this.imageCropper = new ImageCropper(DOMElements.cropControlsContainer, {
-      onBeforeStart: this.showLoader,
-      onCropperReady: this.hideLoader,
+      showLoader: this.showLoader,
+      hideLoader: this.hideLoader,
       onAfterRemove: () => {
         animateControlsContainer(this.controlsContainer, 'in');
         animateCropControlsContainer(this.cropControlsContainer, 'out');
@@ -139,14 +139,16 @@ export class Calendar {
     this.downloadManager.downloadPDF(PDFPagesRangeToDownload.All);
   };
 
-  onCrop = () => {
+  onCrop = async () => {
     const currentImageElement = this.viewController.getCurrentMockup('image');
 
     if (currentImageElement) {
-      animateControlsContainer(this.controlsContainer, 'out');
-      animateCropControlsContainer(this.cropControlsContainer, 'in');
+      await this.imageCropper.start(currentImageElement as SVGImageElement);
 
-      this.imageCropper.start(currentImageElement as SVGImageElement);
+      if (this.imageCropper.cropper) {
+        animateControlsContainer(this.controlsContainer, 'out');
+        animateCropControlsContainer(this.cropControlsContainer, 'in');
+      }
     }
   };
 

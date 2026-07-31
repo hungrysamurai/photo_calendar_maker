@@ -59,8 +59,11 @@ export default class DataController {
 
     const oldImageIndex = this.calendarImagesData.findIndex((el) => el.id === index);
 
+    // Replace image in calendarImagesData if already exist by index
     if (oldImageIndex >= 0) {
       this.calendarImagesData[oldImageIndex] = { id: index, image };
+
+      // ...or add new
     } else {
       this.calendarImagesData.push({ id: index, image });
     }

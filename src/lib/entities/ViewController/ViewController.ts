@@ -60,45 +60,57 @@ export default class ViewController {
 
     this.monthsNamesList = getMonthsList(this.options.lang);
 
-    if (options.type === CalendarType.SinglePage) {
-      this.weekDaysNamesList = getWeekDays('short', options.lang);
+    this.options.showLoader();
 
-      const generatedMockup = this.createOnePageSVGMockup(this.options.storedImages);
-      this.svgMockups.push(generatedMockup);
+    try {
+      if (options.type === CalendarType.SinglePage) {
+        this.weekDaysNamesList = getWeekDays('short', options.lang);
 
-      const imageGroup = generatedMockup.querySelector('#image-group') as SVGGElement;
-      this.imagesContainers.push(imageGroup);
+        const generatedMockup = this.createOnePageSVGMockup(this.options.storedImages);
+        this.svgMockups.push(generatedMockup);
 
-      this.controlsManager = new BasicControlsManager(
-        options.controlsContainer,
-        this.imagesContainers,
-        options.actionsHandlers,
-      );
-      this.controlsManager.init();
-    } else {
-      this.weekDaysNamesList = getWeekDays('long', options.lang);
-
-      const generatedMockups = this.createMultiPageSVGMockups(this.options.storedImages);
-      generatedMockups.forEach((m) => {
-        const imageGroup = m.querySelector('#image-group') as SVGGElement;
-
+        const imageGroup = generatedMockup.querySelector('#image-group') as SVGGElement;
         this.imagesContainers.push(imageGroup);
-        this.svgMockups.push(m);
-      });
 
-      this.controlsManager = new MultiPageControlsManager(
-        options.controlsContainer,
-        this.imagesContainers,
-        options.actionsHandlers,
-        {
-          onPrevMonth: this.showPrevMonth,
-          onNextMonth: this.showNextMonth,
-        },
-      );
-      this.controlsManager.init();
+        this.controlsManager = new BasicControlsManager(
+          options.controlsContainer,
+          this.imagesContainers,
+          options.actionsHandlers,
+        );
+        this.controlsManager.init();
+      } else {
+        this.weekDaysNamesList = getWeekDays('long', options.lang);
+
+        const generatedMockups = this.createMultiPageSVGMockups(this.options.storedImages);
+        generatedMockups.forEach((m) => {
+          const imageGroup = m.querySelector('#image-group') as SVGGElement;
+
+          this.imagesContainers.push(imageGroup);
+          this.svgMockups.push(m);
+        });
+
+        this.controlsManager = new MultiPageControlsManager(
+          options.controlsContainer,
+          this.imagesContainers,
+          options.actionsHandlers,
+          {
+            onPrevMonth: this.showPrevMonth,
+            onNextMonth: this.showNextMonth,
+          },
+        );
+        this.controlsManager.init();
+      }
+
+      animateControlsContainer(options.controlsContainer, 'in');
+    } catch (err) {
+      // If error - clean up DOM containers...
+      this.options.controlsContainer.innerHTML = '';
+      this.options.mainContainer.innerHTML = '';
+
+      console.log('Failed generate calendar mockup:', err);
+    } finally {
+      this.options.hideLoader();
     }
-
-    animateControlsContainer(options.controlsContainer, 'in');
   }
 
   showPrevMonth = () => {
@@ -156,8 +168,6 @@ export default class ViewController {
   };
 
   private createOnePageSVGMockup(storedImages: StoredImage[]): SVGElement {
-    this.options.showLoader();
-
     const mockupOptions = this.options.mockupOptions as SinglePageMockupOutputOptions;
     let year = this.options.year;
     const { format, outputDimensions, firstMonthIndex } = this.options;
@@ -373,13 +383,10 @@ export default class ViewController {
       mockup.appendChild(monthContainer);
     }
 
-    this.options.hideLoader();
     return mockup;
   }
 
   private createMultiPageSVGMockups(storedImages: StoredImage[]): SVGElement[] {
-    this.options.showLoader();
-
     const mockups: SVGElement[] = [];
 
     const mockupOptions = this.options.mockupOptions as MultiPageMockupOutputOptions;
@@ -572,8 +579,6 @@ export default class ViewController {
 
       mockups.push(monthMockup);
     }
-
-    this.options.hideLoader();
 
     return mockups;
   }

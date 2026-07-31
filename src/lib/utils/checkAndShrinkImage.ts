@@ -1,4 +1,4 @@
-export default function reduceImageSize(
+export default function checkAndShrinkImage(
   file: File,
   maxWidth: number,
   maxHeight: number,
@@ -13,7 +13,7 @@ export default function reduceImageSize(
       let { width, height } = img;
 
       if (width <= maxWidth && height <= maxHeight) {
-        resolve();
+        resolve(file);
         return;
       }
 

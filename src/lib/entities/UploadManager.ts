@@ -1,6 +1,6 @@
 import { FormatName } from '../../types';
 import { createSVGElement } from '../utils/DOM/createElement/createSVGElement';
-import reduceImageSize from '../utils/reduceImage';
+import checkAndShrinkImage from '../utils/checkAndShrinkImage';
 
 export type UploadManagerOptions = {
   format: FormatName;
@@ -62,37 +62,43 @@ export default class UploadManager {
     imageGroup: SVGGElement,
     mockupIndex: number,
   ): Promise<void> {
-    // Clean Up
-    const prevImageLink = imageGroup.querySelector('image')?.href.baseVal;
-    if (prevImageLink) URL.revokeObjectURL(prevImageLink);
+    try {
+      const resultImage = await checkAndShrinkImage(
+        file,
+        this.options.mockupOptions.imagePlaceholderWidth * this.imageReduceSizeRate,
+        this.options.mockupOptions.imagePlaceholderHeight * this.imageReduceSizeRate,
+      );
 
-    imageGroup.innerHTML = '';
+      if (resultImage) {
+        // Clean Up
+        const prevImageLink = imageGroup.querySelector('image')?.href.baseVal;
+        if (prevImageLink) URL.revokeObjectURL(prevImageLink);
 
-    const imageEl = createSVGElement({
-      elementName: 'image',
-      parentToAppend: imageGroup,
-      attributes: {
-        height: this.options.mockupOptions.imagePlaceholderHeight.toString(),
-        width: this.options.mockupOptions.imagePlaceholderWidth.toString(),
-        x: this.options.mockupOptions.imagePlaceholderX.toString(),
-        y: this.options.mockupOptions.imagePlaceholderY.toString(),
-      },
-    }) as SVGImageElement;
+        imageGroup.innerHTML = '';
 
-    const reduced = await reduceImageSize(
-      file,
-      this.options.mockupOptions.imagePlaceholderWidth * this.imageReduceSizeRate,
-      this.options.mockupOptions.imagePlaceholderHeight * this.imageReduceSizeRate,
-    );
+        const imageEl = createSVGElement({
+          elementName: 'image',
+          parentToAppend: imageGroup,
+          attributes: {
+            height: this.options.mockupOptions.imagePlaceholderHeight.toString(),
+            width: this.options.mockupOptions.imagePlaceholderWidth.toString(),
+            x: this.options.mockupOptions.imagePlaceholderX.toString(),
+            y: this.options.mockupOptions.imagePlaceholderY.toString(),
+          },
+        }) as SVGImageElement;
 
-    const resultImage = reduced ?? file;
+        imageEl.setAttributeNS(
+          'http://www.w3.org/1999/xlink',
+          'href',
+          URL.createObjectURL(resultImage),
+        );
 
-    imageEl.setAttributeNS(
-      'http://www.w3.org/1999/xlink',
-      'href',
-      URL.createObjectURL(resultImage),
-    );
-
-    await this.options.saveImage(resultImage, mockupIndex);
+        await this.options.saveImage(resultImage, mockupIndex);
+      } else {
+        throw new Error('Failed to parse file');
+      }
+    } catch (err) {
+      console.log(err);
+    }
   }
 }

@@ -31,119 +31,126 @@ export default class DownloadManager {
   public async downloadCurrentJPG(): Promise<void> {
     this.options.showLoader();
 
-    const monthIndex = this.options.getCurrentMonth();
-    const { width, height } = this.options.outputDimensions[this.options.format];
+    try {
+      const monthIndex = this.options.getCurrentMonth();
+      const { width, height } = this.options.outputDimensions[this.options.format];
 
-    const pageClone = this.options.svgMockups[monthIndex].cloneNode(true) as SVGElement;
-    const imageEl = pageClone.querySelector('image');
+      const pageClone = this.options.svgMockups[monthIndex].cloneNode(true) as SVGElement;
+      const imageEl = pageClone.querySelector('image');
 
-    if (imageEl) {
-      // Get imageGroup of image element
-      const imageGroup = imageEl.parentElement as unknown as SVGGElement;
-      // Cut out image el
-      imageEl.remove();
+      if (imageEl) {
+        // Get imageGroup of image element
+        const imageGroup = imageEl.parentElement as unknown as SVGGElement;
+        // Cut out image el
+        imageEl.remove();
 
-      // Re-create image element
-      const newImageEl = createSVGElement({
-        elementName: 'image',
-        parentToAppend: imageGroup,
-        attributes: {
-          height: this.options.mockupOptions.imagePlaceholderHeight.toString(),
-          width: this.options.mockupOptions.imagePlaceholderWidth.toString(),
-          x: this.options.mockupOptions.imagePlaceholderX.toString(),
-          y: this.options.mockupOptions.imagePlaceholderY.toString(),
-        },
-      }) as SVGImageElement;
+        // Re-create image element
+        const newImageEl = createSVGElement({
+          elementName: 'image',
+          parentToAppend: imageGroup,
+          attributes: {
+            height: this.options.mockupOptions.imagePlaceholderHeight.toString(),
+            width: this.options.mockupOptions.imagePlaceholderWidth.toString(),
+            x: this.options.mockupOptions.imagePlaceholderX.toString(),
+            y: this.options.mockupOptions.imagePlaceholderY.toString(),
+          },
+        }) as SVGImageElement;
 
-      const imageBlob = this.options.storedImages.find((el) => el.id === monthIndex);
+        const imageBlob = this.options.storedImages.find((el) => el.id === monthIndex);
 
-      if (imageBlob) {
-        const imageDataUrl = await readFile(imageBlob.image);
+        if (imageBlob) {
+          const imageDataUrl = await readFile(imageBlob.image);
 
-        // Embed base64 to image
-        newImageEl.setAttributeNS('http://www.w3.org/1999/xlink', 'href', imageDataUrl);
+          // Embed base64 to image
+          newImageEl.setAttributeNS('http://www.w3.org/1999/xlink', 'href', imageDataUrl);
+        }
       }
+
+      const imageBlob = await SVGToCanvasBlob(pageClone, width, height);
+
+      const imageUrl = URL.createObjectURL(imageBlob);
+      const fileName = this.getFileName();
+
+      this.downloadElement(imageUrl, fileName);
+    } catch (err) {
+      console.log('Failed to download image:', err);
+    } finally {
+      this.options.hideLoader();
     }
-
-    const imageBlob = await SVGToCanvasBlob(pageClone, width, height);
-
-    const imageUrl = URL.createObjectURL(imageBlob);
-    const fileName = this.getFileName();
-
-    this.downloadElement(imageUrl, fileName);
-
-    this.options.hideLoader();
   }
 
   public async downloadPDF(range: PDFPagesRangeToDownload) {
     this.options.showLoader();
 
-    const {
-      mockupWidth,
-      mockupHeight,
-      imagePlaceholderHeight,
-      imagePlaceholderWidth,
-      imagePlaceholderX,
-      imagePlaceholderY,
-    } = this.options.mockupOptions;
+    try {
+      const {
+        mockupWidth,
+        mockupHeight,
+        imagePlaceholderHeight,
+        imagePlaceholderWidth,
+        imagePlaceholderX,
+        imagePlaceholderY,
+      } = this.options.mockupOptions;
 
-    const monthIndex = this.options.getCurrentMonth();
+      const monthIndex = this.options.getCurrentMonth();
 
-    const pagesToDownload =
-      range === PDFPagesRangeToDownload.All
-        ? this.options.svgMockups
-        : [this.options.svgMockups[monthIndex]];
+      const pagesToDownload =
+        range === PDFPagesRangeToDownload.All
+          ? this.options.svgMockups
+          : [this.options.svgMockups[monthIndex]];
 
-    const pdf = new jsPDF(mockupWidth > mockupHeight ? 'l' : 'p', 'mm', [
-      mockupWidth,
-      mockupHeight,
-    ]);
+      const pdf = new jsPDF(mockupWidth > mockupHeight ? 'l' : 'p', 'mm', [
+        mockupWidth,
+        mockupHeight,
+      ]);
 
-    for (let i = 0; i < pagesToDownload.length; i++) {
-      const pageClone = pagesToDownload[i].cloneNode(true) as SVGElement;
+      for (let i = 0; i < pagesToDownload.length; i++) {
+        const pageClone = pagesToDownload[i].cloneNode(true) as SVGElement;
 
-      const imageEl = pageClone.querySelector('image');
-      if (imageEl) {
-        imageEl.remove();
+        const imageEl = pageClone.querySelector('image');
+        if (imageEl) {
+          imageEl.remove();
+        }
+
+        await pdf.svg(pageClone, { x: 0, y: 0, width: mockupWidth, height: mockupHeight });
+
+        // If download individual page - find image by index of SVG, else - proceed in sequence
+        const imageIndex = range === PDFPagesRangeToDownload.All ? i : monthIndex;
+
+        const imageBlob = this.options.storedImages.find((el) => el.id === imageIndex);
+
+        if (imageBlob) {
+          const arrayBuffer = await imageBlob.image.arrayBuffer();
+          const uint8Array = new Uint8Array(arrayBuffer);
+
+          const { width: imgWidth, height: imgHeight } = await getImageSize(imageBlob.image);
+          const { offsetX, offsetY, scaledWidth, scaledHeight } = getImageDimensionsAndPlacement(
+            imagePlaceholderWidth,
+            imagePlaceholderHeight,
+            imagePlaceholderX,
+            imagePlaceholderY,
+            imgWidth,
+            imgHeight,
+          );
+
+          pdf.addImage(
+            uint8Array,
+            'JPEG',
+            offsetX, // Centered X position
+            offsetY, // Centered Y position
+            scaledWidth,
+            scaledHeight,
+          );
+        }
+
+        if (i !== pagesToDownload.length - 1) pdf.addPage();
       }
-
-      await pdf.svg(pageClone, { x: 0, y: 0, width: mockupWidth, height: mockupHeight });
-
-      // If download individual page - find image by index of SVG, else - proceed in sequence
-      const imageIndex = range === PDFPagesRangeToDownload.All ? i : monthIndex;
-
-      const imageBlob = this.options.storedImages.find((el) => el.id === imageIndex);
-
-      if (imageBlob) {
-        const arrayBuffer = await imageBlob.image.arrayBuffer();
-        const uint8Array = new Uint8Array(arrayBuffer);
-
-        const { width: imgWidth, height: imgHeight } = await getImageSize(imageBlob.image);
-        const { offsetX, offsetY, scaledWidth, scaledHeight } = getImageDimensionsAndPlacement(
-          imagePlaceholderWidth,
-          imagePlaceholderHeight,
-          imagePlaceholderX,
-          imagePlaceholderY,
-          imgWidth,
-          imgHeight,
-        );
-
-        pdf.addImage(
-          uint8Array,
-          'JPEG',
-          offsetX, // Centered X position
-          offsetY, // Centered Y position
-          scaledWidth,
-          scaledHeight,
-        );
-      }
-
-      if (i !== pagesToDownload.length - 1) pdf.addPage();
+      pdf.save(this.getFileName(range === PDFPagesRangeToDownload.All));
+    } catch (err) {
+      console.log('Failed to download PDF:', err);
+    } finally {
+      this.options.hideLoader();
     }
-
-    pdf.save(this.getFileName(range === PDFPagesRangeToDownload.All));
-
-    this.options.hideLoader();
   }
 
   private getFileName(span?: boolean): string {
