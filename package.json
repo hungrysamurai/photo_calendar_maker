@@ -18,7 +18,10 @@
     "format:fix": "prettier --write .",
     "preinstall": "npx only-allow pnpm",
     "postinstall": "node -e \"if(process.env.npm_execpath.indexOf('pnpm') === -1) { console.error('\\n\\x1b[31m✖ Please use pnpm to install dependencies\\x1b[0m\\n'); process.exit(1); }\"",
-    "clear": "rm -rf node_modules"
+    "clear": "rm -rf node_modules",
+    "test": "vitest",
+    "test:run": "vitest run",
+    "test:coverage": "vitest run --coverage"
   },
   "repository": {
     "type": "git",
@@ -48,20 +51,26 @@
     "svg2pdf.js": "^2.7.0"
   },
   "devDependencies": {
+    "@testing-library/dom": "^10.4.1",
+    "@testing-library/jest-dom": "^7.0.0",
+    "@testing-library/user-event": "^14.6.1",
     "@types/node": "^20.19.43",
     "@types/opentype.js": "^1.3.10",
     "@typescript-eslint/eslint-plugin": "^8.62.0",
     "@typescript-eslint/parser": "^8.62.0",
+    "@vitest/coverage-v8": "^4.1.10",
     "eslint": "^9.39.4",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.6",
     "globals": "^16.5.0",
+    "jsdom": "^30.0.1",
     "only-allow": "^1.2.2",
     "prettier": "^3.8.5",
     "process": "^0.11.10",
     "sass": "^1.101.0",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.62.0",
-    "vite": "^6.4.3"
+    "vite": "^6.4.3",
+    "vitest": "^4.1.10"
   }
 }
