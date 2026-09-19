@@ -111,6 +111,7 @@ export class Calendar {
     // Downloader
     this.downloadManager = new DownloadManager({
       calendarType: type,
+      lang,
       calendarFirstMonth: this.firstMonth,
       calendarStartYear: this.startYear,
       calendarLastMonth: this.lastMonth,

@@ -351,23 +351,24 @@ export default class ViewController {
         });
       });
 
+      this.createMonthGrid(
+        currentMonthGrid,
+        getMonthFirstDay(monthCounter, year) - 1,
+        // getDaysInMonth reads day 0 of given month, i.e. last day of the one before it
+        getDaysInMonth(monthCounter + 1, year),
+        getDaysInMonth(monthCounter, year),
+        mockupOptions.calendarGridX,
+        mockupOptions.calendarGridY,
+        mockupOptions.daysFontSize,
+        mockupOptions.dayCellStyles,
+      );
+
       monthCounter++;
 
       if (monthCounter > 11) {
         monthCounter = 0;
         year++;
       }
-
-      this.createMonthGrid(
-        currentMonthGrid,
-        getMonthFirstDay(monthCounter - 1, year) - 1,
-        getDaysInMonth(monthCounter, year),
-        getDaysInMonth(monthCounter - 1, year),
-        mockupOptions.calendarGridX,
-        mockupOptions.calendarGridY,
-        mockupOptions.daysFontSize,
-        mockupOptions.dayCellStyles,
-      );
 
       // Append to main SVG
       mockup.appendChild(monthContainer);
@@ -547,23 +548,24 @@ export default class ViewController {
         });
       }
 
+      this.createMonthGrid(
+        monthTextGroup,
+        getMonthFirstDay(monthCounter, year) - 1,
+        // getDaysInMonth reads day 0 of given month, i.e. last day of the one before it
+        getDaysInMonth(monthCounter + 1, year),
+        getDaysInMonth(monthCounter, year),
+        mockupOptions.calendarGridX,
+        mockupOptions.calendarGridY,
+        mockupOptions.daysFontSize,
+        mockupOptions.dayCellStyles,
+      );
+
       monthCounter++;
 
       if (monthCounter > 11) {
         monthCounter = 0;
         year++;
       }
-
-      this.createMonthGrid(
-        monthTextGroup,
-        getMonthFirstDay(monthCounter - 1, year) - 1,
-        getDaysInMonth(monthCounter, year),
-        getDaysInMonth(monthCounter - 1, year),
-        mockupOptions.calendarGridX,
-        mockupOptions.calendarGridY,
-        mockupOptions.daysFontSize,
-        mockupOptions.dayCellStyles,
-      );
 
       mockups.push(monthMockup);
     }

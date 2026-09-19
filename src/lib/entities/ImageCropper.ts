@@ -4,6 +4,8 @@ import { icons } from '../../assets/icons';
 import { createHTMLElement } from '../utils/DOM/createElement/createHTMLElement';
 import canvasToBlob from '../utils/canvasToBlob';
 
+const ZOOM_EPSILON = 1e-5;
+
 export type ImageCropperCallbacks = {
   saveImage: (image: Blob, index: number) => Promise<void>;
   getCurrentMonthInViewIndex: () => number;
@@ -117,7 +119,8 @@ export default class ImageCropper {
           this.cropper.zoomRatio =
             this.cropper.getCanvasData().width / this.cropper.getCanvasData().naturalWidth;
 
-          if (this.cropper.zoomRatio.toFixed(5) > this.cropper.initialZoomRatio.toFixed(5)) {
+          // Tolerance absorbs float noise from cropper's own width/naturalWidth rounding
+          if (this.cropper.zoomRatio - this.cropper.initialZoomRatio > ZOOM_EPSILON) {
             this.cropper.setDragMode('move');
             this.cropper.options.viewMode = 3;
           } else {

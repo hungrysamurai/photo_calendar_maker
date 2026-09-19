@@ -1,4 +1,4 @@
-import { CalendarType, FormatName, PDFPagesRangeToDownload } from '../../types';
+import { CalendarLanguage, CalendarType, FormatName, PDFPagesRangeToDownload } from '../../types';
 
 import jsPDF from 'jspdf';
 import 'svg2pdf.js';
@@ -10,6 +10,7 @@ import readFile from '../utils/readFile';
 
 export type DownloadManagerOptions = {
   calendarType: CalendarType;
+  lang: CalendarLanguage;
   calendarFirstMonth: number;
   calendarStartYear: number;
   calendarLastMonth: number;
@@ -32,6 +33,14 @@ export type DownloadManagerOptions = {
  * and mockup millimeters are converted here
  */
 const MM_TO_PT = 72 / 25.4;
+
+/**
+ * Uploads are normalised to JPEG, but projects stored before that may still hold PNGs -
+ * jsPDF decodes bytes by declared format, so it must match the blob
+ */
+function getPDFImageFormat(image: Blob): 'JPEG' | 'PNG' {
+  return image.type === 'image/png' ? 'PNG' : 'JPEG';
+}
 
 export default class DownloadManager {
   constructor(private options: DownloadManagerOptions) {}
@@ -152,7 +161,7 @@ export default class DownloadManager {
 
           pdf.addImage(
             uint8Array,
-            'JPEG',
+            getPDFImageFormat(imageBlob.image),
             offsetX * MM_TO_PT, // Centered X position
             offsetY * MM_TO_PT, // Centered Y position
             scaledWidth * MM_TO_PT,
@@ -235,32 +244,26 @@ export default class DownloadManager {
 
   private getFileName(span?: boolean): string {
     if (span || this.options.calendarType === CalendarType.SinglePage) {
-      const firstMonth = this.options.calendarFirstMonth;
-      const firstMonthYear = this.options.calendarStartYear;
+      const { calendarFirstMonth, calendarStartYear, calendarLastMonth, calendarEndYear } =
+        this.options;
 
-      const date1 = new Date(Number(firstMonthYear), Number(firstMonth));
-      const firstMonthName = date1.toLocaleString('default', { month: 'long' });
+      const firstMonthName = this.getMonthName(calendarFirstMonth, calendarStartYear);
+      const lastMonthName = this.getMonthName(calendarLastMonth, calendarEndYear);
 
-      const lastMonth = this.options.calendarLastMonth;
-      const lastMonthYear = this.options.calendarEndYear;
-
-      const date2 = new Date(+lastMonthYear, +lastMonth);
-      const lastMonthName = date2.toLocaleString('default', {
-        month: 'long',
-      });
-
-      return `${firstMonthName}_${firstMonthYear}-${lastMonthName}_${lastMonthYear}`;
+      return `${firstMonthName}_${calendarStartYear}-${lastMonthName}_${calendarEndYear}`;
     }
 
     const currentMonthContainer = this.options.getCurrentMockup();
 
-    const year = currentMonthContainer.dataset.year;
-    const month = currentMonthContainer.dataset.month;
+    const year = Number(currentMonthContainer.dataset.year);
+    const month = Number(currentMonthContainer.dataset.month);
 
-    const date = new Date(Number(year), Number(month));
-    const monthName = date.toLocaleString('default', { month: 'long' });
+    return `${this.getMonthName(month, year)}_${year}`;
+  }
 
-    return `${monthName}_${year}`;
+  // Month name follows calendar language, not browser locale, so file name matches the page
+  private getMonthName(month: number, year: number): string {
+    return new Date(year, month).toLocaleString(this.options.lang, { month: 'long' });
   }
 
   private downloadElement(elementURL: string, fileName: string): void {

@@ -1,3 +1,10 @@
+const OUTPUT_TYPE = 'image/jpeg';
+
+/**
+ * Downscale image to fit given bounds and normalise it to JPEG - PDF export embeds stored
+ * bytes as-is, so every stored image must be one format. Already-fitting JPEGs pass through
+ * untouched.
+ */
 export default function checkAndShrinkImage(
   file: File,
   maxWidth: number,
@@ -12,15 +19,19 @@ export default function checkAndShrinkImage(
 
       let { width, height } = img;
 
-      if (width <= maxWidth && height <= maxHeight) {
+      const fits = width <= maxWidth && height <= maxHeight;
+
+      if (fits && file.type === OUTPUT_TYPE) {
         resolve(file);
         return;
       }
 
-      const scale = Math.min(maxWidth / width, maxHeight / height);
+      if (!fits) {
+        const scale = Math.min(maxWidth / width, maxHeight / height);
 
-      width = Math.round(width * scale);
-      height = Math.round(height * scale);
+        width = Math.round(width * scale);
+        height = Math.round(height * scale);
+      }
 
       const canvas = document.createElement('canvas');
       canvas.width = width;
@@ -33,6 +44,9 @@ export default function checkAndShrinkImage(
         return;
       }
 
+      // JPEG has no alpha - transparent PNG areas would otherwise turn black
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, width, height);
       ctx.drawImage(img, 0, 0, width, height);
 
       canvas.toBlob((blob) => {
@@ -42,7 +56,7 @@ export default function checkAndShrinkImage(
         }
 
         resolve(blob);
-      }, file.type || 'image/png');
+      }, OUTPUT_TYPE);
     };
 
     img.onerror = () => {

@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import jsPDF from 'jspdf';
 import DownloadManager from '../lib/entities/DownloadManager';
-import { CalendarType, FormatName, PDFPagesRangeToDownload } from '../types';
+import { CalendarLanguage, CalendarType, FormatName, PDFPagesRangeToDownload } from '../types';
 import SVGToCanvasBlob from '../lib/utils/SVGToCanvasBlob';
 
 vi.mock('../lib/utils/SVGToCanvasBlob', () => ({
@@ -34,6 +34,9 @@ vi.mock('jspdf', () => ({
   }),
 }));
 vi.mock('svg2pdf.js', () => ({}));
+vi.mock('../lib/utils/getImageSize', () => ({
+  default: vi.fn(async () => ({ width: 100, height: 80 })),
+}));
 
 const rasterize = vi.mocked(SVGToCanvasBlob);
 
@@ -83,6 +86,7 @@ const createMockOptions = (overrides: Record<string, unknown> = {}) => {
 
   return {
     calendarType: CalendarType.MultiPage,
+    lang: CalendarLanguage.EN,
     calendarFirstMonth: 0,
     calendarStartYear: 2026,
     calendarLastMonth: 11,
@@ -231,6 +235,35 @@ describe('DownloadManager PDF export', () => {
     expect(methods().filter((m) => m === 'addFileToVFS')).toHaveLength(2);
     expect(methods().filter((m) => m === 'addFont')).toHaveLength(2);
     expect(methods().at(-1)).toBe('save');
+  });
+
+  it('declares image format from stored blob type so PNGs are not decoded as JPEG', async () => {
+    const png = new Blob(['png'], { type: 'image/png' });
+    const jpeg = new Blob(['jpg'], { type: 'image/jpeg' });
+    const mockups = [createMockup(true), createMockup(true)];
+    const options = createMockOptions({
+      svgMockups: mockups,
+      storedImages: [
+        { id: 0, image: png },
+        { id: 1, image: jpeg },
+      ],
+    });
+    const manager = new DownloadManager(options as never);
+
+    await manager.downloadPDF(PDFPagesRangeToDownload.All);
+
+    const formats = pdfCalls.filter((c) => c.method === 'addImage').map((c) => c.args[1]);
+    expect(formats).toEqual(['PNG', 'JPEG']);
+  });
+
+  it('names file by month in calendar language, not browser locale', async () => {
+    const options = createMockOptions({ lang: CalendarLanguage.RU });
+    const manager = new DownloadManager(options as never);
+
+    await manager.downloadPDF(PDFPagesRangeToDownload.Current);
+
+    const saveCall = pdfCalls.find((c) => c.method === 'save');
+    expect(saveCall?.args[0]).toBe('январь_2026');
   });
 
   it('builds document in points so jsPDF baseline offsets are not scaled down', async () => {
