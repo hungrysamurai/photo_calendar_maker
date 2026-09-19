@@ -639,6 +639,8 @@ export default class ViewController {
         y: `${y}`,
         'text-anchor': 'middle',
         'dominant-baseline': 'central',
+        // svg2pdf ignores dominant-baseline and reads alignment-baseline only
+        'alignment-baseline': 'central',
         'font-family': this.options.font[fontWeight].family,
         'font-size': `${fontSize}`,
         fill,

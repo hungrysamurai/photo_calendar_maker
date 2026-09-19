@@ -58,6 +58,33 @@ describe('FontsController', () => {
     expect(regular.fontFace).toContain("font-family: 'MontserratMedium'");
   });
 
+  it('exposes VFS-ready data with family name, file name and base64 payload per weight', async () => {
+    vi.stubGlobal(
+      'fetch',
+      mockFetch({
+        'MontserratBold.ttf': fontBytes('bold-bytes'),
+        'MontserratMedium.ttf': fontBytes('regular-bytes'),
+      }),
+    );
+
+    const controller = new FontsController();
+    await controller.loadFonts(sourceFonts);
+
+    expect(controller.getVFSFontData('Montserrat', FontSubfamily.Bold)).toEqual({
+      family: 'MontserratBold',
+      fileName: 'MontserratBold.ttf',
+      base64: btoa('bold-bytes'),
+    });
+    expect(controller.getVFSFontData('Montserrat', FontSubfamily.Regular)).toEqual({
+      family: 'MontserratMedium',
+      fileName: 'MontserratMedium.ttf',
+      base64: btoa('regular-bytes'),
+    });
+    expect(controller.getEmbeddableFont('Montserrat', FontSubfamily.Bold).vfs).toEqual(
+      controller.getVFSFontData('Montserrat', FontSubfamily.Bold),
+    );
+  });
+
   it('returns @font-face rules for both weights of a font', async () => {
     vi.stubGlobal(
       'fetch',

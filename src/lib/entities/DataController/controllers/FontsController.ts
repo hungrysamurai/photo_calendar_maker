@@ -10,6 +10,13 @@ export function createFontFaceRule(family: string, base64: string): string {
   return `@font-face { font-family: '${family}'; src: url(data:font/truetype;base64,${base64}) format('truetype'); }`;
 }
 
+/**
+ * Build data needed to register font weight in jsPDF virtual file system
+ */
+export function createVFSFontData(family: string, base64: string): VFSFontData {
+  return { family, fileName: `${family}.ttf`, base64 };
+}
+
 export default class FontsController {
   fonts: LoadedFontsObject = {};
 
@@ -40,6 +47,7 @@ export default class FontsController {
       bytes,
       base64,
       fontFace: createFontFaceRule(fileName, base64),
+      vfs: createVFSFontData(fileName, base64),
       font: opentype.parse(bytes),
     };
   }
@@ -56,6 +64,13 @@ export default class FontsController {
 
   getEmbeddableFont(font: string, weight: FontSubfamily): EmbeddableFont {
     return this.getFont(font)[weight];
+  }
+
+  /**
+   * jsPDF VFS-ready data for given font weight
+   */
+  getVFSFontData(font: string, weight: FontSubfamily): VFSFontData {
+    return this.getEmbeddableFont(font, weight).vfs;
   }
 
   /**

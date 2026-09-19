@@ -82,6 +82,17 @@ declare global {
   };
 
   /**
+   * Data needed to register single font weight in jsPDF virtual file system
+   */
+  type VFSFontData = {
+    /** Font family name to reference from SVG `font-family` */
+    family: string;
+    /** Virtual file name inside jsPDF VFS */
+    fileName: string;
+    base64: string;
+  };
+
+  /**
    * Single font weight ready to be embedded into SVG / PDF
    */
   type EmbeddableFont = {
@@ -91,6 +102,8 @@ declare global {
     base64: string;
     /** Ready-to-inject `@font-face` rule for this weight */
     fontFace: string;
+    /** Ready-to-register jsPDF VFS font data for this weight */
+    vfs: VFSFontData;
     /** Parsed outline font — temporary, until all text is rendered natively */
     font: Font;
   };

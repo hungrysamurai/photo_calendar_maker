@@ -74,9 +74,9 @@ End-to-end: download current-page PDF and all-pages PDF; digits on every page ar
 
 ### Acceptance criteria
 
-- [ ] `FontsController` test: VFS-ready data for a weight has the expected family name, file name, and base64 payload.
-- [ ] `DownloadManager` test: `addFileToVFS`/`addFont` are called for both weights before the first `svg()` call, for both `Current` and `All` ranges (jsPDF mocked).
-- [ ] `DownloadManager` test: missing font data results in the error path.
+- [x] `FontsController` test: VFS-ready data for a weight has the expected family name, file name, and base64 payload.
+- [x] `DownloadManager` test: `addFileToVFS`/`addFont` are called for both weights before the first `svg()` call, for both `Current` and `All` ranges (jsPDF mocked).
+- [x] `DownloadManager` test: missing font data results in the error path.
 - [ ] Manual: single-page and 12-page PDFs show the correct typeface on every page; fonts are embedded (visible in the PDF viewer's font list).
 
 ---

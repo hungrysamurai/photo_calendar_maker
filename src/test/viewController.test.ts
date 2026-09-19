@@ -29,6 +29,7 @@ const createEmbeddableFont = (family: string): EmbeddableFont => ({
   bytes: new ArrayBuffer(0),
   base64: `${family}==`,
   fontFace: `@font-face { font-family: '${family}'; src: url(data:font/truetype;base64,${family}==) format('truetype'); }`,
+  vfs: { family, fileName: `${family}.ttf`, base64: `${family}==` },
   font: fakeOutlineFont as never,
 });
 
@@ -113,6 +114,7 @@ describe.each([
     digits.forEach((text) => {
       expect(text.getAttribute('text-anchor')).toBe('middle');
       expect(text.getAttribute('dominant-baseline')).toBe('central');
+      expect(text.getAttribute('alignment-baseline')).toBe('central');
       expect(text.getAttribute('x')).toBe(`${dayCellWidth / 2}`);
       expect(text.getAttribute('y')).toBe(`${dayCellHeight / 2}`);
       expect(text.getAttribute('font-size')).toBe(`${daysFontSize}`);

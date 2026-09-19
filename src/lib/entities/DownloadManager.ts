@@ -26,6 +26,13 @@ export type DownloadManagerOptions = {
   hideLoader: () => void;
 };
 
+/**
+ * jsPDF advanced API (used by svg2pdf) miscalculates text baseline offsets for any unit
+ * other than 'pt' (offset gets divided by the unit scale factor), so PDF is built in points
+ * and mockup millimeters are converted here
+ */
+const MM_TO_PT = 72 / 25.4;
+
 export default class DownloadManager {
   constructor(private options: DownloadManagerOptions) {}
 
@@ -104,10 +111,13 @@ export default class DownloadManager {
           ? this.options.svgMockups
           : [this.options.svgMockups[monthIndex]];
 
-      const pdf = new jsPDF(mockupWidth > mockupHeight ? 'l' : 'p', 'mm', [
-        mockupWidth,
-        mockupHeight,
-      ]);
+      const pageWidth = mockupWidth * MM_TO_PT;
+      const pageHeight = mockupHeight * MM_TO_PT;
+
+      const pdf = new jsPDF(mockupWidth > mockupHeight ? 'l' : 'p', 'pt', [pageWidth, pageHeight]);
+
+      // svg2pdf resolves <text> font-family against fonts registered on this jsPDF instance
+      this.registerFonts(pdf);
 
       for (let i = 0; i < pagesToDownload.length; i++) {
         const pageClone = pagesToDownload[i].cloneNode(true) as SVGElement;
@@ -117,7 +127,9 @@ export default class DownloadManager {
           imageEl.remove();
         }
 
-        await pdf.svg(pageClone, { x: 0, y: 0, width: mockupWidth, height: mockupHeight });
+        this.resolveCenteredText(pageClone, pdf);
+
+        await pdf.svg(pageClone, { x: 0, y: 0, width: pageWidth, height: pageHeight });
 
         // If download individual page - find image by index of SVG, else - proceed in sequence
         const imageIndex = range === PDFPagesRangeToDownload.All ? i : monthIndex;
@@ -141,10 +153,10 @@ export default class DownloadManager {
           pdf.addImage(
             uint8Array,
             'JPEG',
-            offsetX, // Centered X position
-            offsetY, // Centered Y position
-            scaledWidth,
-            scaledHeight,
+            offsetX * MM_TO_PT, // Centered X position
+            offsetY * MM_TO_PT, // Centered Y position
+            scaledWidth * MM_TO_PT,
+            scaledHeight * MM_TO_PT,
           );
         }
 
@@ -156,6 +168,47 @@ export default class DownloadManager {
     } finally {
       this.options.hideLoader();
     }
+  }
+
+  /**
+   * Register both weights of selected font in jsPDF VFS so every page embeds them.
+   * Throws if embeddable font data is missing - no silent fallback typeface in exports.
+   */
+  private registerFonts(pdf: jsPDF): void {
+    const { font } = this.options;
+
+    if (!font?.bold?.vfs || !font?.regular?.vfs) {
+      throw new Error('Embeddable font data is missing');
+    }
+
+    for (const { family, fileName, base64 } of [font.bold.vfs, font.regular.vfs]) {
+      pdf.addFileToVFS(fileName, base64);
+      // <text> elements carry no font-weight, so svg2pdf looks up the 'normal' style
+      pdf.addFont(fileName, family, 'normal');
+    }
+  }
+
+  /**
+   * svg2pdf resolves `text-anchor="middle"` by measuring strings in the browser at the SVG
+   * font size - for single-page mockups that is ~1.5px, where glyph advances get rounded
+   * and digits drift horizontally. Center from exact embedded font metrics instead.
+   */
+  private resolveCenteredText(svg: SVGElement, pdf: jsPDF): void {
+    svg.querySelectorAll('text[text-anchor="middle"]').forEach((textEl) => {
+      const family = textEl.getAttribute('font-family');
+      const fontSize = Number(textEl.getAttribute('font-size'));
+      const x = Number(textEl.getAttribute('x'));
+
+      if (!family || !fontSize || Number.isNaN(x)) return;
+
+      // Document is in 'pt' with scale factor 1, so width comes back in SVG user units
+      pdf.setFont(family, 'normal');
+      pdf.setFontSize(fontSize);
+      const width = pdf.getTextWidth(textEl.textContent ?? '');
+
+      textEl.setAttribute('x', `${x - width / 2}`);
+      textEl.setAttribute('text-anchor', 'start');
+    });
   }
 
   /**
