@@ -193,7 +193,6 @@ declare global {
     monthCellPadding: number;
     calendarGridLeftIndent: number;
     calendarGridTopIndent: number;
-    descenderException: number;
     numberOfColumns: number;
     [key: string]: string | number | FormatWidthHeigth;
   }

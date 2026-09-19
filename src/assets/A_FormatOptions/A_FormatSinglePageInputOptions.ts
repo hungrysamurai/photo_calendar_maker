@@ -26,7 +26,6 @@ export const A_FormatYSinglePageInputOptions: SinglePageMockupInputOptions = {
   yearTitleFontSize: 2,
   weekDayY: 3.33,
   weekDayFontSize: 1.5,
-  descenderException: 3.2,
   numberOfColumns: 4,
 };
 
@@ -58,6 +57,5 @@ export const A_FormatXSinglePageInputOptions: SinglePageMockupInputOptions = {
   yearTitleFontSize: 2,
   weekDayY: 3.33,
   weekDayFontSize: 1.4,
-  descenderException: 3.2,
   numberOfColumns: 2,
 };

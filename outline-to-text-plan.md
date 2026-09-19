@@ -93,10 +93,10 @@ End-to-end: preview, JPG and PDF show all text in the chosen font, in RU and EN,
 
 ### Acceptance criteria
 
-- [ ] `ViewController` test: weekday labels are `<text>` with `middle`/`central` centering, correct content for RU short/long and EN short/long lists, bold family.
-- [ ] `ViewController` test: month title and year title are `<text>` with `text-anchor="start"`, correct content, positioned at the configured title `x`/`y`.
-- [ ] `ViewController` test: no `<path>` text elements remain anywhere in a generated mockup.
-- [ ] No reference to `descenderException` remains in rendering code.
+- [x] `ViewController` test: weekday labels are `<text>` with `middle`/`central` centering, correct content for RU short/long and EN short/long lists, bold family.
+- [x] `ViewController` test: month title and year title are `<text>` with `text-anchor="start"`, correct content, positioned at the configured title `x`/`y`.
+- [x] `ViewController` test: no `<path>` text elements remain anywhere in a generated mockup.
+- [x] No reference to `descenderException` remains in rendering code.
 - [ ] Manual: RU labels with descenders/ascenders (`р`, `у`, `д`) and all three fonts look correctly placed; titles have not shifted compared to the previous build.
 
 ---

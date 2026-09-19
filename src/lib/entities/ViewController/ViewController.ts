@@ -15,7 +15,6 @@ import {
   BasicControlsManager,
   MultiPageControlsManager,
 } from './ControlsManager';
-import OutlineCache from './OutlineCache';
 
 interface DayCell {
   root: SVGGElement;
@@ -53,11 +52,7 @@ export default class ViewController {
   svgMockups: SVGElement[] = [];
   imagesContainers: SVGGElement[] = [];
 
-  private outlineCache: OutlineCache;
-
   constructor(private options: ViewControllerOptions) {
-    this.outlineCache = new OutlineCache(options.font);
-
     this.monthsNamesList = getMonthsList(this.options.lang);
 
     this.options.showLoader();
@@ -295,36 +290,32 @@ export default class ViewController {
       // Increment x-movement
       x += mockupOptions.monthCellWidth + mockupOptions.monthCellPadding;
 
-      const monthOutline = this.options.font.bold.font.getPath(
-        this.monthsNamesList[monthCounter],
-        mockupOptions.monthTitleX,
-        mockupOptions.monthTitleY,
-        mockupOptions.monthTitleFontSize,
-      );
-      monthOutline.fill = '#231f20';
-      const monthSVG = monthOutline.toSVG(2);
-
       createSVGElement({
         elementName: 'g',
         id: 'month-title',
         parentToAppend: monthContainer,
-        content: monthSVG,
+        children: [
+          this.createTitleText(
+            this.monthsNamesList[monthCounter],
+            mockupOptions.monthTitleX,
+            mockupOptions.monthTitleY,
+            mockupOptions.monthTitleFontSize,
+          ),
+        ],
       });
-
-      const yearOutline = this.options.font.bold.font.getPath(
-        `${year}`,
-        mockupOptions.yearTitleX,
-        mockupOptions.yearTitleY,
-        mockupOptions.yearTitleFontSize,
-      );
-      yearOutline.fill = '#231f20';
-      const yearSVG = yearOutline.toSVG(2);
 
       createSVGElement({
         elementName: 'g',
         id: 'year-title',
         parentToAppend: monthContainer,
-        content: yearSVG,
+        children: [
+          this.createTitleText(
+            `${year}`,
+            mockupOptions.yearTitleX,
+            mockupOptions.yearTitleY,
+            mockupOptions.yearTitleFontSize,
+          ),
+        ],
       });
 
       const daysTitles = createSVGElement({
@@ -339,18 +330,8 @@ export default class ViewController {
         parentToAppend: monthContainer,
       });
 
-      // Generate week days paths
-      this.weekDaysNamesList.map((weekDayName, i) => {
-        // исключение для 'Cр'
-        const descenderException = i === 2 && this.options.lang === 'ru' ? true : false;
-
-        const weekDayPath = this.getAndPlaceOutline(
-          weekDayName,
-          mockupOptions.weekDayX,
-          descenderException ? mockupOptions.descenderException : mockupOptions.weekDayY,
-          mockupOptions.weekDayFontSize,
-        );
-
+      // Generate week days labels
+      this.weekDaysNamesList.forEach((weekDayName, i) => {
         createSVGElement({
           elementName: 'g',
           parentToAppend: daysTitles,
@@ -359,7 +340,14 @@ export default class ViewController {
               mockupOptions.calendarGridX + mockupOptions.dayCellWidth * i,
             ).toFixed(2)} 0)`,
           },
-          children: [weekDayPath],
+          children: [
+            this.createCenteredText(
+              weekDayName,
+              mockupOptions.weekDayX,
+              mockupOptions.weekDayY,
+              mockupOptions.weekDayFontSize,
+            ),
+          ],
         });
       });
 
@@ -454,36 +442,32 @@ export default class ViewController {
         parentToAppend: monthMockup,
       });
 
-      const monthOutline = this.options.font.bold.font.getPath(
-        this.monthsNamesList[monthCounter],
-        mockupOptions.monthTitleX,
-        mockupOptions.monthTitleY,
-        mockupOptions.monthTitleFontSize,
-      );
-      monthOutline.fill = '#231f20';
-      const monthSVG = monthOutline.toSVG(2);
-
       createSVGElement({
         elementName: 'g',
-        id: `#month-title-${i}`,
+        id: `month-title-${i}`,
         parentToAppend: monthTextGroup,
-        content: monthSVG,
+        children: [
+          this.createTitleText(
+            this.monthsNamesList[monthCounter],
+            mockupOptions.monthTitleX,
+            mockupOptions.monthTitleY,
+            mockupOptions.monthTitleFontSize,
+          ),
+        ],
       });
 
-      const yearOutline = this.options.font.bold.font.getPath(
-        `${year}`,
-        mockupOptions.yearTitleX,
-        mockupOptions.yearTitleY,
-        mockupOptions.yearTitleFontSize,
-      );
-      yearOutline.fill = '#231f20';
-      const yearSVG = yearOutline.toSVG(2);
-
       createSVGElement({
         elementName: 'g',
-        id: `#year-title-${i}`,
+        id: `year-title-${i}`,
         parentToAppend: monthTextGroup,
-        content: yearSVG,
+        children: [
+          this.createTitleText(
+            `${year}`,
+            mockupOptions.yearTitleX,
+            mockupOptions.yearTitleY,
+            mockupOptions.yearTitleFontSize,
+          ),
+        ],
       });
 
       const daysTitles = createSVGElement({
@@ -492,13 +476,13 @@ export default class ViewController {
         parentToAppend: monthTextGroup,
       });
 
-      // Generate week days paths
-      this.weekDaysNamesList.map((weekDayName, i) => {
+      // Generate week days labels
+      this.weekDaysNamesList.forEach((weekDayName, i) => {
         createSVGElement({
           elementName: 'g',
           parentToAppend: daysTitles,
           children: [
-            this.getAndPlaceOutline(
+            this.createCenteredText(
               weekDayName,
               mockupOptions.weekDayX,
               mockupOptions.weekDayY,
@@ -587,26 +571,6 @@ export default class ViewController {
     return mockups;
   }
 
-  getAndPlaceOutline(
-    text: string,
-    x: number,
-    y: number,
-    fontSize: number,
-    fontWeight: 'bold' | 'regular' = 'bold',
-    fill = '#231f20',
-  ): SVGPathElement {
-    const outline = this.outlineCache.get(text, fontSize, fontWeight);
-
-    return createSVGElement({
-      elementName: 'path',
-      attributes: {
-        d: outline.d,
-        fill,
-        transform: `translate(${(x - outline.xShift).toFixed(3)} ${(y + outline.yShift).toFixed(3)})`,
-      },
-    });
-  }
-
   /**
    * Embed `@font-face` rules for both weights of selected font, so mockup SVG is self-describing
    */
@@ -641,6 +605,31 @@ export default class ViewController {
         'dominant-baseline': 'central',
         // svg2pdf ignores dominant-baseline and reads alignment-baseline only
         'alignment-baseline': 'central',
+        'font-family': this.options.font[fontWeight].family,
+        'font-size': `${fontSize}`,
+        fill,
+      },
+    });
+  }
+
+  /**
+   * Native SVG text left-aligned with baseline at given point (matches former outline `getPath(text, x, y)` placement)
+   */
+  private createTitleText(
+    text: string,
+    x: number,
+    y: number,
+    fontSize: number,
+    fontWeight: FontSubfamily = FontSubfamily.Bold,
+    fill = '#231f20',
+  ): SVGTextElement {
+    return createSVGElement({
+      elementName: 'text',
+      text,
+      attributes: {
+        x: `${x}`,
+        y: `${y}`,
+        'text-anchor': 'start',
         'font-family': this.options.font[fontWeight].family,
         'font-size': `${fontSize}`,
         fill,
