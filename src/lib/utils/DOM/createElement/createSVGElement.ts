@@ -17,6 +17,10 @@ export const createSVGElement = <TagName extends keyof SVGElementTagNameMap>(
     element.innerHTML = params.content;
   }
 
+  if (params.text) {
+    element.textContent = params.text;
+  }
+
   if (params.parentToAppend) {
     params.parentToAppend.appendChild(element);
   }

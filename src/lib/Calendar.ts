@@ -18,7 +18,7 @@ export class Calendar {
   private uploadManager: UploadManager;
   private downloadManager: DownloadManager;
 
-  font: FontData = {};
+  font: FontData;
   outputDimensions: OutputDimensions;
   mockupOptions: SinglePageMockupOutputOptions | MultiPageMockupOutputOptions;
 

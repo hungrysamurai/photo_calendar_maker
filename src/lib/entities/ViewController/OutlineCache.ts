@@ -20,7 +20,7 @@ export default class OutlineCache {
       return cached;
     }
 
-    const path = this.font[weight].getPath(text, 0, 0, size);
+    const path = this.font[weight].font.getPath(text, 0, 0, size);
 
     const { x1, x2, y1, y2 } = path.getBoundingBox();
 

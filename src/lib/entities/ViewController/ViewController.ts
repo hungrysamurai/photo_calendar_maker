@@ -1,5 +1,5 @@
 import { icons } from '../../../assets/icons';
-import { CalendarLanguage, CalendarType, FormatName } from '../../../types';
+import { CalendarLanguage, CalendarType, FontSubfamily, FormatName } from '../../../types';
 import animateControlsContainer from '../../animations/animateControlsContainer';
 
 import { createHTMLElement } from '../../utils/DOM/createElement/createHTMLElement';
@@ -194,6 +194,8 @@ export default class ViewController {
       },
     });
 
+    this.appendFontFaceStyle(mockup);
+
     createSVGElement({
       elementName: 'rect',
       id: 'background-rect',
@@ -293,7 +295,7 @@ export default class ViewController {
       // Increment x-movement
       x += mockupOptions.monthCellWidth + mockupOptions.monthCellPadding;
 
-      const monthOutline = this.options.font['bold'].getPath(
+      const monthOutline = this.options.font.bold.font.getPath(
         this.monthsNamesList[monthCounter],
         mockupOptions.monthTitleX,
         mockupOptions.monthTitleY,
@@ -309,7 +311,7 @@ export default class ViewController {
         content: monthSVG,
       });
 
-      const yearOutline = this.options.font['bold'].getPath(
+      const yearOutline = this.options.font.bold.font.getPath(
         `${year}`,
         mockupOptions.yearTitleX,
         mockupOptions.yearTitleY,
@@ -433,6 +435,8 @@ export default class ViewController {
         },
       });
 
+      this.appendFontFaceStyle(monthMockup);
+
       createSVGElement({
         elementName: 'rect',
         id: `background-rect-${i}`,
@@ -450,7 +454,7 @@ export default class ViewController {
         parentToAppend: monthMockup,
       });
 
-      const monthOutline = this.options.font['bold'].getPath(
+      const monthOutline = this.options.font.bold.font.getPath(
         this.monthsNamesList[monthCounter],
         mockupOptions.monthTitleX,
         mockupOptions.monthTitleY,
@@ -466,7 +470,7 @@ export default class ViewController {
         content: monthSVG,
       });
 
-      const yearOutline = this.options.font['bold'].getPath(
+      const yearOutline = this.options.font.bold.font.getPath(
         `${year}`,
         mockupOptions.yearTitleX,
         mockupOptions.yearTitleY,
@@ -603,6 +607,45 @@ export default class ViewController {
     });
   }
 
+  /**
+   * Embed `@font-face` rules for both weights of selected font, so mockup SVG is self-describing
+   */
+  private appendFontFaceStyle(mockup: SVGElement): void {
+    const { bold, regular } = this.options.font;
+
+    createSVGElement({
+      elementName: 'style',
+      parentToAppend: mockup,
+      text: `${bold.fontFace}\n${regular.fontFace}`,
+    });
+  }
+
+  /**
+   * Native SVG text centered (horizontally and vertically) at given point
+   */
+  private createCenteredText(
+    text: string,
+    x: number,
+    y: number,
+    fontSize: number,
+    fontWeight: FontSubfamily = FontSubfamily.Bold,
+    fill = '#231f20',
+  ): SVGTextElement {
+    return createSVGElement({
+      elementName: 'text',
+      text,
+      attributes: {
+        x: `${x}`,
+        y: `${y}`,
+        'text-anchor': 'middle',
+        'dominant-baseline': 'central',
+        'font-family': this.options.font[fontWeight].family,
+        'font-size': `${fontSize}`,
+        fill,
+      },
+    });
+  }
+
   private createMonthGrid(
     monthGrid: SVGGElement,
     startIndex: number,
@@ -647,12 +690,12 @@ export default class ViewController {
 
     for (let i = startIndex - 1; i >= 0; i--) {
       cells[i].digitContainer.appendChild(
-        this.getAndPlaceOutline(
+        this.createCenteredText(
           `${prev}`,
           dayCellWidth / 2,
           dayCellHeight / 2,
           fontSize,
-          'regular',
+          FontSubfamily.Regular,
           '#999',
         ),
       );
@@ -668,7 +711,7 @@ export default class ViewController {
 
     for (let day = 1; day <= totalDays; day++) {
       cells[cellIndex].digitContainer.appendChild(
-        this.getAndPlaceOutline(`${day}`, dayCellWidth / 2, dayCellHeight / 2, fontSize),
+        this.createCenteredText(`${day}`, dayCellWidth / 2, dayCellHeight / 2, fontSize),
       );
 
       cellIndex++;
@@ -682,12 +725,12 @@ export default class ViewController {
 
     while (cellIndex < 42) {
       cells[cellIndex].digitContainer.appendChild(
-        this.getAndPlaceOutline(
+        this.createCenteredText(
           `${next}`,
           dayCellWidth / 2,
           dayCellHeight / 2,
           fontSize,
-          'regular',
+          FontSubfamily.Regular,
           '#999',
         ),
       );

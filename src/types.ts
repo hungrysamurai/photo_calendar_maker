@@ -70,8 +70,6 @@ declare global {
     image: Blob;
   };
 
-  type FontArray = Font[];
-
   type SourceFontData = {
     fontNameBold: string;
     fontNameRegular: string;
@@ -83,12 +81,26 @@ declare global {
     Caveat: SourceFontData;
   };
 
-  type LoadedFontsObject = {
-    [key: string]: FontArray;
+  /**
+   * Single font weight ready to be embedded into SVG / PDF
+   */
+  type EmbeddableFont = {
+    /** CSS font-family name (equals TTF file base name) */
+    family: string;
+    bytes: ArrayBuffer;
+    base64: string;
+    /** Ready-to-inject `@font-face` rule for this weight */
+    fontFace: string;
+    /** Parsed outline font — temporary, until all text is rendered natively */
+    font: Font;
   };
 
   type FontData = {
-    [key: string]: Font;
+    [key in FontSubfamily]: EmbeddableFont;
+  };
+
+  type LoadedFontsObject = {
+    [key: string]: FontData;
   };
 
   interface CreateHTMLElementParams<TagName> {
