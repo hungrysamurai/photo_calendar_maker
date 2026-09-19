@@ -372,7 +372,7 @@ export default class ViewController {
         currentMonthGrid,
         getMonthFirstDay(monthCounter - 1, year) - 1,
         getDaysInMonth(monthCounter, year),
-        getDaysInMonth(monthCounter - 1, year) - 1,
+        getDaysInMonth(monthCounter - 1, year),
         mockupOptions.calendarGridX,
         mockupOptions.calendarGridY,
         mockupOptions.daysFontSize,
