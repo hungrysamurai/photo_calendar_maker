@@ -1,5 +1,3 @@
-import { Font } from 'opentype.js';
-
 export enum CalendarLanguage {
   RU = 'ru',
   EN = 'en',
@@ -104,8 +102,6 @@ declare global {
     fontFace: string;
     /** Ready-to-register jsPDF VFS font data for this weight */
     vfs: VFSFontData;
-    /** Parsed outline font — temporary, until all text is rendered natively */
-    font: Font;
   };
 
   type FontData = {

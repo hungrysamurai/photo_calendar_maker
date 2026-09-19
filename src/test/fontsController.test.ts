@@ -5,10 +5,6 @@ import FontsController, {
 } from '../lib/entities/DataController/controllers/FontsController';
 import { FontSubfamily } from '../types';
 
-vi.mock('opentype.js', () => ({
-  default: { parse: vi.fn(() => ({ parsed: true })) },
-}));
-
 const fontBytes = (text: string) => new TextEncoder().encode(text).buffer as ArrayBuffer;
 
 const mockFetch = (files: Record<string, ArrayBuffer>) =>

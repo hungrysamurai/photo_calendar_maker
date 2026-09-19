@@ -1,5 +1,3 @@
-import opentype from 'opentype.js';
-
 import { FontSubfamily } from '../../../../types';
 import arrayBufferToBase64 from '../../../utils/arrayBufferToBase64';
 
@@ -48,7 +46,6 @@ export default class FontsController {
       base64,
       fontFace: createFontFaceRule(fileName, base64),
       vfs: createVFSFontData(fileName, base64),
-      font: opentype.parse(bytes),
     };
   }
 

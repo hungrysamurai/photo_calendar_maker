@@ -111,7 +111,7 @@ Delete `OutlineCache`, `getAndPlaceOutline`, all `opentype.js` imports, the `ope
 
 ### Acceptance criteria
 
-- [ ] `opentype.js` is absent from `package.json`, the lockfile, and all source imports; `pnpm build`, `pnpm lint`, `pnpm test:run` pass.
-- [ ] No `xShift`/`yShift` or bounding-box centering code remains.
+- [x] `opentype.js` is absent from `package.json`, the lockfile, and all source imports; `pnpm build`, `pnpm lint`, `pnpm test:run` pass.
+- [x] No `xShift`/`yShift` or bounding-box centering code remains.
 - [ ] Manual verification matrix completed: 3 fonts × 2 languages × {live preview, JPG, single PDF, all-pages PDF} × 2 browsers, with no fallback typeface observed.
 - [ ] (Recommended) one physical test print of a PDF page.

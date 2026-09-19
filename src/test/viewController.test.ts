@@ -22,8 +22,6 @@ const createEmbeddableFont = (family: string): EmbeddableFont => ({
   base64: `${family}==`,
   fontFace: `@font-face { font-family: '${family}'; src: url(data:font/truetype;base64,${family}==) format('truetype'); }`,
   vfs: { family, fileName: `${family}.ttf`, base64: `${family}==` },
-  // opentype Font is no longer used by rendering; removed entirely in phase 5
-  font: {} as never,
 });
 
 const font: FontData = {
