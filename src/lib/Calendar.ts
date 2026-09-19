@@ -122,6 +122,7 @@ export class Calendar {
       getCurrentMockup: this.viewController.getCurrentMockup,
       svgMockups: this.viewController.svgMockups,
       storedImages,
+      font: this.font,
       showLoader: this.showLoader,
       hideLoader: this.hideLoader,
     });

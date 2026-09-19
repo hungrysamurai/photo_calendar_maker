@@ -56,8 +56,8 @@ End-to-end: download JPG; day digits appear in the chosen typeface, matching the
 
 ### Acceptance criteria
 
-- [ ] `DownloadManager` test: the SVG handed to the rasterizer contains a `<style>` with the selected font's `@font-face` rules (rasterizer mocked).
-- [ ] `DownloadManager` test: missing font data results in the error path (loader hidden, no download triggered).
+- [x] `DownloadManager` test: the SVG handed to the rasterizer contains a `<style>` with the selected font's `@font-face` rules (rasterizer mocked).
+- [x] `DownloadManager` test: missing font data results in the error path (loader hidden, no download triggered).
 - [ ] Manual: JPG export shows correct typeface for all three fonts, in at least two browsers.
 
 ---

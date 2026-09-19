@@ -19,6 +19,7 @@ export type DownloadManagerOptions = {
   mockupOptions: SinglePageMockupOutputOptions | MultiPageMockupOutputOptions;
   svgMockups: SVGElement[];
   storedImages: StoredImage[];
+  font: FontData;
   getCurrentMonth: () => number;
   getCurrentMockup: (element?: string) => SVGElement | SVGImageElement;
   showLoader: () => void;
@@ -36,6 +37,10 @@ export default class DownloadManager {
       const { width, height } = this.options.outputDimensions[this.options.format];
 
       const pageClone = this.options.svgMockups[monthIndex].cloneNode(true) as SVGElement;
+
+      // Detached blob-loaded SVG can't see page CSS - fonts must live inside the markup
+      this.ensureFontFaceStyle(pageClone);
+
       const imageEl = pageClone.querySelector('image');
 
       if (imageEl) {
@@ -151,6 +156,28 @@ export default class DownloadManager {
     } finally {
       this.options.hideLoader();
     }
+  }
+
+  /**
+   * Make sure SVG carries `@font-face` rules for both weights of selected font.
+   * Throws if embeddable font data is missing - no silent fallback typeface in exports.
+   */
+  private ensureFontFaceStyle(svg: SVGElement): void {
+    const { font } = this.options;
+
+    if (!font?.bold?.fontFace || !font?.regular?.fontFace) {
+      throw new Error('Embeddable font data is missing');
+    }
+
+    const rules = [font.bold.fontFace, font.regular.fontFace];
+
+    const hasAllRules = Array.from(svg.querySelectorAll('style')).some((styleEl) =>
+      rules.every((rule) => styleEl.textContent?.includes(rule)),
+    );
+
+    if (hasAllRules) return;
+
+    svg.prepend(createSVGElement({ elementName: 'style', text: rules.join('\n') }));
   }
 
   private getFileName(span?: boolean): string {
