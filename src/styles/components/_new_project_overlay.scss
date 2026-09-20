@@ -102,6 +102,17 @@
     }
   }
 
+  &__settings {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2.5rem;
+
+    @include mixins.resize(600) {
+      gap: 1.5rem;
+    }
+  }
+
   &__mode-radio-btns {
     display: flex;
     flex-direction: column;

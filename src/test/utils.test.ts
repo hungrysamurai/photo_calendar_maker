@@ -2,10 +2,11 @@ import { describe, expect, it } from 'vitest';
 
 import getDaysInMonth from '../lib/utils/getDaysInMonth';
 import getMonthFirstDay from '../lib/utils/getMonthFirstDay';
+import getProjectSummary from '../lib/utils/getProjectSummary';
 import { getMonthsList } from '../lib/utils/getMonthsList';
 import getWeekDays from '../lib/utils/getWeekDays';
 import { createSVGElement } from '../lib/utils/DOM/createElement/createSVGElement';
-import { CalendarLanguage } from '../types';
+import { CalendarLanguage, CalendarType, FormatName } from '../types';
 
 describe('calendar utility helpers', () => {
   it('returns 29 days for February in a leap year', () => {
@@ -22,6 +23,22 @@ describe('calendar utility helpers', () => {
     expect(months).toHaveLength(12);
     expect(months[0]).toBe('Январь');
     expect(months[11]).toBe('Декабрь');
+  });
+
+  it('summarises project settings as year · first month · format', () => {
+    const summary = getProjectSummary({
+      name: 'x',
+      createdAt: 0,
+      lastOpenedAt: 0,
+      startYear: 2026,
+      firstMonthIndex: 2,
+      lang: CalendarLanguage.RU,
+      font: 'Montserrat',
+      format: FormatName.A3_X,
+      type: CalendarType.MultiPage,
+    });
+
+    expect(summary).toBe('2026 · Март · A3 горизонтальный');
   });
 
   it('returns the weekday names in the requested language', () => {

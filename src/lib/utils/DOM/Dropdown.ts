@@ -65,6 +65,24 @@ export class Dropdown<T> {
     this.valueElement = this.root.querySelector('.dropdown__value')!;
     this.menu = this.root.querySelector('.dropdown__menu')!;
 
+    this.renderMenu();
+  }
+
+  /**
+   * Replace the items list, re-render the menu and re-select `value` (or the first item).
+   * Does not emit `onChange`.
+   */
+  setItems(items: T[], value?: T) {
+    this.options.items = items;
+
+    this.renderMenu();
+
+    this.select(value ?? items[0], false);
+  }
+
+  private renderMenu() {
+    this.menu.innerHTML = '';
+
     this.options.items.forEach((item) => {
       const element = document.createElement('div');
 

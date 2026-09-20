@@ -116,6 +116,24 @@
     transition: background 0.15s;
   }
 
+  // Muted secondary line inside an item (e.g. project settings summary)
+  &__item-summary {
+    display: block;
+    margin-top: 0.15rem;
+    font-size: 0.9rem;
+    font-weight: normal;
+    opacity: 0.7;
+
+    @include mixins.resize(600) {
+      font-size: 0.7rem;
+    }
+  }
+
+  // The trigger only has room for the primary line
+  &__value &__item-summary {
+    display: none;
+  }
+
   &__item:hover {
     background: var(--sandy-clay);
   }

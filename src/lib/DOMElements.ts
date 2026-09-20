@@ -13,6 +13,11 @@ const getButton = document.querySelector('#get-button') as HTMLButtonElement;
 
 const projectNameInput = document.querySelector('#project-name-input') as HTMLInputElement;
 
+const projectsDropdownContainer = document.querySelector('#projects-dropdown') as HTMLDivElement;
+const projectSettingsBlock = document.querySelector(
+  '.new-project-section__settings',
+) as HTMLDivElement;
+
 const yearDropdownContainer = document.querySelector('#year-dropdown') as HTMLDivElement;
 const monthDropdownContainer = document.querySelector('#month-dropdown') as HTMLDivElement;
 const langDropdownContainer = document.querySelector('#lang-dropdown') as HTMLDivElement;
@@ -29,6 +34,8 @@ export {
   cropControlsContainer,
   getButton,
   projectNameInput,
+  projectsDropdownContainer,
+  projectSettingsBlock,
   multiModeBtn,
   newProjectOverlayTriggerBtn,
   newProjectOverlaySection,

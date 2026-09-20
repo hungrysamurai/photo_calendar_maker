@@ -7,6 +7,8 @@ import {
   cropControlsContainer,
   getButton,
   projectNameInput,
+  projectsDropdownContainer,
+  projectSettingsBlock,
   multiModeBtn,
   newProjectOverlayTriggerBtn,
   newProjectOverlaySection,
@@ -17,6 +19,11 @@ import DataController from './entities/DataController/DataController';
 import animateTriggerBtn from './animations/animateTriggerBtn';
 import animateNewProjectOverlay from './animations/animateNewProjectOverlay';
 import createDropdowns from './utils/DOM/createDropdowns';
+import createProjectsDropdown, {
+  NEW_PROJECT_ITEM,
+  ProjectPickerItem,
+  toProjectPickerItems,
+} from './utils/DOM/createProjectsDropdown';
 import getProjectName from './utils/getProjectName';
 import { CalendarType } from '../types';
 
@@ -24,6 +31,7 @@ let activeCalendar: Calendar | null = null;
 let dataController: DataController | null;
 
 let userInputs: ReturnType<typeof createDropdowns>;
+let projectsInput: ReturnType<typeof createProjectsDropdown>;
 
 // Set once the user edits the name field; stops auto-suggestions from overwriting it
 let isProjectNameDirty = false;
@@ -37,6 +45,35 @@ function syncSuggestedProjectName() {
   if (!isProjectNameDirty) {
     projectNameInput.value = getSuggestedProjectName();
   }
+}
+
+function openOverlay() {
+  animateNewProjectOverlay(newProjectOverlayBG, newProjectOverlaySection, 'in');
+}
+
+function closeOverlay() {
+  animateNewProjectOverlay(newProjectOverlayBG, newProjectOverlaySection, 'out');
+}
+
+/**
+ * Re-read saved projects into the picker and select "Новый";
+ * the picker is hidden while there are no projects
+ */
+async function refreshProjectsList() {
+  const projects = (await dataController?.listProjects()) ?? [];
+
+  projectsInput.setItems(toProjectPickerItems(projects), NEW_PROJECT_ITEM);
+  projectsDropdownContainer.classList.toggle('hide', projects.length === 0);
+
+  onProjectPickerChange(NEW_PROJECT_ITEM);
+}
+
+// "Новый" shows the settings form + "Создать"; a saved project hides the form + "Открыть"
+function onProjectPickerChange(item: ProjectPickerItem) {
+  const isNew = item.kind === 'new';
+
+  projectSettingsBlock.classList.toggle('hide', !isNew);
+  getButton.textContent = isNew ? 'Создать' : 'Открыть';
 }
 
 async function newProject() {
@@ -59,8 +96,6 @@ async function newProject() {
     type: multiModeBtn.checked ? CalendarType.MultiPage : CalendarType.SinglePage,
   };
 
-  // Purge all current content
-  calendarContainer.innerHTML = '';
   // Persist a new project (earlier projects stay in IDB) and make it active
   await dataController?.createProject(newCalendarData);
   // Generate new calendar
@@ -69,13 +104,42 @@ async function newProject() {
   // Reset name field to a fresh suggestion for the next project
   isProjectNameDirty = false;
   syncSuggestedProjectName();
+
+  await refreshProjectsList();
+}
+
+async function openProject(id: number) {
+  // Already looking at this project — nothing to re-render
+  if (dataController?.activeProjectId === id) return;
+
+  try {
+    await dataController?.loadProject(id);
+    newCalendar();
+  } catch (err) {
+    console.log(`Failed to open project ${id}:`, err);
+    disposeCalendar();
+  }
+
+  // Keep "most recently opened first" ordering up to date
+  await refreshProjectsList();
+}
+
+// Primary overlay button: create or open, depending on the picker
+async function onGetButtonClick() {
+  const selected = projectsInput.value;
+
+  closeOverlay();
+
+  if (selected.kind === 'new') {
+    await newProject();
+  } else {
+    await openProject(selected.project.id);
+  }
 }
 
 function newCalendar() {
+  disposeCalendar();
   controlsContainer.classList.remove('hide');
-  if (activeCalendar) {
-    activeCalendar.dispose();
-  }
 
   activeCalendar = new Calendar(
     {
@@ -87,6 +151,17 @@ function newCalendar() {
   );
 }
 
+/**
+ * Tear down the current calendar and leave the app in the "no project" state
+ */
+function disposeCalendar() {
+  activeCalendar?.dispose();
+  activeCalendar = null;
+
+  calendarContainer.innerHTML = '';
+  controlsContainer.classList.add('hide');
+}
+
 // Init
 window.addEventListener(
   'DOMContentLoaded',
@@ -94,27 +169,25 @@ window.addEventListener(
     userInputs = createDropdowns(syncSuggestedProjectName);
     syncSuggestedProjectName();
 
+    projectsInput = createProjectsDropdown(onProjectPickerChange);
+
     projectNameInput.addEventListener('input', () => {
       isProjectNameDirty = true;
     });
 
-    // Generate new calendar from inputs
-    getButton.addEventListener('click', () => {
-      animateNewProjectOverlay(newProjectOverlayBG, newProjectOverlaySection, 'out');
-      newProject();
-    });
+    // Create or open a project from the picker
+    getButton.addEventListener('click', onGetButtonClick);
 
     // Animate new project overlay trigger button on hover
     newProjectOverlayTriggerBtn?.addEventListener('mouseenter', animateTriggerBtn);
     newProjectOverlayTriggerBtn?.addEventListener('mouseleave', animateTriggerBtn);
 
-    // Animate & toggle new project container
-    newProjectOverlayTriggerBtn?.addEventListener('click', () => {
-      animateNewProjectOverlay(newProjectOverlayBG, newProjectOverlaySection, 'in');
+    // Animate & toggle new project container; picker always reopens on "Новый"
+    newProjectOverlayTriggerBtn?.addEventListener('click', async () => {
+      await refreshProjectsList();
+      openOverlay();
     });
-    newProjectOverlayCloseBtn.addEventListener('click', () => {
-      animateNewProjectOverlay(newProjectOverlayBG, newProjectOverlaySection, 'out');
-    });
+    newProjectOverlayCloseBtn.addEventListener('click', closeOverlay);
 
     // Init dataController
     dataController = new DataController();
@@ -131,7 +204,10 @@ window.addEventListener(
       }
     } catch (err) {
       console.log('Failed to restore saved project:', err);
+      disposeCalendar();
     }
+
+    await refreshProjectsList();
   },
   { once: true },
 );
