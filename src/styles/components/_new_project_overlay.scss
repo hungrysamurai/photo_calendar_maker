@@ -212,6 +212,10 @@
   }
 
   &__get-button-container {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+
     button {
       border: none;
       background-color: var(--sandy-clay);
@@ -239,6 +243,17 @@
       @include mixins.resize(600) {
         font-size: 1rem;
         padding: 0.5rem 1rem;
+      }
+    }
+
+    #delete-button {
+      background-color: transparent;
+      border: 2px solid var(--sandy-clay);
+      color: var(--text-light);
+
+      &:hover {
+        border-color: var(--cool-steel);
+        background-color: var(--cool-steel);
       }
     }
   }

@@ -6,6 +6,7 @@ import {
   controlsContainer,
   cropControlsContainer,
   getButton,
+  deleteButton,
   projectNameInput,
   projectsDropdownContainer,
   projectSettingsBlock,
@@ -68,12 +69,13 @@ async function refreshProjectsList() {
   onProjectPickerChange(NEW_PROJECT_ITEM);
 }
 
-// "Новый" shows the settings form + "Создать"; a saved project hides the form + "Открыть"
+// "Новый" shows the settings form + "Создать"; a saved project hides the form + "Открыть"/"Удалить"
 function onProjectPickerChange(item: ProjectPickerItem) {
   const isNew = item.kind === 'new';
 
   projectSettingsBlock.classList.toggle('hide', !isNew);
   getButton.textContent = isNew ? 'Создать' : 'Открыть';
+  deleteButton.classList.toggle('hide', isNew);
 }
 
 async function newProject() {
@@ -137,6 +139,36 @@ async function onGetButtonClick() {
   }
 }
 
+/**
+ * Delete the selected project with all of its images after confirmation;
+ * the overlay stays open with the picker reset to "Новый"
+ */
+async function onDeleteButtonClick() {
+  const selected = projectsInput.value;
+
+  if (selected.kind !== 'project') return;
+
+  const { id, name } = selected.project;
+
+  if (!confirm(`Удалить проект «${name}»? Все его изображения будут удалены.`)) return;
+
+  const wasActive = dataController?.activeProjectId === id;
+
+  try {
+    await dataController?.deleteProject(id);
+  } catch (err) {
+    console.log(`Failed to delete project ${id}:`, err);
+    return;
+  }
+
+  // The calendar behind the overlay no longer exists
+  if (wasActive) {
+    disposeCalendar();
+  }
+
+  await refreshProjectsList();
+}
+
 function newCalendar() {
   disposeCalendar();
   controlsContainer.classList.remove('hide');
@@ -177,6 +209,7 @@ window.addEventListener(
 
     // Create or open a project from the picker
     getButton.addEventListener('click', onGetButtonClick);
+    deleteButton.addEventListener('click', onDeleteButtonClick);
 
     // Animate new project overlay trigger button on hover
     newProjectOverlayTriggerBtn?.addEventListener('mouseenter', animateTriggerBtn);

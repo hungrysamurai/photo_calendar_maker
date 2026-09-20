@@ -10,6 +10,7 @@ const newProjectOverlayCloseBtn = document.querySelector(
 const multiModeBtn = document.querySelector('#multi-page') as HTMLInputElement;
 
 const getButton = document.querySelector('#get-button') as HTMLButtonElement;
+const deleteButton = document.querySelector('#delete-button') as HTMLButtonElement;
 
 const projectNameInput = document.querySelector('#project-name-input') as HTMLInputElement;
 
@@ -33,6 +34,7 @@ export {
   controlsContainer,
   cropControlsContainer,
   getButton,
+  deleteButton,
   projectNameInput,
   projectsDropdownContainer,
   projectSettingsBlock,
