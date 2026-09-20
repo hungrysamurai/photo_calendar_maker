@@ -232,3 +232,51 @@
     }
   }
 }
+
+.text-input {
+  width: 100%;
+  user-select: none;
+
+  &__caption {
+    display: block;
+    font-size: 1rem;
+    font-weight: normal;
+    opacity: 0.75;
+
+    @include mixins.resize(600) {
+      font-size: 0.75rem;
+    }
+  }
+
+  &__field {
+    margin: 0.5rem auto 0;
+    height: 3.5rem;
+    width: 400px;
+    font-size: 1.5rem;
+    font-family: inherit;
+    font-weight: inherit;
+    text-align: center;
+
+    padding: 0 1rem;
+
+    border: 2px solid var(--sandy-clay);
+    border-radius: 1rem;
+
+    background: var(--shadow-grey);
+    color: var(--text-light);
+
+    outline: none;
+    transition: border-color 0.2s;
+
+    &:hover,
+    &:focus {
+      border-color: var(--cool-steel);
+    }
+
+    @include mixins.resize(600) {
+      height: 2.5rem;
+      width: 300px;
+      font-size: 1rem;
+    }
+  }
+}

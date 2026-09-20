@@ -6,6 +6,7 @@ import {
   controlsContainer,
   cropControlsContainer,
   getButton,
+  projectNameInput,
   multiModeBtn,
   newProjectOverlayTriggerBtn,
   newProjectOverlaySection,
@@ -24,13 +25,30 @@ let dataController: DataController | null;
 
 let userInputs: ReturnType<typeof createDropdowns>;
 
+// Set once the user edits the name field; stops auto-suggestions from overwriting it
+let isProjectNameDirty = false;
+
+function getSuggestedProjectName() {
+  return getProjectName(userInputs.yearsInput.value, userInputs.formatsInput.value);
+}
+
+// Refresh the suggested name unless the user has typed their own
+function syncSuggestedProjectName() {
+  if (!isProjectNameDirty) {
+    projectNameInput.value = getSuggestedProjectName();
+  }
+}
+
 async function newProject() {
   const now = Date.now();
   const startYear = userInputs.yearsInput.value;
   const format = userInputs.formatsInput.value;
 
+  // Empty / whitespace-only name falls back to the generated default
+  const name = projectNameInput.value.trim() || getProjectName(startYear, format);
+
   const newCalendarData: CalendarData = {
-    name: getProjectName(startYear, format),
+    name,
     createdAt: now,
     lastOpenedAt: now,
     startYear,
@@ -47,6 +65,10 @@ async function newProject() {
   await dataController?.createProject(newCalendarData);
   // Generate new calendar
   newCalendar();
+
+  // Reset name field to a fresh suggestion for the next project
+  isProjectNameDirty = false;
+  syncSuggestedProjectName();
 }
 
 function newCalendar() {
@@ -69,7 +91,12 @@ function newCalendar() {
 window.addEventListener(
   'DOMContentLoaded',
   async () => {
-    userInputs = createDropdowns();
+    userInputs = createDropdowns(syncSuggestedProjectName);
+    syncSuggestedProjectName();
+
+    projectNameInput.addEventListener('input', () => {
+      isProjectNameDirty = true;
+    });
 
     // Generate new calendar from inputs
     getButton.addEventListener('click', () => {

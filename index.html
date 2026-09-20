@@ -30,7 +30,7 @@
   </button>
 
   <section class="new-project-section">
-    <h1>Новый календарь</h1>
+    <h1>Проект</h1>
     <div class="new-project-section__close-modal">
       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
@@ -53,6 +53,10 @@
     </div>
 
     <div class="new-project-section__calendar-options">
+      <div class="text-input">
+        <label class="text-input__caption" for="project-name-input">Название</label>
+        <input class="text-input__field" id="project-name-input" type="text" autocomplete="off" />
+      </div>
       <div id="year-dropdown"></div>
       <div id="month-dropdown"></div>
       <div id="lang-dropdown"></div>

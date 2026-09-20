@@ -11,6 +11,8 @@ const multiModeBtn = document.querySelector('#multi-page') as HTMLInputElement;
 
 const getButton = document.querySelector('#get-button') as HTMLButtonElement;
 
+const projectNameInput = document.querySelector('#project-name-input') as HTMLInputElement;
+
 const yearDropdownContainer = document.querySelector('#year-dropdown') as HTMLDivElement;
 const monthDropdownContainer = document.querySelector('#month-dropdown') as HTMLDivElement;
 const langDropdownContainer = document.querySelector('#lang-dropdown') as HTMLDivElement;
@@ -26,6 +28,7 @@ export {
   controlsContainer,
   cropControlsContainer,
   getButton,
+  projectNameInput,
   multiModeBtn,
   newProjectOverlayTriggerBtn,
   newProjectOverlaySection,

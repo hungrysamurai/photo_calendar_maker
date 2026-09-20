@@ -15,13 +15,17 @@ import fontsData from '../../../assets/sourceFontsData';
 import { A_outputFormats } from '../../../assets/A_FormatOptions/A_OutputDimensions';
 import { CalendarLanguage, FormatName } from '../../../types';
 
-export default function createDropdowns() {
+/**
+ * @param onChange - called whenever a dropdown that affects the generated project name changes
+ */
+export default function createDropdowns(onChange?: () => void) {
   // Create years dropdown
   const yearsInput = new Dropdown<number>({
     container: yearDropdownContainer,
     items: getYears(10),
     caption: 'Начальный год',
     renderItem: (item) => item.toString(),
+    onChange,
   });
 
   // Create months dropdown
@@ -72,6 +76,7 @@ export default function createDropdowns() {
     value: FormatName.A4_Y,
     caption: 'Формат',
     renderItem: getFormatLabel,
+    onChange,
   });
 
   return { yearsInput, monthsInput, langsInput, fontsInput, formatsInput };
