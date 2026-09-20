@@ -67,6 +67,8 @@
   padding: 1rem;
   color: var(--text-light);
 
+  // Only vertical scrolling; fixed-width fields shrink instead of overflowing sideways
+  overflow-x: hidden;
   overflow-y: scroll;
 
   @include mixins.resize(600) {
@@ -278,6 +280,7 @@
     margin: 0.5rem auto 0;
     height: 3.5rem;
     width: 400px;
+    max-width: 100%;
     font-size: 1.5rem;
     font-family: inherit;
     font-weight: inherit;
