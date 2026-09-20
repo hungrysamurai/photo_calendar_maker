@@ -50,7 +50,12 @@
     }
   }
 
+  // Long values (e.g. project names) stay inside the trigger and get truncated
   &__value {
+    flex: 1;
+    min-width: 0;
+    padding: 0 0.5rem;
+    overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
@@ -107,9 +112,11 @@
       transform 0.2s;
   }
 
+  // Menu items show the full value, wrapping long names onto several lines
   &__item {
-    padding: 0.5rem;
+    padding: 0.5rem 0.75rem;
     border-radius: 0.5rem;
+    overflow-wrap: anywhere;
 
     cursor: pointer;
 
