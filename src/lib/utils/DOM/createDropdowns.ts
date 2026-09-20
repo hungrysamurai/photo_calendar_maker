@@ -9,6 +9,7 @@ import {
 import { Dropdown } from './Dropdown';
 
 import getYears from '../getYears';
+import getFormatLabel from '../getFormatLabel';
 import { getMonthsList } from '../getMonthsList';
 import fontsData from '../../../assets/sourceFontsData';
 import { A_outputFormats } from '../../../assets/A_FormatOptions/A_OutputDimensions';
@@ -70,14 +71,7 @@ export default function createDropdowns() {
     items: Object.keys(A_outputFormats) as FormatName[],
     value: FormatName.A4_Y,
     caption: 'Формат',
-    renderItem: (format) => {
-      const formatPrefix = format.slice(0, 2);
-      if (format.endsWith('Y')) {
-        return `${formatPrefix} вертикальный`;
-      } else {
-        return `${formatPrefix} горизонтальный`;
-      }
-    },
+    renderItem: getFormatLabel,
   });
 
   return { yearsInput, monthsInput, langsInput, fontsInput, formatsInput };

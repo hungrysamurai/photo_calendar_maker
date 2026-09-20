@@ -40,22 +40,79 @@ export default class DataController {
 
   private IDBController: IDBController;
 
-  async retrieveDataFromIDB() {
-    const dataFromIDB = await this.IDBController.initIDB();
+  /**
+   * Id of the project currently loaded into memory (`null` when no project is open)
+   */
+  activeProjectId: number | null = null;
 
-    if (dataFromIDB) {
-      const { data, images } = dataFromIDB;
+  constructor() {
+    this.fontsController = new FontsController();
+    this.IDBController = new IDBController();
+  }
 
-      images.forEach((image) => {
-        this.calendarImagesData.push(image);
-      });
+  listProjects(): Promise<StoredProject[]> {
+    return this.IDBController.listProjects();
+  }
 
-      this.calendarProjectData = data;
+  /**
+   * Persist a new project and make it the active one
+   * @returns id of the created project
+   */
+  async createProject(data: CalendarData): Promise<number> {
+    const id = await this.IDBController.createProject(data);
+
+    this.setActive(id, data, []);
+
+    return id;
+  }
+
+  /**
+   * Load project record + images into memory and mark it as last opened
+   */
+  async loadProject(id: number): Promise<void> {
+    const project = await this.IDBController.getProject(id);
+
+    if (!project) {
+      throw new Error(`Project ${id} not found`);
+    }
+
+    const images = await this.IDBController.getProjectImages(id);
+    const lastOpenedAt = Date.now();
+    await this.IDBController.touchProject(id, lastOpenedAt);
+
+    this.setActive(id, this.toCalendarData({ ...project, lastOpenedAt }), images);
+  }
+
+  /**
+   * Open the most recently opened project, if any
+   * @returns whether a project was restored
+   */
+  async restoreLastOpened(): Promise<boolean> {
+    const [latest] = await this.IDBController.listProjects();
+
+    if (!latest) return false;
+
+    await this.loadProject(latest.id);
+    return true;
+  }
+
+  /**
+   * Delete project with all of its images; clears in-memory state if it was active
+   */
+  async deleteProject(id: number): Promise<void> {
+    await this.IDBController.deleteProject(id);
+
+    if (this.activeProjectId === id) {
+      this.clearActive();
     }
   }
 
   saveImageToIDB = async (image: Blob, index: number) => {
-    await this.IDBController.saveToIDB(image, index);
+    if (this.activeProjectId === null) {
+      throw new Error('No active project to save image to');
+    }
+
+    await this.IDBController.saveImage(this.activeProjectId, index, image);
 
     const oldImageIndex = this.calendarImagesData.findIndex((el) => el.id === index);
 
@@ -69,15 +126,24 @@ export default class DataController {
     }
   };
 
-  constructor() {
-    this.fontsController = new FontsController();
-    this.IDBController = new IDBController();
+  /**
+   * Strip the storage key from a stored record
+   */
+  private toCalendarData(project: StoredProject): CalendarData {
+    const data: CalendarData & { id?: number } = { ...project };
+    delete data.id;
+    return data;
   }
 
-  async reset(newCalendarData: CalendarData) {
-    this.calendarProjectData = newCalendarData;
-    this.calendarImagesData = [];
+  private setActive(id: number, data: CalendarData, images: StoredImage[]) {
+    this.activeProjectId = id;
+    this.calendarProjectData = data;
+    this.calendarImagesData = images;
+  }
 
-    await this.IDBController.resetWithNewData(newCalendarData);
+  private clearActive() {
+    this.activeProjectId = null;
+    this.calendarProjectData = undefined as unknown as CalendarData;
+    this.calendarImagesData = [];
   }
 }

@@ -16,6 +16,7 @@ import DataController from './entities/DataController/DataController';
 import animateTriggerBtn from './animations/animateTriggerBtn';
 import animateNewProjectOverlay from './animations/animateNewProjectOverlay';
 import createDropdowns from './utils/DOM/createDropdowns';
+import getProjectName from './utils/getProjectName';
 import { CalendarType } from '../types';
 
 let activeCalendar: Calendar | null = null;
@@ -24,19 +25,26 @@ let dataController: DataController | null;
 let userInputs: ReturnType<typeof createDropdowns>;
 
 async function newProject() {
+  const now = Date.now();
+  const startYear = userInputs.yearsInput.value;
+  const format = userInputs.formatsInput.value;
+
   const newCalendarData: CalendarData = {
-    startYear: userInputs.yearsInput.value,
+    name: getProjectName(startYear, format),
+    createdAt: now,
+    lastOpenedAt: now,
+    startYear,
     firstMonthIndex: userInputs.monthsInput.value,
     lang: userInputs.langsInput.value,
     font: userInputs.fontsInput.value,
-    format: userInputs.formatsInput.value,
+    format,
     type: multiModeBtn.checked ? CalendarType.MultiPage : CalendarType.SinglePage,
   };
 
   // Purge all current content
   calendarContainer.innerHTML = '';
-  // Set new calendar in IDB via DS with user's input data
-  await dataController?.reset(newCalendarData);
+  // Persist a new project (earlier projects stay in IDB) and make it active
+  await dataController?.createProject(newCalendarData);
   // Generate new calendar
   newCalendar();
 }
@@ -88,11 +96,10 @@ window.addEventListener(
     await dataController.loadFonts();
 
     try {
-      // If some data in IDB - get it and store in DS object
-      await dataController.retrieveDataFromIDB();
+      // Reopen the most recently opened project, if any
+      const restored = await dataController.restoreLastOpened();
 
-      // If data in DS - init new project
-      if (dataController.calendarProjectData) {
+      if (restored) {
         newCalendar();
       }
     } catch (err) {
