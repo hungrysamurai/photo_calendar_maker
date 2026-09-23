@@ -29,7 +29,8 @@ import createProjectsDropdown, {
   ProjectPickerItem,
   toProjectPickerItems,
 } from './utils/DOM/createProjectsDropdown';
-import getProjectName from './utils/getProjectName';
+import getProjectName, { isCustomProjectName } from './utils/getProjectName';
+import { withYear } from './utils/getYears';
 import { CalendarType } from '../types';
 
 let activeCalendar: Calendar | null = null;
@@ -163,6 +164,9 @@ function enterEditMode() {
   newProjectDraft = takeNewProjectDraft();
   editingProject = project;
 
+  // A past project year is not in the standard list, but must stay selectable
+  userInputs.yearsInput.setItems(withYear(userInputs.years, project.startYear));
+
   fillSettingsForm({
     startYear: project.startYear,
     firstMonthIndex: project.firstMonthIndex,
@@ -171,8 +175,8 @@ function enterEditMode() {
     format: project.format,
     isMultiPage: project.type === CalendarType.MultiPage,
     name: project.name,
-    // Keep the project's name as-is while its year changes
-    isNameDirty: true,
+    // An auto-generated name follows year changes, a custom one is kept
+    isNameDirty: isCustomProjectName(project.name, project.startYear, project.format),
   });
 
   setEditLocks(true);
@@ -186,6 +190,8 @@ function exitEditMode() {
   if (!editingProject) return;
 
   editingProject = null;
+
+  userInputs.yearsInput.setItems(userInputs.years);
 
   if (newProjectDraft) {
     fillSettingsForm(newProjectDraft);

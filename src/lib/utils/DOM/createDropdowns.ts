@@ -20,9 +20,11 @@ import { CalendarLanguage, FormatName } from '../../../types';
  */
 export default function createDropdowns(onChange?: () => void) {
   // Create years dropdown
+  const years = getYears(10);
+
   const yearsInput = new Dropdown<number>({
     container: yearDropdownContainer,
-    items: getYears(10),
+    items: years,
     caption: 'Начальный год',
     renderItem: (item) => item.toString(),
     onChange,
@@ -79,5 +81,5 @@ export default function createDropdowns(onChange?: () => void) {
     onChange,
   });
 
-  return { yearsInput, monthsInput, langsInput, fontsInput, formatsInput };
+  return { years, yearsInput, monthsInput, langsInput, fontsInput, formatsInput };
 }
