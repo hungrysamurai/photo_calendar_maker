@@ -149,4 +149,14 @@
   &__item--selected {
     background: var(--cool-steel);
   }
+
+  // Locked field: visible but can't be opened
+  &--disabled &__trigger {
+    opacity: 0.5;
+    cursor: not-allowed;
+
+    &:hover {
+      border-color: var(--sandy-clay);
+    }
+  }
 }

@@ -7,10 +7,13 @@ const newProjectOverlayCloseBtn = document.querySelector(
   '.new-project-section__close-modal',
 ) as HTMLDivElement;
 
+const singleModeBtn = document.querySelector('#single-page') as HTMLInputElement;
 const multiModeBtn = document.querySelector('#multi-page') as HTMLInputElement;
 
 const getButton = document.querySelector('#get-button') as HTMLButtonElement;
+const editButton = document.querySelector('#edit-button') as HTMLButtonElement;
 const deleteButton = document.querySelector('#delete-button') as HTMLButtonElement;
+const cancelButton = document.querySelector('#cancel-button') as HTMLButtonElement;
 
 const projectNameInput = document.querySelector('#project-name-input') as HTMLInputElement;
 
@@ -18,6 +21,9 @@ const projectsDropdownContainer = document.querySelector('#projects-dropdown') a
 const projectSettingsBlock = document.querySelector(
   '.new-project-section__settings',
 ) as HTMLDivElement;
+const lockedSettingsHint = document.querySelector(
+  '.new-project-section__locked-hint',
+) as HTMLParagraphElement;
 
 const yearDropdownContainer = document.querySelector('#year-dropdown') as HTMLDivElement;
 const monthDropdownContainer = document.querySelector('#month-dropdown') as HTMLDivElement;
@@ -34,10 +40,14 @@ export {
   controlsContainer,
   cropControlsContainer,
   getButton,
+  editButton,
   deleteButton,
+  cancelButton,
   projectNameInput,
   projectsDropdownContainer,
   projectSettingsBlock,
+  lockedSettingsHint,
+  singleModeBtn,
   multiModeBtn,
   newProjectOverlayTriggerBtn,
   newProjectOverlaySection,

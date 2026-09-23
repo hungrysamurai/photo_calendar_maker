@@ -68,4 +68,53 @@ describe('Dropdown', () => {
       expect(onChange).toHaveBeenCalledWith('y');
     });
   });
+
+  describe('setDisabled', () => {
+    const root = () => container.querySelector('.dropdown')!;
+    const trigger = () => container.querySelector('.dropdown__trigger') as HTMLButtonElement;
+
+    it('blocks opening and applies the modifier class', () => {
+      const dropdown = create(['a', 'b']);
+
+      dropdown.setDisabled(true);
+      trigger().click();
+
+      expect(root()).toHaveClass('dropdown--disabled');
+      expect(root()).not.toHaveClass('dropdown--open');
+    });
+
+    it('closes an already open menu', () => {
+      const dropdown = create(['a', 'b']);
+
+      trigger().click();
+      dropdown.setDisabled(true);
+
+      expect(root()).not.toHaveClass('dropdown--open');
+    });
+
+    it('setDisabled(false) restores opening and removes the modifier class', () => {
+      const dropdown = create(['a', 'b']);
+
+      dropdown.setDisabled(true);
+      dropdown.setDisabled(false);
+      trigger().click();
+
+      expect(root()).not.toHaveClass('dropdown--disabled');
+      expect(root()).toHaveClass('dropdown--open');
+    });
+  });
+
+  describe('setValue', () => {
+    it('updates the value without emitting onChange', () => {
+      const onChange = vi.fn();
+      const dropdown = create(['a', 'b', 'c'], onChange);
+
+      dropdown.setValue('c');
+
+      expect(dropdown.value).toBe('c');
+      expect(valueText()).toBe('c');
+      expect(selectedText()).toBe('c');
+      expect(onChange).not.toHaveBeenCalled();
+    });
+  });
 });

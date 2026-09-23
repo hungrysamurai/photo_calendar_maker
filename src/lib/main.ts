@@ -6,10 +6,14 @@ import {
   controlsContainer,
   cropControlsContainer,
   getButton,
+  editButton,
   deleteButton,
+  cancelButton,
   projectNameInput,
   projectsDropdownContainer,
   projectSettingsBlock,
+  lockedSettingsHint,
+  singleModeBtn,
   multiModeBtn,
   newProjectOverlayTriggerBtn,
   newProjectOverlaySection,
@@ -36,6 +40,25 @@ let projectsInput: ReturnType<typeof createProjectsDropdown>;
 
 // Set once the user edits the name field; stops auto-suggestions from overwriting it
 let isProjectNameDirty = false;
+
+// Saved project whose settings are being edited; null outside edit mode
+let editingProject: StoredProject | null = null;
+
+/**
+ * State of the "Новый" form, kept aside while the form is borrowed for editing
+ */
+type NewProjectDraft = {
+  startYear: number;
+  firstMonthIndex: number;
+  lang: CalendarData['lang'];
+  font: string;
+  format: CalendarData['format'];
+  isMultiPage: boolean;
+  name: string;
+  isNameDirty: boolean;
+};
+
+let newProjectDraft: NewProjectDraft | null = null;
 
 function getSuggestedProjectName() {
   return getProjectName(userInputs.yearsInput.value, userInputs.formatsInput.value);
@@ -69,13 +92,105 @@ async function refreshProjectsList() {
   onProjectPickerChange(NEW_PROJECT_ITEM);
 }
 
-// "Новый" shows the settings form + "Создать"; a saved project hides the form + "Открыть"/"Удалить"
+/**
+ * "Новый" shows the settings form + "Создать";
+ * a saved project hides the form + "Открыть"/"Изменить"/"Удалить";
+ * editing shows the pre-filled form + "Сохранить"/"Отмена"
+ */
 function onProjectPickerChange(item: ProjectPickerItem) {
-  const isNew = item.kind === 'new';
+  const isEditing = editingProject !== null;
+  const isNew = !isEditing && item.kind === 'new';
+  const isSelected = !isEditing && item.kind === 'project';
 
-  projectSettingsBlock.classList.toggle('hide', !isNew);
-  getButton.textContent = isNew ? 'Создать' : 'Открыть';
-  deleteButton.classList.toggle('hide', isNew);
+  projectSettingsBlock.classList.toggle('hide', isSelected);
+  getButton.textContent = isEditing ? 'Сохранить' : isNew ? 'Создать' : 'Открыть';
+  editButton.classList.toggle('hide', !isSelected);
+  deleteButton.classList.toggle('hide', !isSelected);
+  cancelButton.classList.toggle('hide', !isEditing);
+}
+
+function takeNewProjectDraft(): NewProjectDraft {
+  return {
+    startYear: userInputs.yearsInput.value,
+    firstMonthIndex: userInputs.monthsInput.value,
+    lang: userInputs.langsInput.value,
+    font: userInputs.fontsInput.value,
+    format: userInputs.formatsInput.value,
+    isMultiPage: multiModeBtn.checked,
+    name: projectNameInput.value,
+    isNameDirty: isProjectNameDirty,
+  };
+}
+
+// Fill the settings form without triggering name auto-suggestions
+function fillSettingsForm(values: NewProjectDraft) {
+  userInputs.yearsInput.setValue(values.startYear);
+  userInputs.monthsInput.setValue(values.firstMonthIndex);
+  userInputs.langsInput.setValue(values.lang);
+  userInputs.fontsInput.setValue(values.font);
+  userInputs.formatsInput.setValue(values.format);
+
+  multiModeBtn.checked = values.isMultiPage;
+  singleModeBtn.checked = !values.isMultiPage;
+
+  projectNameInput.value = values.name;
+  isProjectNameDirty = values.isNameDirty;
+}
+
+// Format and type are fixed after creation; the picker is locked while editing
+function setEditLocks(locked: boolean) {
+  userInputs.formatsInput.setDisabled(locked);
+  singleModeBtn.disabled = locked;
+  multiModeBtn.disabled = locked;
+  lockedSettingsHint.classList.toggle('hide', !locked);
+
+  projectsInput.setDisabled(locked);
+}
+
+/**
+ * Put the "Новый" draft aside and show the selected project's settings in the form
+ */
+function enterEditMode() {
+  const selected = projectsInput.value;
+
+  if (selected.kind !== 'project' || editingProject) return;
+
+  const { project } = selected;
+
+  newProjectDraft = takeNewProjectDraft();
+  editingProject = project;
+
+  fillSettingsForm({
+    startYear: project.startYear,
+    firstMonthIndex: project.firstMonthIndex,
+    lang: project.lang,
+    font: project.font,
+    format: project.format,
+    isMultiPage: project.type === CalendarType.MultiPage,
+    name: project.name,
+    // Keep the project's name as-is while its year changes
+    isNameDirty: true,
+  });
+
+  setEditLocks(true);
+  onProjectPickerChange(selected);
+}
+
+/**
+ * Discard edits, restore the "Новый" draft and return to the selected project
+ */
+function exitEditMode() {
+  if (!editingProject) return;
+
+  editingProject = null;
+
+  if (newProjectDraft) {
+    fillSettingsForm(newProjectDraft);
+    newProjectDraft = null;
+  }
+
+  setEditLocks(false);
+  onProjectPickerChange(projectsInput.value);
 }
 
 async function newProject() {
@@ -128,6 +243,12 @@ async function openProject(id: number) {
 
 // Primary overlay button: create or open, depending on the picker
 async function onGetButtonClick() {
+  // Saving is not wired up yet: behaves like "Отмена"
+  if (editingProject) {
+    exitEditMode();
+    return;
+  }
+
   const selected = projectsInput.value;
 
   closeOverlay();
@@ -209,7 +330,9 @@ window.addEventListener(
 
     // Create or open a project from the picker
     getButton.addEventListener('click', onGetButtonClick);
+    editButton.addEventListener('click', enterEditMode);
     deleteButton.addEventListener('click', onDeleteButtonClick);
+    cancelButton.addEventListener('click', exitEditMode);
 
     // Animate new project overlay trigger button on hover
     newProjectOverlayTriggerBtn?.addEventListener('mouseenter', animateTriggerBtn);
@@ -220,7 +343,11 @@ window.addEventListener(
       await refreshProjectsList();
       openOverlay();
     });
-    newProjectOverlayCloseBtn.addEventListener('click', closeOverlay);
+    // Closing the overlay while editing discards the edit
+    newProjectOverlayCloseBtn.addEventListener('click', () => {
+      exitEditMode();
+      closeOverlay();
+    });
 
     // Init dataController
     dataController = new DataController();

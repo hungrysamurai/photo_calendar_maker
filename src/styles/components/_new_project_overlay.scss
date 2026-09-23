@@ -181,6 +181,13 @@
       line-height: 1.2;
     }
 
+    // Type is locked while editing an existing project
+    input[type='radio']:disabled,
+    input[type='radio']:disabled + label {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
     &::after {
       content: '';
       position: absolute;
@@ -196,6 +203,16 @@
         var(--sandy-clay) 50%,
         rgba(255, 255, 255, 0) 100%
       );
+    }
+  }
+
+  &__locked-hint {
+    margin: 0;
+    font-size: 1rem;
+    opacity: 0.75;
+
+    @include mixins.resize(600) {
+      font-size: 0.75rem;
     }
   }
 
@@ -247,7 +264,9 @@
       }
     }
 
-    #delete-button {
+    #edit-button,
+    #delete-button,
+    #cancel-button {
       background-color: transparent;
       border: 2px solid var(--sandy-clay);
       color: var(--text-light);
