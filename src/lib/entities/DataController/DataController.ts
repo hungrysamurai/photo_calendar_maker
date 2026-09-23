@@ -107,6 +107,32 @@ export default class DataController {
     }
   }
 
+  /**
+   * Save edited settings of a project and make it the active one;
+   * nothing is written when the settings are unchanged
+   * @returns whether anything was changed
+   */
+  async updateProject(id: number, settings: EditableProjectSettings): Promise<boolean> {
+    const project = await this.IDBController.getProject(id);
+
+    if (!project) {
+      throw new Error(`Project ${id} not found`);
+    }
+
+    const isChanged = (Object.keys(settings) as (keyof EditableProjectSettings)[]).some(
+      (key) => settings[key] !== project[key],
+    );
+
+    if (!isChanged) return false;
+
+    const updated = await this.IDBController.updateProject(id, settings);
+    const images = await this.IDBController.getProjectImages(id);
+
+    this.setActive(id, this.toCalendarData(updated), images);
+
+    return true;
+  }
+
   saveImageToIDB = async (image: Blob, index: number) => {
     if (this.activeProjectId === null) {
       throw new Error('No active project to save image to');

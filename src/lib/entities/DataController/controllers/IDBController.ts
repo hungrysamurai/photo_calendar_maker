@@ -211,6 +211,36 @@ export default class IDBController {
   }
 
   /**
+   * Apply edited settings to a project; `createdAt` is kept, `lastOpenedAt` is bumped
+   * @returns the updated project record
+   */
+  updateProject(
+    id: number,
+    patch: Partial<EditableProjectSettings>,
+    lastOpenedAt = Date.now(),
+  ): Promise<StoredProject> {
+    return this.withTransaction([PROJECTS_STORE, IMAGES_STORE], 'readwrite', async (tx) => {
+      const store = tx.objectStore(PROJECTS_STORE);
+      const project = await this.promisifyRequest<StoredProject | undefined>(store.get(id));
+
+      if (!project) {
+        throw new Error(`Project ${id} not found`);
+      }
+
+      const updated: StoredProject = {
+        ...project,
+        ...patch,
+        id,
+        createdAt: project.createdAt,
+        lastOpenedAt,
+      };
+      await this.promisifyRequest(store.put(updated));
+
+      return updated;
+    });
+  }
+
+  /**
    * Key range covering every `[projectId, monthIndex]` of a project
    */
   private projectImagesRange(projectId: number): IDBKeyRange {

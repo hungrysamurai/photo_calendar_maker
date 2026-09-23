@@ -67,6 +67,14 @@ declare global {
   };
 
   /**
+   * Project settings that can be changed after creation
+   */
+  type EditableProjectSettings = Pick<
+    CalendarData,
+    'name' | 'startYear' | 'firstMonthIndex' | 'lang' | 'font'
+  >;
+
+  /**
    * Project record as stored in IDB `projects` store
    */
   type StoredProject = CalendarData & { id: number };

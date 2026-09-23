@@ -144,6 +144,9 @@ function setEditLocks(locked: boolean) {
   multiModeBtn.disabled = locked;
   lockedSettingsHint.classList.toggle('hide', !locked);
 
+  // Photos are not re-indexed yet, so a new first month would put them on the wrong pages
+  userInputs.monthsInput.setDisabled(locked);
+
   projectsInput.setDisabled(locked);
 }
 
@@ -191,6 +194,45 @@ function exitEditMode() {
 
   setEditLocks(false);
   onProjectPickerChange(projectsInput.value);
+}
+
+/**
+ * Persist the edited settings and open the project. Unchanged settings only
+ * open it (nothing is written); a failure keeps edit mode and the current calendar.
+ */
+async function saveEditedProject() {
+  if (!editingProject) return;
+
+  const { id } = editingProject;
+
+  const settings: EditableProjectSettings = {
+    // Empty / whitespace-only name falls back to the generated default
+    name: projectNameInput.value.trim() || getSuggestedProjectName(),
+    startYear: userInputs.yearsInput.value,
+    firstMonthIndex: userInputs.monthsInput.value,
+    lang: userInputs.langsInput.value,
+    font: userInputs.fontsInput.value,
+  };
+
+  let isChanged: boolean;
+
+  try {
+    isChanged = (await dataController?.updateProject(id, settings)) ?? false;
+  } catch (err) {
+    console.log(`Failed to save project ${id}:`, err);
+    return;
+  }
+
+  exitEditMode();
+  closeOverlay();
+
+  if (isChanged) {
+    // Re-render with the new settings
+    newCalendar();
+    await refreshProjectsList();
+  } else {
+    await openProject(id);
+  }
 }
 
 async function newProject() {
@@ -243,9 +285,8 @@ async function openProject(id: number) {
 
 // Primary overlay button: create or open, depending on the picker
 async function onGetButtonClick() {
-  // Saving is not wired up yet: behaves like "Отмена"
   if (editingProject) {
-    exitEditMode();
+    await saveEditedProject();
     return;
   }
 

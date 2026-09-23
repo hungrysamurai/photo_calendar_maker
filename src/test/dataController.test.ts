@@ -153,6 +153,87 @@ describe('DataController', () => {
     });
   });
 
+  describe('updateProject', () => {
+    const settingsOf = (data: CalendarData): EditableProjectSettings => ({
+      name: data.name,
+      startYear: data.startYear,
+      firstMonthIndex: data.firstMonthIndex,
+      lang: data.lang,
+      font: data.font,
+    });
+
+    it('performs no write and reports no change when nothing changed', async () => {
+      const data = projectData({ lastOpenedAt: 100 });
+      const id = await idb.createProject(data);
+      const update = vi.spyOn(IDBController.prototype, 'updateProject');
+
+      const changed = await controller.updateProject(id, settingsOf(data));
+
+      expect(changed).toBe(false);
+      expect(update).not.toHaveBeenCalled();
+      expect(await idb.getProject(id)).toEqual({ ...data, id });
+      update.mockRestore();
+    });
+
+    it('persists changes and makes the project active with its settings and images', async () => {
+      const data = projectData({ createdAt: 100, lastOpenedAt: 100 });
+      const id = await idb.createProject(data);
+      await idb.saveImage(id, 0, blob('jan'));
+      await controller.createProject(projectData({ name: 'Другой активный' }));
+      const before = Date.now();
+
+      const changed = await controller.updateProject(id, {
+        ...settingsOf(data),
+        name: 'Переименован',
+        startYear: 2031,
+        lang: CalendarLanguage.EN,
+        font: 'Caveat',
+      });
+
+      expect(changed).toBe(true);
+      expect(controller.activeProjectId).toBe(id);
+      expect(controller.calendarProjectData).toMatchObject({
+        name: 'Переименован',
+        startYear: 2031,
+        lang: CalendarLanguage.EN,
+        font: 'Caveat',
+        createdAt: 100,
+      });
+      expect(controller.calendarProjectData.lastOpenedAt).toBeGreaterThanOrEqual(before);
+      expect(controller.calendarProjectData).not.toHaveProperty('id');
+      expect(controller.calendarImagesData.map((image) => image.id)).toEqual([0]);
+      expect(await blobText(controller.calendarImagesData[0].image)).toBe('jan');
+
+      const stored = await idb.getProject(id);
+      expect(stored?.name).toBe('Переименован');
+      expect(stored?.createdAt).toBe(100);
+      expect(stored?.lastOpenedAt).toBeGreaterThanOrEqual(before);
+    });
+
+    it('keeps the current active project when the update fails', async () => {
+      const target = await idb.createProject(projectData({ name: 'Цель' }));
+      const active = await controller.createProject(projectData({ name: 'Активный' }));
+      await controller.saveImageToIDB(blob('jan'), 0);
+      const update = vi
+        .spyOn(IDBController.prototype, 'updateProject')
+        .mockRejectedValueOnce(new Error('boom'));
+
+      await expect(
+        controller.updateProject(target, { ...settingsOf(projectData()), name: 'Новое' }),
+      ).rejects.toThrow('boom');
+
+      expect(controller.activeProjectId).toBe(active);
+      expect(controller.calendarProjectData.name).toBe('Активный');
+      expect(controller.calendarImagesData.map((image) => image.id)).toEqual([0]);
+      expect((await idb.getProject(target))?.name).toBe('Цель');
+      update.mockRestore();
+    });
+
+    it('throws for an unknown project id', async () => {
+      await expect(controller.updateProject(42, settingsOf(projectData()))).rejects.toThrow();
+    });
+  });
+
   it('listProjects delegates to IDB ordering', async () => {
     await idb.createProject(projectData({ name: 'A', lastOpenedAt: 1 }));
     await idb.createProject(projectData({ name: 'B', lastOpenedAt: 2 }));

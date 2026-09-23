@@ -157,6 +157,39 @@ describe('IDBController', () => {
       expect((await controller.getProject(id))?.lastOpenedAt).toBe(500);
     });
 
+    it('updateProject changes settings, keeps createdAt and bumps lastOpenedAt', async () => {
+      const id = await controller.createProject(projectData({ createdAt: 100, lastOpenedAt: 100 }));
+      const patch = {
+        name: 'Новое имя',
+        startYear: 2030,
+        firstMonthIndex: 0,
+        lang: CalendarLanguage.EN,
+        font: 'Caveat',
+      };
+
+      const updated = await controller.updateProject(id, patch, 700);
+
+      const expected = { ...projectData(), ...patch, id, createdAt: 100, lastOpenedAt: 700 };
+      expect(updated).toEqual(expected);
+      expect(await controller.getProject(id)).toEqual(expected);
+    });
+
+    it('updateProject leaves the project images alone', async () => {
+      const id = await controller.createProject(projectData({ type: CalendarType.MultiPage }));
+      await controller.saveImage(id, 0, blob('jan'));
+      await controller.saveImage(id, 7, blob('aug'));
+
+      await controller.updateProject(id, { name: 'Другое', startYear: 2031 });
+
+      const images = await controller.getProjectImages(id);
+      expect(images.map((image) => image.id).sort()).toEqual([0, 7]);
+      expect(await blobText(imageById(images, 7).image)).toBe('aug');
+    });
+
+    it('updateProject rejects for an unknown project id', async () => {
+      await expect(controller.updateProject(999, { name: 'X' })).rejects.toThrow();
+    });
+
     it('deletes a project', async () => {
       const id = await controller.createProject(projectData());
       const other = await controller.createProject(projectData({ name: 'Другой' }));
