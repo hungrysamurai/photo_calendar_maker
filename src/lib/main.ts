@@ -129,6 +129,16 @@ function onProjectPickerChange(item: ProjectPickerItem) {
   cancelButton.classList.toggle('hide', !isEditing);
 }
 
+// Picking any item while editing discards the edit, like "Отмена"
+function onProjectPickerSelect(item: ProjectPickerItem) {
+  if (editingProject) {
+    exitEditMode();
+    return;
+  }
+
+  onProjectPickerChange(item);
+}
+
 function takeNewProjectDraft(): NewProjectDraft {
   return {
     startYear: userInputs.yearsInput.value,
@@ -157,13 +167,12 @@ function fillSettingsForm(values: NewProjectDraft) {
   isProjectNameDirty = values.isNameDirty;
 }
 
-// Format and type are fixed after creation; the picker is locked while editing
+// Format and type are fixed after creation
 function setEditLocks(locked: boolean) {
   userInputs.formatsInput.setDisabled(locked);
   singleModeBtn.disabled = locked;
   multiModeBtn.disabled = locked;
   lockedSettingsHint.classList.toggle('hide', !locked);
-  projectsInput.setDisabled(locked);
 }
 
 /**
@@ -384,7 +393,7 @@ window.addEventListener(
     userInputs = createDropdowns(syncSuggestedProjectName);
     syncSuggestedProjectName();
 
-    projectsInput = createProjectsDropdown(onProjectPickerChange);
+    projectsInput = createProjectsDropdown(onProjectPickerSelect);
 
     projectNameInput.addEventListener('input', () => {
       isProjectNameDirty = true;

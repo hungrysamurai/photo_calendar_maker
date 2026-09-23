@@ -12,7 +12,7 @@ Durable decisions that apply across all phases:
 - **Re-index formula**: stored `monthIndex` is a page position. `newIndex = ((oldIndex + oldFirstMonth − newFirstMonth) mod 12 + 12) mod 12`. Only multi-page projects whose first month changed are re-indexed. It works as read all → range-delete → write back, never per-key in place.
 - **Data controller**: an "update project" operation. If nothing changed → no write. Otherwise → compute the shift → IDB update → load as active (settings + images), the same way open does.
 - **Dropdown API additions**: `setDisabled(disabled)` (blocks opening, adds a `dropdown--disabled` modifier) and a public non-emitting select.
-- **Overlay states**: "Новый" (form + "Создать"), project selected (form hidden + "Открыть" · "Изменить" · "Удалить"), editing (form pre-filled, format/type disabled + hint "Формат и тип нельзя изменить после создания", picker disabled, "Сохранить" · "Отмена").
+- **Overlay states**: "Новый" (form + "Создать"), project selected (form hidden + "Открыть" · "Изменить" · "Удалить"), editing (form pre-filled, format/type disabled + hint "Формат и тип нельзя изменить после создания", picker enabled (picking any item acts as "Отмена"), "Сохранить" · "Отмена").
 - **"Новый" snapshot**: taken on entering edit mode (all dropdown values, type radio, name value, name dirty flag) and restored on every exit (save, cancel, overlay close).
 - **Strings**: all user-facing strings are Russian.
 

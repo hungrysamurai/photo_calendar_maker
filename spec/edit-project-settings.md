@@ -31,7 +31,7 @@ Saved projects become editable. When a saved project is selected in the project 
 19. As a user, I want the year dropdown to include my project's current year even if it is already in the past, so that I can keep it unchanged.
 20. As a user, I want the year dropdown in edit mode to otherwise offer the same years as when creating, so that editing does not invite arbitrary past years.
 21. As a user, I want "Сохранить" and "Отмена" buttons while editing, so that it is clear how to finish or abandon the edit.
-22. As a user, I want the project picker to be locked while I'm editing, so that I can't accidentally switch projects mid-edit.
+22. As a user, I want picking any item in the project picker while editing to discard the edit like "Отмена", so that I can switch to "Новый" or another project without an extra click.
 23. As a user, I want "Отмена" to discard my changes without a confirmation, so that backing out is quick.
 24. As a user, I want closing the overlay while editing to act like "Отмена", so that I never save changes unintentionally.
 25. As a user, I want the picker to return to the project-selected state (Открыть / Изменить / Удалить) after I cancel, so that I can continue from where I was.
@@ -82,7 +82,7 @@ Saved projects become editable. When a saved project is selected in the project 
 - The overlay gains an explicit edit mode on top of the existing "Новый" and "project selected" states:
   - "Новый": form visible, "Создать".
   - Project selected: form hidden, "Открыть" · "Изменить" · "Удалить".
-  - Editing: form visible and pre-filled; format dropdown and type radios disabled, with a hint "Формат и тип нельзя изменить после создания"; picker disabled; "Сохранить" · "Отмена".
+  - Editing: form visible and pre-filled; format dropdown and type radios disabled, with a hint "Формат и тип нельзя изменить после создания"; picker enabled — picking any item acts as "Отмена" and then shows that item; "Сохранить" · "Отмена".
 - On entering edit mode, a snapshot of the "Новый" form state is taken: all dropdown values, the type radio, the name input value and the name dirty flag. It is restored on every exit (save, cancel, overlay close).
 - The year dropdown's items in edit mode are the standard year list plus the project's year when it is missing, sorted. The standard list is restored on exit.
 - Name dirty flag on entering edit: dirty if the project name differs from the generated name for the project's original year and format. It is recalculated on year changes, exactly as in create mode.
