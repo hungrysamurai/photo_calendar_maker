@@ -229,6 +229,57 @@ describe('DataController', () => {
       update.mockRestore();
     });
 
+    it('re-indexes photos of a multi-page project when the first month changes', async () => {
+      const data = projectData({ type: CalendarType.MultiPage, firstMonthIndex: 0 });
+      const id = await idb.createProject(data);
+      await idb.saveImage(id, 0, blob('jan'));
+      await idb.saveImage(id, 2, blob('mar'));
+      const update = vi.spyOn(IDBController.prototype, 'updateProject');
+
+      await controller.updateProject(id, { ...settingsOf(data), firstMonthIndex: 2 });
+
+      // January → March: shift = old − new = −2
+      expect(update).toHaveBeenCalledWith(id, expect.anything(), -2);
+      expect(controller.activeProjectId).toBe(id);
+      expect(controller.calendarProjectData.firstMonthIndex).toBe(2);
+      const byIndex = Object.fromEntries(
+        await Promise.all(
+          controller.calendarImagesData.map(async ({ id: index, image }) => [
+            index,
+            await blobText(image),
+          ]),
+        ),
+      );
+      expect(byIndex).toEqual({ 10: 'jan', 0: 'mar' });
+      update.mockRestore();
+    });
+
+    it('never re-indexes a single-page project', async () => {
+      const data = projectData({ type: CalendarType.SinglePage, firstMonthIndex: 0 });
+      const id = await idb.createProject(data);
+      await idb.saveImage(id, 0, blob('photo'));
+      const update = vi.spyOn(IDBController.prototype, 'updateProject');
+
+      await controller.updateProject(id, { ...settingsOf(data), firstMonthIndex: 5 });
+
+      expect(update).toHaveBeenCalledWith(id, expect.anything(), undefined);
+      expect(controller.calendarImagesData.map((image) => image.id)).toEqual([0]);
+      update.mockRestore();
+    });
+
+    it('does not re-index a multi-page project when the first month is unchanged', async () => {
+      const data = projectData({ type: CalendarType.MultiPage, firstMonthIndex: 3 });
+      const id = await idb.createProject(data);
+      await idb.saveImage(id, 4, blob('may'));
+      const update = vi.spyOn(IDBController.prototype, 'updateProject');
+
+      await controller.updateProject(id, { ...settingsOf(data), startYear: 2032, font: 'Caveat' });
+
+      expect(update).toHaveBeenCalledWith(id, expect.anything(), undefined);
+      expect(controller.calendarImagesData.map((image) => image.id)).toEqual([4]);
+      update.mockRestore();
+    });
+
     it('throws for an unknown project id', async () => {
       await expect(controller.updateProject(42, settingsOf(projectData()))).rejects.toThrow();
     });

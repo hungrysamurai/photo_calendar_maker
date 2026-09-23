@@ -118,7 +118,8 @@ export default class IDBController {
   }
 
   /**
-   * Run `fn` inside a transaction over the given stores, closing the DB afterwards
+   * Run `fn` inside a transaction over the given stores, closing the DB afterwards.
+   * If `fn` fails, the transaction is aborted so none of its writes are kept.
    */
   private async withTransaction<T>(
     storeNames: string[],
@@ -129,8 +130,23 @@ export default class IDBController {
 
     try {
       const tx = db.transaction(storeNames, mode);
-      const result = await fn(tx);
-      await this.transactionComplete(tx);
+      const complete = this.transactionComplete(tx);
+      // Rejection is surfaced by `fn`'s own error below
+      complete.catch(() => {});
+
+      let result: T;
+      try {
+        result = await fn(tx);
+      } catch (err) {
+        try {
+          tx.abort();
+        } catch {
+          // Already finished or aborted
+        }
+        throw err;
+      }
+
+      await complete;
       return result;
     } finally {
       db.close();
@@ -211,12 +227,15 @@ export default class IDBController {
   }
 
   /**
-   * Apply edited settings to a project; `createdAt` is kept, `lastOpenedAt` is bumped
+   * Apply edited settings to a project; `createdAt` is kept, `lastOpenedAt` is bumped.
+   * With `reindexShift`, the project images move to `(monthIndex + shift) mod 12`
+   * in the same transaction, so settings and images change together or not at all.
    * @returns the updated project record
    */
   updateProject(
     id: number,
     patch: Partial<EditableProjectSettings>,
+    reindexShift?: number,
     lastOpenedAt = Date.now(),
   ): Promise<StoredProject> {
     return this.withTransaction([PROJECTS_STORE, IMAGES_STORE], 'readwrite', async (tx) => {
@@ -236,8 +255,32 @@ export default class IDBController {
       };
       await this.promisifyRequest(store.put(updated));
 
+      if (reindexShift) {
+        await this.reindexImages(tx, id, reindexShift);
+      }
+
       return updated;
     });
+  }
+
+  /**
+   * Move every image of a project by `shift` pages (wrapping around the year).
+   * Read all → range-delete → write back: rewriting key by key would collide
+   * with images that have not been moved yet.
+   */
+  private async reindexImages(tx: IDBTransaction, projectId: number, shift: number) {
+    const store = tx.objectStore(IMAGES_STORE);
+    const range = this.projectImagesRange(projectId);
+
+    const records = await this.promisifyRequest<StoredProjectImage[]>(store.getAll(range));
+    await this.promisifyRequest(store.delete(range));
+
+    await Promise.all(
+      records.map((record) => {
+        const monthIndex = (((record.monthIndex + shift) % 12) + 12) % 12;
+        return this.promisifyRequest(store.add({ ...record, monthIndex }));
+      }),
+    );
   }
 
   /**

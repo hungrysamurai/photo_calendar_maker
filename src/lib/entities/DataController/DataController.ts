@@ -125,7 +125,15 @@ export default class DataController {
 
     if (!isChanged) return false;
 
-    const updated = await this.IDBController.updateProject(id, settings);
+    // Stored image indices are page positions: keep each photo on its calendar month.
+    // A single-page project has only one photo, which stays put.
+    const reindexShift =
+      project.type === CalendarType.MultiPage &&
+      settings.firstMonthIndex !== project.firstMonthIndex
+        ? project.firstMonthIndex - settings.firstMonthIndex
+        : undefined;
+
+    const updated = await this.IDBController.updateProject(id, settings, reindexShift);
     const images = await this.IDBController.getProjectImages(id);
 
     this.setActive(id, this.toCalendarData(updated), images);

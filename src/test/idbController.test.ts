@@ -167,7 +167,7 @@ describe('IDBController', () => {
         font: 'Caveat',
       };
 
-      const updated = await controller.updateProject(id, patch, 700);
+      const updated = await controller.updateProject(id, patch, undefined, 700);
 
       const expected = { ...projectData(), ...patch, id, createdAt: 100, lastOpenedAt: 700 };
       expect(updated).toEqual(expected);
@@ -184,6 +184,99 @@ describe('IDBController', () => {
       const images = await controller.getProjectImages(id);
       expect(images.map((image) => image.id).sort()).toEqual([0, 7]);
       expect(await blobText(imageById(images, 7).image)).toBe('aug');
+    });
+
+    describe('updateProject with reindexShift', () => {
+      const multiPage = () => projectData({ type: CalendarType.MultiPage });
+
+      async function seedImages(id: number, entries: [number, string][]) {
+        for (const [monthIndex, text] of entries) {
+          await controller.saveImage(id, monthIndex, blob(text));
+        }
+      }
+
+      async function imagesByIndex(id: number): Promise<Record<number, string>> {
+        const images = await controller.getProjectImages(id);
+        const entries = await Promise.all(
+          images.map(async ({ id: index, image }) => [index, await blobText(image)] as const),
+        );
+        return Object.fromEntries(entries);
+      }
+
+      it('moves images forward by a positive shift', async () => {
+        const id = await controller.createProject(multiPage());
+        await seedImages(id, [
+          [0, 'p0'],
+          [3, 'p3'],
+        ]);
+
+        await controller.updateProject(id, { firstMonthIndex: 0 }, 2);
+
+        expect(await imagesByIndex(id)).toEqual({ 2: 'p0', 5: 'p3' });
+      });
+
+      it('moves images back by a negative shift', async () => {
+        const id = await controller.createProject(multiPage());
+        await seedImages(id, [
+          [4, 'p4'],
+          [11, 'p11'],
+        ]);
+
+        await controller.updateProject(id, { firstMonthIndex: 3 }, -3);
+
+        expect(await imagesByIndex(id)).toEqual({ 1: 'p4', 8: 'p11' });
+      });
+
+      it('wraps around the year boundary without losing images', async () => {
+        const id = await controller.createProject(multiPage());
+        // Start January → March: January is now the 11th page
+        await seedImages(id, [
+          [0, 'jan'],
+          [1, 'feb'],
+          [2, 'mar'],
+          [11, 'dec'],
+        ]);
+
+        await controller.updateProject(id, { firstMonthIndex: 2 }, -2);
+
+        expect(await imagesByIndex(id)).toEqual({ 10: 'jan', 11: 'feb', 0: 'mar', 9: 'dec' });
+        expect((await controller.getProject(id))?.firstMonthIndex).toBe(2);
+      });
+
+      it('never touches images of other projects', async () => {
+        const id = await controller.createProject(multiPage());
+        const other = await controller.createProject(multiPage());
+        await seedImages(id, [[0, 'mine']]);
+        await seedImages(other, [
+          [0, 'other-0'],
+          [5, 'other-5'],
+        ]);
+
+        await controller.updateProject(id, { firstMonthIndex: 1 }, -1);
+
+        expect(await imagesByIndex(id)).toEqual({ 11: 'mine' });
+        expect(await imagesByIndex(other)).toEqual({ 0: 'other-0', 5: 'other-5' });
+      });
+
+      it('leaves the record and the images unchanged when the transaction fails', async () => {
+        const data = projectData({ type: CalendarType.MultiPage, lastOpenedAt: 100 });
+        const id = await controller.createProject(data);
+        await seedImages(id, [
+          [0, 'jan'],
+          [6, 'jul'],
+        ]);
+        const add = vi.spyOn(IDBObjectStore.prototype, 'add').mockImplementationOnce(() => {
+          throw new Error('boom');
+        });
+
+        await expect(
+          controller.updateProject(id, { name: 'Новое', firstMonthIndex: 4 }, -4, 900),
+        ).rejects.toThrow('boom');
+        add.mockRestore();
+
+        expect(await controller.getProject(id)).toEqual({ ...data, id });
+        expect(await imagesByIndex(id)).toEqual({ 0: 'jan', 6: 'jul' });
+      });
     });
 
     it('updateProject rejects for an unknown project id', async () => {

@@ -144,10 +144,6 @@ function setEditLocks(locked: boolean) {
   singleModeBtn.disabled = locked;
   multiModeBtn.disabled = locked;
   lockedSettingsHint.classList.toggle('hide', !locked);
-
-  // Photos are not re-indexed yet, so a new first month would put them on the wrong pages
-  userInputs.monthsInput.setDisabled(locked);
-
   projectsInput.setDisabled(locked);
 }
 
