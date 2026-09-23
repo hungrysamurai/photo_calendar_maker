@@ -82,6 +82,10 @@ export class Dropdown<T> {
     this.select(value ?? items[0], false);
   }
 
+  get items(): readonly T[] {
+    return this.options.items;
+  }
+
   /**
    * Select `item` programmatically. Does not emit `onChange`.
    */

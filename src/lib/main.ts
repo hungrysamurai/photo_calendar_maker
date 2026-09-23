@@ -94,6 +94,25 @@ async function refreshProjectsList() {
 }
 
 /**
+ * Open the overlay on the active project in edit mode, or on "Новый" when no project is open
+ */
+async function onOverlayTriggerClick() {
+  await refreshProjectsList();
+
+  const activeId = dataController?.activeProjectId;
+  const activeItem = projectsInput.items.find(
+    (item) => item.kind === 'project' && item.project.id === activeId,
+  );
+
+  if (activeItem) {
+    projectsInput.setValue(activeItem);
+    enterEditMode();
+  }
+
+  openOverlay();
+}
+
+/**
  * "Новый" shows the settings form + "Создать";
  * a saved project hides the form + "Открыть"/"Изменить"/"Удалить";
  * editing shows the pre-filled form + "Сохранить"/"Отмена"
@@ -381,11 +400,8 @@ window.addEventListener(
     newProjectOverlayTriggerBtn?.addEventListener('mouseenter', animateTriggerBtn);
     newProjectOverlayTriggerBtn?.addEventListener('mouseleave', animateTriggerBtn);
 
-    // Animate & toggle new project container; picker always reopens on "Новый"
-    newProjectOverlayTriggerBtn?.addEventListener('click', async () => {
-      await refreshProjectsList();
-      openOverlay();
-    });
+    // Animate & toggle new project container
+    newProjectOverlayTriggerBtn?.addEventListener('click', onOverlayTriggerClick);
     // Closing the overlay while editing discards the edit
     newProjectOverlayCloseBtn.addEventListener('click', () => {
       exitEditMode();
