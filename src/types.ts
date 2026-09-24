@@ -55,6 +55,9 @@ declare global {
   }
 
   type CalendarData = {
+    name: string;
+    createdAt: number;
+    lastOpenedAt: number;
     startYear: number;
     firstMonthIndex: number;
     lang: CalendarLanguage;
@@ -63,8 +66,33 @@ declare global {
     type: CalendarType;
   };
 
+  /**
+   * Project settings that can be changed after creation
+   */
+  type EditableProjectSettings = Pick<
+    CalendarData,
+    'name' | 'startYear' | 'firstMonthIndex' | 'lang' | 'font'
+  >;
+
+  /**
+   * Project record as stored in IDB `projects` store
+   */
+  type StoredProject = CalendarData & { id: number };
+
+  /**
+   * In-memory image of the active project, keyed by month index
+   */
   type StoredImage = {
     id: number;
+    image: Blob;
+  };
+
+  /**
+   * Image record as stored in IDB `images` store
+   */
+  type StoredProjectImage = {
+    projectId: number;
+    monthIndex: number;
     image: Blob;
   };
 

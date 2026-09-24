@@ -58,7 +58,6 @@
   width: 100%;
   height: 100%;
   align-items: center;
-  justify-content: center;
   flex-direction: column;
   gap: 2.5rem;
   z-index: 4;
@@ -67,6 +66,8 @@
   padding: 1rem;
   color: var(--text-light);
 
+  // Only vertical scrolling; fixed-width fields shrink instead of overflowing sideways
+  overflow-x: hidden;
   overflow-y: scroll;
 
   @include mixins.resize(600) {
@@ -99,6 +100,17 @@
         width: 1.5rem;
         height: 1.5rem;
       }
+    }
+  }
+
+  &__settings {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2.5rem;
+
+    @include mixins.resize(600) {
+      gap: 1.5rem;
     }
   }
 
@@ -169,6 +181,13 @@
       line-height: 1.2;
     }
 
+    // Type is locked while editing an existing project
+    input[type='radio']:disabled,
+    input[type='radio']:disabled + label {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
     &::after {
       content: '';
       position: absolute;
@@ -187,6 +206,16 @@
     }
   }
 
+  &__locked-hint {
+    margin: 0;
+    font-size: 1rem;
+    opacity: 0.75;
+
+    @include mixins.resize(600) {
+      font-size: 0.75rem;
+    }
+  }
+
   &__calendar-options {
     display: flex;
     flex-direction: column;
@@ -201,6 +230,10 @@
   }
 
   &__get-button-container {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+
     button {
       border: none;
       background-color: var(--sandy-clay);
@@ -229,6 +262,68 @@
         font-size: 1rem;
         padding: 0.5rem 1rem;
       }
+    }
+
+    #edit-button,
+    #delete-button,
+    #cancel-button {
+      background-color: transparent;
+      border: 2px solid var(--sandy-clay);
+      color: var(--text-light);
+
+      &:hover {
+        border-color: var(--cool-steel);
+        background-color: var(--cool-steel);
+      }
+    }
+  }
+}
+
+.text-input {
+  width: 100%;
+  user-select: none;
+
+  &__caption {
+    display: block;
+    font-size: 1rem;
+    font-weight: normal;
+    opacity: 0.75;
+
+    @include mixins.resize(600) {
+      font-size: 0.75rem;
+    }
+  }
+
+  &__field {
+    margin: 0.5rem auto 0;
+    height: 3.5rem;
+    width: 400px;
+    max-width: 100%;
+    font-size: 1.5rem;
+    font-family: inherit;
+    font-weight: inherit;
+    text-align: center;
+
+    padding: 0 1rem;
+
+    border: 2px solid var(--sandy-clay);
+    border-radius: 1rem;
+
+    background: var(--shadow-grey);
+    color: var(--text-light);
+
+    outline: none;
+    transition: border-color 0.2s;
+
+    &:hover,
+    &:focus {
+      border-color: var(--cool-steel);
+    }
+
+    @include mixins.resize(600) {
+      height: 2.5rem;
+      width: 300px;
+      font-size: 1rem;
     }
   }
 }

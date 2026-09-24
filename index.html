@@ -30,7 +30,7 @@
   </button>
 
   <section class="new-project-section">
-    <h1>Новый календарь</h1>
+    <h1>Проект</h1>
     <div class="new-project-section__close-modal">
       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
@@ -41,27 +41,40 @@
       </svg>
     </div>
 
-    <div class="new-project-section__mode-radio-btns">
-      <div class="single">
-        <input type="radio" id="single-page" name="calendar-mode" value="single-page" />
-        <label for="single-page">Одностраничный</label>
-      </div>
-      <div class="multi">
-        <input type="radio" id="multi-page" name="calendar-mode" value="multi-page" checked />
-        <label for="multi-page">Многостраничный</label><br />
-      </div>
-    </div>
+    <div id="projects-dropdown" class="hide"></div>
 
-    <div class="new-project-section__calendar-options">
-      <div id="year-dropdown"></div>
-      <div id="month-dropdown"></div>
-      <div id="lang-dropdown"></div>
-      <div id="font-dropdown"></div>
-      <div id="format-dropdown"></div>
+    <div class="new-project-section__settings">
+      <div class="new-project-section__mode-radio-btns">
+        <div class="single">
+          <input type="radio" id="single-page" name="calendar-mode" value="single-page" />
+          <label for="single-page">Одностраничный</label>
+        </div>
+        <div class="multi">
+          <input type="radio" id="multi-page" name="calendar-mode" value="multi-page" checked />
+          <label for="multi-page">Многостраничный</label><br />
+        </div>
+      </div>
+
+      <p class="new-project-section__locked-hint hide">Формат и тип нельзя изменить после создания</p>
+
+      <div class="new-project-section__calendar-options">
+        <div class="text-input">
+          <label class="text-input__caption" for="project-name-input">Название</label>
+          <input class="text-input__field" id="project-name-input" type="text" autocomplete="off" />
+        </div>
+        <div id="year-dropdown"></div>
+        <div id="month-dropdown"></div>
+        <div id="lang-dropdown"></div>
+        <div id="font-dropdown"></div>
+        <div id="format-dropdown"></div>
+      </div>
     </div>
 
     <div class="new-project-section__get-button-container">
       <button id="get-button">Создать</button>
+      <button id="edit-button" class="hide">Изменить</button>
+      <button id="delete-button" class="hide">Удалить</button>
+      <button id="cancel-button" class="hide">Отмена</button>
     </div>
   </section>
 

@@ -14,11 +14,13 @@ export interface DropdownOptions<T> {
 
 export class Dropdown<T> {
   private root!: HTMLElement;
-  private trigger!: HTMLElement;
+  private trigger!: HTMLButtonElement;
   private valueElement!: HTMLElement;
   private menu!: HTMLElement;
 
   private caption: string;
+
+  private disabled = false;
 
   value!: T;
 
@@ -65,6 +67,49 @@ export class Dropdown<T> {
     this.valueElement = this.root.querySelector('.dropdown__value')!;
     this.menu = this.root.querySelector('.dropdown__menu')!;
 
+    this.renderMenu();
+  }
+
+  /**
+   * Replace the items list, re-render the menu and re-select `value` (or the first item).
+   * Does not emit `onChange`.
+   */
+  setItems(items: T[], value?: T) {
+    this.options.items = items;
+
+    this.renderMenu();
+
+    this.select(value ?? items[0], false);
+  }
+
+  get items(): readonly T[] {
+    return this.options.items;
+  }
+
+  /**
+   * Select `item` programmatically. Does not emit `onChange`.
+   */
+  setValue(item: T) {
+    this.select(item, false);
+  }
+
+  /**
+   * Block (or restore) opening the menu; a disabled dropdown gets the `dropdown--disabled` modifier
+   */
+  setDisabled(disabled: boolean) {
+    this.disabled = disabled;
+
+    this.trigger.disabled = disabled;
+    this.root.classList.toggle('dropdown--disabled', disabled);
+
+    if (disabled) {
+      this.close();
+    }
+  }
+
+  private renderMenu() {
+    this.menu.innerHTML = '';
+
     this.options.items.forEach((item) => {
       const element = document.createElement('div');
 
@@ -84,6 +129,8 @@ export class Dropdown<T> {
 
   private attachEvents() {
     this.trigger.onclick = () => {
+      if (this.disabled) return;
+
       this.root.classList.toggle('dropdown--open');
     };
 

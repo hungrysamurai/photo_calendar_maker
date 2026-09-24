@@ -8,3 +8,12 @@ export default function getYears(numberOfYearsToAdd: number): number[] {
 
   return years;
 }
+
+/**
+ * `years` plus `year` when it is missing, sorted ascending
+ */
+export function withYear(years: number[], year: number): number[] {
+  if (years.includes(year)) return years;
+
+  return [...years, year].sort((a, b) => a - b);
+}
