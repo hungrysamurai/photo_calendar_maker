@@ -1,4 +1,10 @@
 export default {
+  // Served by nginx at /projects/photo_calendar_maker/ (see wrapper repo nginx/locations.conf)
+  base: '/projects/photo_calendar_maker/',
+  build: {
+    outDir: 'build',
+    emptyOutDir: true,
+  },
   server: {
     host: '127.0.0.1',
   },
