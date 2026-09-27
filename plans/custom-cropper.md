@@ -50,8 +50,8 @@ Removing cropperjs forces the full cleanup in the same phase: the package, the H
 
 ### Acceptance criteria
 
-- [ ] `cropperjs` is gone from `package.json`, the lockfile, `index.html`, the styles and `types.ts`; `@hungrysamurai/cropper` resolves via `link:`
-- [ ] The dev server loads the crop tool with no module-resolution or fs-access errors
+- [x] `cropperjs` is gone from `package.json`, the lockfile, `index.html`, the styles and `types.ts`; `@hungrysamurai/cropper` resolves via `link:`
+- [x] The dev server loads the crop tool with no module-resolution or fs-access errors
 - [ ] Opening the crop tool shows the photo letterboxed exactly as in the slot; the SVG photo is hidden; main controls hide and crop controls show
 - [ ] Wheel, trackpad pinch and touch pinch zoom continuously from letterboxed to cover, anchored on the pointer; zoom-out stops at the letterboxed view; zoom-in goes up to about 8×
 - [ ] Dragging pans whenever an axis has slack and stops at the photo edges
@@ -59,8 +59,8 @@ Removing cropperjs forces the full cleanup in the same phase: the package, the H
 - [ ] Cancel and Esc close the tool, leave the photo untouched and swap the controls back
 - [ ] Pressing Crop while active does nothing
 - [ ] It works for portrait and landscape photos in single-page and multi-page formats
-- [ ] Tests cover: `start()` positions the overlay from the image rect, hides the image, enables pointer events, and shows then hides the loader; cancel via the button and via a direct `cancel` emit restores visibility and calls `onAfterRemove` once without saving; `start()` while active is a no-op; the view is constructed with the agreed config
-- [ ] Typecheck, lint and tests pass
+- [x] Tests cover: `start()` positions the overlay from the image rect, hides the image, enables pointer events, and shows then hides the loader; cancel via the button and via a direct `cancel` emit restores visibility and calls `onAfterRemove` once without saving; `start()` while active is a no-op; the view is constructed with the agreed config
+- [x] Typecheck, lint and tests pass
 
 ---
 

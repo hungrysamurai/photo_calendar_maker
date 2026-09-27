@@ -147,7 +147,7 @@ export class Calendar {
     if (currentImageElement) {
       await this.imageCropper.start(currentImageElement as SVGImageElement);
 
-      if (this.imageCropper.cropper) {
+      if (this.imageCropper.isActive) {
         animateControlsContainer(this.controlsContainer, 'out');
         animateCropControlsContainer(this.cropControlsContainer, 'in');
       }

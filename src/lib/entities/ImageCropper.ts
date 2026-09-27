@@ -1,10 +1,7 @@
-import Cropper from 'cropperjs';
+import { CropperView } from '@hungrysamurai/cropper';
 
 import { icons } from '../../assets/icons';
 import { createHTMLElement } from '../utils/DOM/createElement/createHTMLElement';
-import canvasToBlob from '../utils/canvasToBlob';
-
-const ZOOM_EPSILON = 1e-5;
 
 export type ImageCropperCallbacks = {
   saveImage: (image: Blob, index: number) => Promise<void>;
@@ -17,14 +14,13 @@ export type ImageCropperCallbacks = {
 
 export default class ImageCropper {
   cropperOuter: HTMLDivElement;
-  cropper?: Cropper;
   imageToCrop?: SVGImageElement;
-  tempCropImageElement?: HTMLImageElement;
   applyCropBtn: HTMLButtonElement;
   cancelCropBtn: HTMLButtonElement;
   cropControlsContainer: HTMLDivElement;
   callbacks: ImageCropperCallbacks;
 
+  private view: CropperView;
   private boundUpdateCropperPosition = this.updateCropperPosition.bind(this);
 
   constructor(cropControlsContainer: HTMLDivElement, callbacks: ImageCropperCallbacks) {
@@ -38,6 +34,25 @@ export default class ImageCropper {
       className: 'cropper-outer-container',
       parentToAppend: document.body,
     }) as HTMLDivElement;
+
+    // Contain matches the SVG's default letterboxing, so opening the tool never crops by itself
+    this.view = new CropperView(this.cropperOuter, {
+      fit: 'contain',
+      // Stored photos are shrunk to ~1100px, so the default of 1 would barely allow any zoom
+      maxScale: 8,
+      grid: false,
+      output: {
+        type: 'image/jpeg',
+        minWidth: 256,
+        minHeight: 256,
+        maxWidth: 4096,
+        maxHeight: 4096,
+        clipToImage: true,
+      },
+    });
+
+    // Covers both the cancel button and Esc inside the view
+    this.view.on('cancel', () => this.teardown());
 
     this.applyCropBtn = createHTMLElement({
       elementName: 'button',
@@ -53,87 +68,32 @@ export default class ImageCropper {
       parentToAppend: this.cropControlsContainer,
     }) as HTMLButtonElement;
 
-    this.applyCropBtn.addEventListener('click', () => this.applyCrop());
-    this.cancelCropBtn.addEventListener('click', () => this.removeCropper());
+    this.applyCropBtn.addEventListener('click', () => this.view.accept());
+    this.cancelCropBtn.addEventListener('click', () => this.view.cancel());
   }
 
   get isActive(): boolean {
-    return Boolean(this.cropper);
+    return this.view.state !== 'idle';
   }
 
   async start(imageElement: SVGImageElement): Promise<void> {
-    if (this.cropper) return;
+    if (this.isActive) return;
     this.imageToCrop = imageElement;
+    this.updateCropperPosition();
     this.callbacks.showLoader();
 
     try {
       const imageFile = this.imageToCrop.getAttribute('href') as string;
       const blob = await fetch(imageFile).then((res) => res.blob());
 
-      this.updateCropperPosition();
-
-      this.tempCropImageElement = createHTMLElement({
-        elementName: 'img',
-        className: 'image-element',
-        parentToAppend: this.cropperOuter,
-        attributes: {
-          src: URL.createObjectURL(blob),
-        },
-      }) as HTMLImageElement;
+      await this.view.start(blob);
 
       this.imageToCrop.style.visibility = 'hidden';
       this.cropperOuter.style.pointerEvents = 'auto';
-
-      this.cropper = new Cropper(this.tempCropImageElement, {
-        viewMode: 0,
-        dragMode: 'none',
-        modal: false,
-        background: false,
-        autoCropArea: 1,
-        ready: () => {
-          if (this.cropper) {
-            this.cropper.initialZoomRatio =
-              this.cropper.getCanvasData().width / this.cropper.getCanvasData().naturalWidth;
-          }
-
-          window.addEventListener('resize', this.boundUpdateCropperPosition);
-        },
-
-        zoom: (e) => {
-          if (!this.cropper) return;
-
-          this.cropper.crop();
-          this.cropper.setAspectRatio(0);
-
-          this.cropper.setCropBoxData({
-            width: this.cropper.getContainerData().width,
-            height: this.cropper.getContainerData().height,
-          });
-
-          if (e.detail.ratio < e.detail.oldRatio) {
-            if (this.cropper.getCanvasData().width - 10 < this.cropper.initialCanvasData.width) {
-              this.cropper.reset();
-            }
-          }
-
-          this.cropper.zoomRatio =
-            this.cropper.getCanvasData().width / this.cropper.getCanvasData().naturalWidth;
-
-          // Tolerance absorbs float noise from cropper's own width/naturalWidth rounding
-          if (this.cropper.zoomRatio - this.cropper.initialZoomRatio > ZOOM_EPSILON) {
-            this.cropper.setDragMode('move');
-            this.cropper.options.viewMode = 3;
-          } else {
-            this.cropper.setDragMode('none');
-            this.cropper.options.viewMode = 0;
-          }
-        },
-      });
+      window.addEventListener('resize', this.boundUpdateCropperPosition);
     } catch (err) {
       this.imageToCrop.style.visibility = 'visible';
       this.cropperOuter.style.pointerEvents = 'none';
-
-      this.cropperOuter.innerHTML = '';
 
       console.log('Failed to init cropper tool:', err);
     } finally {
@@ -153,60 +113,17 @@ export default class ImageCropper {
     this.cropperOuter.style.height = `${height}px`;
   }
 
-  async applyCrop(): Promise<void> {
-    if (!this.cropper || !this.imageToCrop) return;
-
-    const canvas = this.cropper.getCroppedCanvas({
-      minWidth: 256,
-      minHeight: 256,
-      maxWidth: 4096,
-      maxHeight: 4096,
-      fillColor: 'white',
-    });
-
-    const ctx = canvas.getContext('2d', {
-      willReadFrequently: true,
-    }) as CanvasRenderingContext2D;
-    ctx.drawImage(canvas, 0, 0);
-
-    const blob = await canvasToBlob(canvas);
-    const resultURL = URL.createObjectURL(blob);
-
-    // Clean Up
-    const prevImageLink = this.imageToCrop.href.baseVal;
-    if (prevImageLink) URL.revokeObjectURL(prevImageLink);
-
-    this.imageToCrop.setAttributeNS('http://www.w3.org/1999/xlink', 'href', resultURL);
-
-    const currentMockupIndex = this.callbacks.getCurrentMonthInViewIndex();
-
-    await this.callbacks.saveImage(blob, currentMockupIndex);
-
-    this.removeCropper();
-  }
-
-  removeCropper(): void {
-    if (!this.cropper || !this.imageToCrop) return;
-
-    this.imageToCrop.style.visibility = 'visible';
+  private teardown(): void {
+    if (this.imageToCrop) this.imageToCrop.style.visibility = 'visible';
     this.cropperOuter.style.pointerEvents = 'none';
-    this.cropper.destroy();
-    this.cropper = undefined;
-
     window.removeEventListener('resize', this.boundUpdateCropperPosition);
 
-    if (this.tempCropImageElement) {
-      URL.revokeObjectURL(this.tempCropImageElement.src);
-      this.tempCropImageElement.remove();
-      this.tempCropImageElement = undefined;
-    }
-
-    this.cropperOuter.innerHTML = '';
     this.callbacks.onAfterRemove?.();
   }
 
   dispose() {
-    this.removeCropper();
+    window.removeEventListener('resize', this.boundUpdateCropperPosition);
+    this.view.destroy();
     this.cropperOuter.remove();
   }
 }

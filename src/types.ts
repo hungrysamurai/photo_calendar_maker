@@ -47,13 +47,6 @@ declare global {
 
   type AnimationDirection = 'in' | 'out';
 
-  interface Cropper {
-    initialZoomRatio: number;
-    initialCanvasData: Cropper.CanvasData;
-    zoomRatio: number;
-    options: Cropper.Options;
-  }
-
   type CalendarData = {
     name: string;
     createdAt: number;

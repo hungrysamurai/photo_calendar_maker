@@ -8,9 +8,9 @@ importers:
 
   .:
     dependencies:
-      cropperjs:
-        specifier: ^1.6.2
-        version: 1.6.2
+      '@hungrysamurai/cropper':
+        specifier: link:../../../../standalone/cropper
+        version: link:../../../../standalone/cropper
       gsap:
         specifier: ^3.15.0
         version: 3.15.0
@@ -874,9 +874,6 @@ packages:
 
   core-js@3.49.0:
     resolution: {integrity: sha512-es1U2+YTtzpwkxVLwAFdSpaIMyQaq0PBgm3YD1W3Qpsn1NAmO3KSgZfu+oGSWVu6NvLHoHCV/aYcsE5wiB7ALg==}
-
-  cropperjs@1.6.2:
-    resolution: {integrity: sha512-nhymn9GdnV3CqiEHJVai54TULFAE3VshJTXSqSJKa8yXAKyBKDWdhHarnlIPrshJ0WMFTGuFvG02YjLXfPiuOA==}
 
   cross-spawn@7.0.6:
     resolution: {integrity: sha512-uV2QOWP2nWzsy2aMp8aRibhi9dlzF5Hgh5SHaB9OiTGEyDTiJJyx0uy51QXdyWbtAHNua4XJzUKca3OzKUd3vA==}
@@ -2360,8 +2357,6 @@ snapshots:
 
   core-js@3.49.0:
     optional: true
-
-  cropperjs@1.6.2: {}
 
   cross-spawn@7.0.6:
     dependencies:
