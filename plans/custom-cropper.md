@@ -133,9 +133,9 @@ Confirm that `vite build` bundles the linked library into `build/` as a self-con
 
 ### Acceptance criteria
 
-- [ ] `vite build` succeeds, and the output contains no reference to the `link:` path or to `node_modules`
-- [ ] The build prerequisite is documented
-- [ ] The library README's migration section reflects the final wrapper
+- [x] `vite build` succeeds, and the output contains no reference to the `link:` path or to `node_modules`
+- [x] The build prerequisite is documented
+- [x] The library README's migration section reflects the final wrapper
 - [ ] Manual checklist passes:
   - [ ] Portrait and landscape photos in every single-page and multi-page format
   - [ ] Wheel, trackpad pinch, touch pinch and drag
