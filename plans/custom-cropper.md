@@ -11,7 +11,7 @@ Durable decisions that apply across all phases:
 - **Library API addition**: `RenderCropOptions.clipToImage?: boolean`. When true, the crop rect is intersected with `0, 0, naturalWidth, naturalHeight` before output sizing and rasterising, and the result's `rect` is the clipped rect. When false or absent, behaviour is unchanged.
 - **Wrapper contract**: `ImageCropper` keeps its constructor `(cropControlsContainer, ImageCropperCallbacks)`, the `ImageCropperCallbacks` type, `start(imageElement)`, `isActive` and `dispose()`, plus the Apply/Cancel buttons (`#apply-crop`, `#cancel-crop`, existing icons) in the crop controls container. The only caller change is that `Calendar` checks `isActive` instead of the internal `cropper` field.
 - **Overlay**: the `cropper-outer-container` div is appended to the body and positioned over the SVG `<image>`'s bounding rect. One `CropperView` is constructed on it for the wrapper's lifetime.
-- **View config**: `fit: 'contain'`, `maxScale: 8`, `grid: false`, output `{ JPEG, min 256×256, max 4096×4096, clipToImage: true }`, no `fillColor`.
+- **View config**: `fit: 'contain'`, `maxScale: 8`, `grid: { rows: 3, cols: 3 }`, output `{ JPEG, min 256×256, max 4096×4096, clipToImage: true }`, no `fillColor`.
 - **Lifecycle**: the view's `accept` and `cancel` events drive teardown (not `statechange → idle`, which fires before the async save completes). Teardown restores the SVG image's visibility, disables overlay pointer events and removes the window resize listener, then calls `onAfterRemove`.
 - **Testing**: library geometry is tested in the library's Vitest `core`/`dom` projects. The calendar tests `ImageCropper` in jsdom against a module-mocked fake `CropperView` (real `on`/`emit`, controllable `state`, stubbed `start`/`accept`/`cancel`/`destroy`), and asserts only public behaviour, callbacks and DOM side effects.
 
@@ -115,7 +115,7 @@ Theme the view through custom properties on the overlay: the line colour and foc
 
 ### Acceptance criteria
 
-- [ ] The frame is a 3px `--shadow-grey` outline around the whole slot, with no grid, no corner handles and no centre cross
+- [ ] The frame is a 3px `--shadow-grey` outline around the whole slot, with a thin 3×3 grid, no corner handles and no centre cross
 - [ ] The crop area receives focus on open; Tab shows a `--shadow-grey` focus ring
 - [ ] Arrow keys nudge the photo and `+`/`-` zoom
 - [x] No stale cropperjs or temporary-image styles remain

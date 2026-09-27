@@ -61,6 +61,11 @@
     outline: none;
   }
 
+  // Grid lines share the frame's line width, but should stay thin
+  .hs-cropper__grid {
+    --cropper-line-width: 1px;
+  }
+
   // The frame cannot be resized, so corner markers would mislead
   .hs-cropper__handle {
     display: none;

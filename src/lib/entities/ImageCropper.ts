@@ -43,7 +43,7 @@ export default class ImageCropper {
       fit: 'contain',
       // Stored photos are shrunk to ~1100px, so the default of 1 would barely allow any zoom
       maxScale: 8,
-      grid: false,
+      grid: { rows: 3, cols: 3 },
       output: {
         type: 'image/jpeg',
         minWidth: 256,

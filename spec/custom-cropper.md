@@ -51,7 +51,7 @@ One small addition to the library makes this possible: an output option that cli
 31. As a calendar maker, I want the crop tool to fail gracefully if the photo can't be loaded (loader hidden, photo visible, controls unchanged), so that a failure never leaves the UI stuck.
 32. As a calendar maker, I want pressing Crop while the tool is already open to do nothing, so that double-clicks don't create duplicate sessions.
 33. As a calendar maker, I want the original SVG photo hidden while cropping, so that I only see one copy of the photo.
-34. As a calendar maker, I want a clean, understated frame (a 3px grey outline, no grid, no corner handles), so that the crop tool matches the app's look and doesn't suggest the frame can be resized.
+34. As a calendar maker, I want a clean, understated frame (a 3px grey outline, a thin rule-of-thirds grid, no corner handles), so that the crop tool matches the app's look and doesn't suggest the frame can be resized.
 35. As a calendar maker, I want the frame to outline the whole slot, so that I can see exactly what will fill it.
 36. As a calendar maker, I want this to work the same for portrait and landscape photos in every calendar format (single-page and multi-page), so that no format is left behind.
 37. As a calendar maker, I want to re-crop a photo I've already cropped, so that I can refine my framing over several passes.
@@ -96,7 +96,7 @@ One small addition to the library makes this possible: an output option that cli
 - The overlay element (`cropper-outer-container`, appended to the body) is kept and positioned over the SVG `<image>`'s bounding rect. A `CropperView` is constructed once on it with:
   - `fit: 'contain'`: the rest state matches the SVG's default `preserveAspectRatio` (meet) letterboxing;
   - `maxScale: 8`: the default of 1 would allow only about 1.2–1.8× zoom on desktop, because stored photos are shrunk to about 1100 px;
-  - `grid: false`;
+  - `grid: { rows: 3, cols: 3 }`: the classic rule-of-thirds guide, with 1px lines regardless of the frame width;
   - `output`: JPEG, min 256×256, max 4096×4096, `clipToImage: true`. There is no `fillColor`, because clipping means there are no areas outside the image.
 - `start` flow:
   1. Do nothing if already active.
@@ -131,6 +131,7 @@ One small addition to the library makes this possible: an output option that cli
   - line colour: the app's `--shadow-grey`;
   - line width: 3px;
   - focus colour: `--shadow-grey`.
+- Keep grid lines at 1px (they share `--cropper-line-width` with the frame).
 - Hide the corner markers (`.hs-cropper__handle`), because the frame cannot be resized.
 
 ### Behaviour changes, accepted deliberately
@@ -156,7 +157,7 @@ One small addition to the library makes this possible: an output option that cli
      - calls `onAfterRemove` exactly once, after the save.
   4. A `cancel` event (the button or a direct emit simulating Esc) restores visibility and calls `onAfterRemove` once, without saving.
   5. `start()` while active does nothing, and `dispose()` destroys the view and removes the overlay.
-  6. The view is constructed with `fit: 'contain'`, `maxScale: 8`, `grid: false`, and the JPEG/256/4096/`clipToImage` output.
+  6. The view is constructed with `fit: 'contain'`, `maxScale: 8`, a 3×3 `grid`, and the JPEG/256/4096/`clipToImage` output.
 - **Manual acceptance checklist:**
   - Portrait and landscape photos in each single-page and multi-page format.
   - Wheel, trackpad pinch, touch pinch and drag.

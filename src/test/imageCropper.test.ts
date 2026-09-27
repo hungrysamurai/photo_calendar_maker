@@ -129,7 +129,7 @@ describe('ImageCropper', () => {
     expect(view.options).toMatchObject({
       fit: 'contain',
       maxScale: 8,
-      grid: false,
+      grid: { rows: 3, cols: 3 },
       output: {
         type: 'image/jpeg',
         minWidth: 256,
