@@ -310,4 +310,158 @@ describe('ImageCropper', () => {
     expect(view.start).toHaveBeenCalledTimes(2);
     expect(cropper.isActive).toBe(true);
   });
+  describe('robustness', () => {
+    const moveImage = (image: SVGImageElement, rect: typeof IMAGE_RECT) => {
+      image.getBoundingClientRect = () => ({ ...rect, x: rect.left, y: rect.top }) as DOMRect;
+    };
+    const MOVED_RECT = { left: 50, top: 60, width: 400, height: 250 };
+
+    it('a failing view start leaves the UI usable and the tool inactive', async () => {
+      const { cropper, callbacks, view, overlay, image } = setup();
+      const error = new Error('decode failed');
+      view.start.mockRejectedValueOnce(error);
+      const log = vi.spyOn(console, 'log').mockImplementation(() => {});
+
+      await cropper.start(image);
+
+      expect(callbacks.showLoader).toHaveBeenCalledTimes(1);
+      expect(callbacks.hideLoader).toHaveBeenCalledTimes(1);
+      expect(image.style.visibility).toBe('visible');
+      expect(overlay.style.pointerEvents).toBe('none');
+      expect(cropper.isActive).toBe(false);
+      expect(log).toHaveBeenCalledWith('Failed to init cropper tool:', error);
+      log.mockRestore();
+    });
+
+    it('a failing fetch leaves the UI usable and never starts the view', async () => {
+      const { cropper, callbacks, view, overlay, image } = setup();
+      vi.mocked(fetch).mockRejectedValueOnce(new Error('revoked'));
+      const log = vi.spyOn(console, 'log').mockImplementation(() => {});
+
+      await cropper.start(image);
+
+      expect(view.start).not.toHaveBeenCalled();
+      expect(callbacks.hideLoader).toHaveBeenCalledTimes(1);
+      expect(image.style.visibility).toBe('visible');
+      expect(overlay.style.pointerEvents).toBe('none');
+      expect(cropper.isActive).toBe(false);
+      log.mockRestore();
+    });
+
+    it('can be started again after a failed start', async () => {
+      const { cropper, view, image } = setup();
+      view.start.mockRejectedValueOnce(new Error('decode failed'));
+      const log = vi.spyOn(console, 'log').mockImplementation(() => {});
+      await cropper.start(image);
+
+      await cropper.start(image);
+
+      expect(view.start).toHaveBeenCalledTimes(2);
+      expect(cropper.isActive).toBe(true);
+      log.mockRestore();
+    });
+
+    it('a window resize mid-crop realigns the overlay with the image', async () => {
+      const { cropper, overlay, image } = setup();
+      await cropper.start(image);
+
+      moveImage(image, MOVED_RECT);
+      window.dispatchEvent(new Event('resize'));
+
+      expect(overlay.style.left).toBe('50px');
+      expect(overlay.style.top).toBe('60px');
+      expect(overlay.style.width).toBe('400px');
+      expect(overlay.style.height).toBe('250px');
+    });
+
+    it.each([
+      ['cancel', async ({ cancelBtn }: ReturnType<typeof setup>) => cancelBtn.click()],
+      ['accept', async ({ applyBtn }: ReturnType<typeof setup>) => applyBtn.click()],
+    ])('stops following window resizes after %s', async (_, close) => {
+      const ctx = setup();
+      await ctx.cropper.start(ctx.image);
+
+      await close(ctx);
+      await vi.waitFor(() => expect(ctx.callbacks.onAfterRemove).toHaveBeenCalledTimes(1));
+      moveImage(ctx.image, MOVED_RECT);
+      window.dispatchEvent(new Event('resize'));
+
+      expect(ctx.overlay.style.left).toBe('12px');
+    });
+
+    it('dispose() destroys the view and removes the overlay', () => {
+      const { cropper, view, overlay } = setup();
+
+      cropper.dispose();
+
+      expect(view.destroy).toHaveBeenCalledTimes(1);
+      expect(overlay).not.toBeInTheDocument();
+      expect(document.querySelector('.cropper-outer-container')).toBeNull();
+    });
+
+    it('dispose() mid-crop restores the photo, swaps the controls back and stops following resizes', async () => {
+      const { cropper, callbacks, overlay, image } = setup();
+      await cropper.start(image);
+
+      cropper.dispose();
+      moveImage(image, MOVED_RECT);
+      window.dispatchEvent(new Event('resize'));
+
+      expect(image.style.visibility).toBe('visible');
+      expect(callbacks.onAfterRemove).toHaveBeenCalledTimes(1);
+      expect(callbacks.saveImage).not.toHaveBeenCalled();
+      expect(overlay.style.left).toBe('12px');
+    });
+
+    it('dispose() while idle does not call onAfterRemove', () => {
+      const { cropper, callbacks } = setup();
+
+      cropper.dispose();
+
+      expect(callbacks.onAfterRemove).not.toHaveBeenCalled();
+    });
+
+    it('dispose() while the view is loading leaves nothing behind once the load settles', async () => {
+      const { cropper, callbacks, view, overlay, image } = setup();
+      const load = deferred();
+      view.start.mockImplementationOnce(async () => {
+        view.state = 'loading';
+        await load.promise;
+        // The real view resolves without entering cropping once destroyed
+        view.state = 'idle';
+      });
+      const starting = cropper.start(image);
+      await vi.waitFor(() => expect(view.start).toHaveBeenCalledTimes(1));
+
+      cropper.dispose();
+      load.resolve();
+      await starting;
+      moveImage(image, MOVED_RECT);
+      window.dispatchEvent(new Event('resize'));
+
+      expect(image.style.visibility).not.toBe('hidden');
+      expect(overlay.style.pointerEvents).not.toBe('auto');
+      expect(overlay.style.left).toBe('12px');
+      expect(callbacks.hideLoader).toHaveBeenCalledTimes(1);
+      // The controls were never swapped, so there is nothing to swap back
+      expect(callbacks.onAfterRemove).not.toHaveBeenCalled();
+    });
+
+    it('dispose() mid-save still saves, but swaps the controls back only once', async () => {
+      const { cropper, callbacks, image, applyBtn } = setup();
+      const save = deferred();
+      callbacks.saveImage.mockReturnValueOnce(save.promise);
+      await cropper.start(image);
+      applyBtn.click();
+      await vi.waitFor(() => expect(callbacks.saveImage).toHaveBeenCalledTimes(1));
+
+      cropper.dispose();
+      save.resolve();
+      await save.promise;
+      await Promise.resolve();
+
+      expect(callbacks.saveImage).toHaveBeenCalledExactlyOnceWith(CROPPED_BLOB, 3);
+      expect(callbacks.onAfterRemove).toHaveBeenCalledTimes(1);
+    });
+  });
 });

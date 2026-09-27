@@ -23,6 +23,7 @@ export default class ImageCropper {
   private view: CropperView;
   // The view is idle while the result is saved, but the tool is not done yet
   private isSaving = false;
+  private isDisposed = false;
   private boundUpdateCropperPosition = this.updateCropperPosition.bind(this);
 
   constructor(cropControlsContainer: HTMLDivElement, callbacks: ImageCropperCallbacks) {
@@ -89,8 +90,11 @@ export default class ImageCropper {
     try {
       const imageFile = this.imageToCrop.getAttribute('href') as string;
       const blob = await fetch(imageFile).then((res) => res.blob());
+      if (this.isDisposed) return;
 
       await this.view.start(blob);
+      // Disposed mid-load: the view resolves without a session
+      if (this.isDisposed) return;
 
       this.imageToCrop.style.visibility = 'hidden';
       this.cropperOuter.style.pointerEvents = 'auto';
@@ -131,20 +135,26 @@ export default class ImageCropper {
       console.log('Failed to save cropped image:', err);
     } finally {
       this.isSaving = false;
-      this.teardown();
+      // Disposed mid-save: dispose() already tore down
+      if (!this.isDisposed) this.teardown();
     }
   }
 
-  private teardown(): void {
+  private teardown(swapControlsBack = true): void {
     if (this.imageToCrop) this.imageToCrop.style.visibility = 'visible';
     this.cropperOuter.style.pointerEvents = 'none';
     window.removeEventListener('resize', this.boundUpdateCropperPosition);
 
-    this.callbacks.onAfterRemove?.();
+    if (swapControlsBack) this.callbacks.onAfterRemove?.();
   }
 
   dispose() {
-    window.removeEventListener('resize', this.boundUpdateCropperPosition);
+    if (this.isDisposed) return;
+    // Controls are swapped only once a session is open, so only then swap them back
+    const controlsSwapped = this.isSaving || this.view.state === 'cropping';
+    this.isDisposed = true;
+
+    this.teardown(controlsSwapped);
     this.view.destroy();
     this.cropperOuter.remove();
   }

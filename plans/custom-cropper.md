@@ -98,10 +98,10 @@ A failure in `start()` (fetch or view start) restores the SVG image's visibility
 
 - [ ] A failed load leaves the UI usable: loader hidden, photo visible, controls unchanged, `isActive` false
 - [ ] Resizing the window or rotating a phone mid-crop keeps the same part of the photo framed, and the overlay stays aligned with the slot
-- [ ] The resize listener is removed on accept, on cancel and on dispose
+- [x] The resize listener is removed on accept, on cancel and on dispose
 - [ ] Switching or closing a project mid-crop leaves no overlay, listeners or object URLs behind
-- [ ] Tests cover: a failing `start()` hides the loader, restores visibility, disables pointer events and leaves `isActive` false; `dispose()` destroys the view and removes the overlay
-- [ ] Typecheck, lint and tests pass
+- [x] Tests cover: a failing `start()` hides the loader, restores visibility, disables pointer events and leaves `isActive` false; `dispose()` destroys the view and removes the overlay
+- [x] Typecheck, lint and tests pass
 
 ---
 
