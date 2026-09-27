@@ -118,8 +118,8 @@ Theme the view through custom properties on the overlay: the line colour and foc
 - [ ] The frame is a 3px `--shadow-grey` outline around the whole slot, with no grid, no corner handles and no centre cross
 - [ ] The crop area receives focus on open; Tab shows a `--shadow-grey` focus ring
 - [ ] Arrow keys nudge the photo and `+`/`-` zoom
-- [ ] No stale cropperjs or temporary-image styles remain
-- [ ] Lint and format checks pass
+- [x] No stale cropperjs or temporary-image styles remain
+- [x] Lint and format checks pass
 
 ---
 

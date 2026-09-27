@@ -52,11 +52,17 @@
   margin: 0;
   position: relative;
   pointer-events: none;
+  --cropper-line-color: var(--shadow-grey);
+  --cropper-line-width: 3px;
+  --cropper-focus-color: var(--shadow-grey);
 
-  .image-element {
-    display: block;
-    max-height: 100%;
-    max-width: 100%;
-    margin: 0 auto;
+  // The view draws its own focus ring inside the container
+  &:focus {
+    outline: none;
+  }
+
+  // The frame cannot be resized, so corner markers would mislead
+  .hs-cropper__handle {
+    display: none;
   }
 }
