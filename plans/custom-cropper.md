@@ -81,8 +81,8 @@ A single `accept` event handler serves both the Apply button (which calls `view.
 - [ ] Controls swap back only after the save completes
 - [ ] Enter produces the same image and save as the Apply button
 - [ ] An already-cropped photo can be opened, zoomed and re-cropped
-- [ ] Tests cover: an `accept` via the Apply button and via a direct emit swaps the href, revokes the old URL, calls `saveImage` with the blob and the current month index, and calls `onAfterRemove` exactly once, after the save resolves
-- [ ] Typecheck, lint and tests pass
+- [x] Tests cover: an `accept` via the Apply button and via a direct emit swaps the href, revokes the old URL, calls `saveImage` with the blob and the current month index, and calls `onAfterRemove` exactly once, after the save resolves
+- [x] Typecheck, lint and tests pass
 
 ---
 

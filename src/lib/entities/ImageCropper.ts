@@ -1,4 +1,4 @@
-import { CropperView } from '@hungrysamurai/cropper';
+import { CropperView, type CropResult } from '@hungrysamurai/cropper';
 
 import { icons } from '../../assets/icons';
 import { createHTMLElement } from '../utils/DOM/createElement/createHTMLElement';
@@ -21,6 +21,8 @@ export default class ImageCropper {
   callbacks: ImageCropperCallbacks;
 
   private view: CropperView;
+  // The view is idle while the result is saved, but the tool is not done yet
+  private isSaving = false;
   private boundUpdateCropperPosition = this.updateCropperPosition.bind(this);
 
   constructor(cropControlsContainer: HTMLDivElement, callbacks: ImageCropperCallbacks) {
@@ -51,6 +53,8 @@ export default class ImageCropper {
       },
     });
 
+    // Covers both the apply button and Enter inside the view
+    this.view.on('accept', (result) => void this.applyCrop(result));
     // Covers both the cancel button and Esc inside the view
     this.view.on('cancel', () => this.teardown());
 
@@ -73,7 +77,7 @@ export default class ImageCropper {
   }
 
   get isActive(): boolean {
-    return this.view.state !== 'idle';
+    return this.isSaving || this.view.state !== 'idle';
   }
 
   async start(imageElement: SVGImageElement): Promise<void> {
@@ -111,6 +115,24 @@ export default class ImageCropper {
     this.cropperOuter.style.top = `${top}px`;
     this.cropperOuter.style.width = `${width}px`;
     this.cropperOuter.style.height = `${height}px`;
+  }
+
+  private async applyCrop({ blob }: CropResult): Promise<void> {
+    if (!this.imageToCrop) return;
+    this.isSaving = true;
+
+    const previousUrl = this.imageToCrop.getAttribute('href');
+    this.imageToCrop.setAttribute('href', URL.createObjectURL(blob));
+    if (previousUrl) URL.revokeObjectURL(previousUrl);
+
+    try {
+      await this.callbacks.saveImage(blob, this.callbacks.getCurrentMonthInViewIndex());
+    } catch (err) {
+      console.log('Failed to save cropped image:', err);
+    } finally {
+      this.isSaving = false;
+      this.teardown();
+    }
   }
 
   private teardown(): void {

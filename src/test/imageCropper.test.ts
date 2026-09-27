@@ -2,7 +2,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import ImageCropper, { ImageCropperCallbacks } from '../lib/entities/ImageCropper';
 
-const { FakeCropperView } = vi.hoisted(() => {
+const { FakeCropperView, CROP_RECT, CROPPED_BLOB } = vi.hoisted(() => {
+  const CROP_RECT = { x: 10, y: 20, width: 300, height: 200 };
+  const CROPPED_BLOB = new Blob(['cropped'], { type: 'image/jpeg' });
   type Listener = (payload: unknown) => void;
 
   class FakeCropperView {
@@ -17,7 +19,13 @@ const { FakeCropperView } = vi.hoisted(() => {
       void source;
       this.state = 'cropping';
     });
-    accept = vi.fn(async () => null);
+    accept = vi.fn(async () => {
+      if (this.state !== 'cropping') return null;
+      const result = { rect: CROP_RECT, blob: CROPPED_BLOB };
+      this.emit('accept', result);
+      this.state = 'idle';
+      return result;
+    });
     cancel = vi.fn(async () => {
       this.state = 'idle';
       this.emit('cancel', undefined);
@@ -45,7 +53,7 @@ const { FakeCropperView } = vi.hoisted(() => {
     }
   }
 
-  return { FakeCropperView };
+  return { FakeCropperView, CROP_RECT, CROPPED_BLOB };
 });
 
 vi.mock('@hungrysamurai/cropper', () => ({ CropperView: FakeCropperView }));
@@ -90,6 +98,13 @@ const setup = () => {
 };
 
 const imageBlob = new Blob(['pixels'], { type: 'image/jpeg' });
+const CROPPED_URL = 'blob:http://localhost/cropped';
+
+const deferred = () => {
+  let resolve!: () => void;
+  const promise = new Promise<void>((res) => (resolve = res));
+  return { promise, resolve };
+};
 
 describe('ImageCropper', () => {
   beforeEach(() => {
@@ -98,6 +113,8 @@ describe('ImageCropper', () => {
       'fetch',
       vi.fn(async () => ({ blob: async () => imageBlob })),
     );
+    URL.createObjectURL = vi.fn(() => CROPPED_URL);
+    URL.revokeObjectURL = vi.fn();
   });
 
   afterEach(() => {
@@ -203,13 +220,83 @@ describe('ImageCropper', () => {
     expect(callbacks.saveImage).not.toHaveBeenCalled();
   });
 
-  it('the apply button asks the view to accept', async () => {
-    const { cropper, view, image, applyBtn } = setup();
+  it('the apply button swaps in the cropped image, saves it, then closes the tool', async () => {
+    const { cropper, callbacks, view, overlay, image, applyBtn } = setup();
     await cropper.start(image);
 
     applyBtn.click();
+    await vi.waitFor(() => expect(callbacks.onAfterRemove).toHaveBeenCalledTimes(1));
 
     expect(view.accept).toHaveBeenCalledTimes(1);
+    expect(URL.createObjectURL).toHaveBeenCalledWith(CROPPED_BLOB);
+    expect(image.getAttribute('href')).toBe(CROPPED_URL);
+    expect(URL.revokeObjectURL).toHaveBeenCalledWith(IMAGE_HREF);
+    expect(callbacks.saveImage).toHaveBeenCalledExactlyOnceWith(CROPPED_BLOB, 3);
+    expect(image.style.visibility).toBe('visible');
+    expect(overlay.style.pointerEvents).toBe('none');
+    expect(cropper.isActive).toBe(false);
+  });
+
+  it('an accept event from the view (Enter) saves the same way as the apply button', async () => {
+    const { cropper, callbacks, view, image } = setup();
+    await cropper.start(image);
+
+    view.emit('accept', { rect: CROP_RECT, blob: CROPPED_BLOB });
+    view.state = 'idle';
+    await vi.waitFor(() => expect(callbacks.onAfterRemove).toHaveBeenCalledTimes(1));
+
+    expect(image.getAttribute('href')).toBe(CROPPED_URL);
+    expect(URL.revokeObjectURL).toHaveBeenCalledWith(IMAGE_HREF);
+    expect(callbacks.saveImage).toHaveBeenCalledExactlyOnceWith(CROPPED_BLOB, 3);
+  });
+
+  it('closes the tool only after the save resolves', async () => {
+    const { cropper, callbacks, image, applyBtn } = setup();
+    const save = deferred();
+    callbacks.saveImage.mockReturnValueOnce(save.promise);
+    await cropper.start(image);
+
+    applyBtn.click();
+    await vi.waitFor(() => expect(callbacks.saveImage).toHaveBeenCalledTimes(1));
+
+    expect(image.getAttribute('href')).toBe(CROPPED_URL);
+    expect(callbacks.onAfterRemove).not.toHaveBeenCalled();
+    expect(image.style.visibility).toBe('hidden');
+    expect(cropper.isActive).toBe(true);
+
+    save.resolve();
+    await vi.waitFor(() => expect(callbacks.onAfterRemove).toHaveBeenCalledTimes(1));
+    expect(image.style.visibility).toBe('visible');
+    expect(cropper.isActive).toBe(false);
+  });
+
+  it('start() while a save is pending does nothing', async () => {
+    const { cropper, callbacks, view, image, applyBtn } = setup();
+    const save = deferred();
+    callbacks.saveImage.mockReturnValueOnce(save.promise);
+    await cropper.start(image);
+    applyBtn.click();
+    await vi.waitFor(() => expect(callbacks.saveImage).toHaveBeenCalledTimes(1));
+
+    await cropper.start(image);
+
+    expect(view.start).toHaveBeenCalledTimes(1);
+    save.resolve();
+  });
+
+  it('closes the tool even if the save fails', async () => {
+    const { callbacks, image, applyBtn, cropper } = setup();
+    const error = new Error('quota');
+    callbacks.saveImage.mockRejectedValueOnce(error);
+    const log = vi.spyOn(console, 'log').mockImplementation(() => {});
+    await cropper.start(image);
+
+    applyBtn.click();
+    await vi.waitFor(() => expect(callbacks.onAfterRemove).toHaveBeenCalledTimes(1));
+
+    expect(image.style.visibility).toBe('visible');
+    expect(log).toHaveBeenCalledWith('Failed to save cropped image:', error);
+    log.mockRestore();
   });
 
   it('can be started again after a cancel', async () => {
