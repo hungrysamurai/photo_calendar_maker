@@ -2,3 +2,5 @@ allowBuilds:
   '@parcel/watcher': false
   core-js: false
   esbuild: false
+minimumReleaseAgeExclude:
+  - '@hungrysamurai/cropper@0.1.0'
